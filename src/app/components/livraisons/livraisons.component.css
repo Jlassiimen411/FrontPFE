@@ -1,0 +1,27 @@
+ /* Personnalisation du FullCalendar */
+ full-calendar {
+   
+  max-width: 50%;
+  margin: 0 auto;
+  margin-top: -35em;
+  margin-left: 50em;
+}
+
+/* Ajout d'une bordure pour le calendrier */
+.full-calendar .fc {
+  border-radius: 8px;
+  border: 1px solid #d97c09;
+}
+
+/* Personnalisation de l'en-tête */
+.fc-toolbar {
+  background-color: #007bff;
+  color: white;
+}
+button {
+  margin-top: -100000px; /* Réduit la marge supérieure du bouton */
+  position: relative; /* Permet de déplacer précisément le bouton */
+  top: -500px; /* Déplace le bouton vers le haut */
+  left: 30%; /* Centre le bouton horizontalement */
+  transform: translateX(-50%); /* Centrer horizontalement avec la position relative */
+}

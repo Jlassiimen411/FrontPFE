@@ -1,0 +1,20 @@
+<h2>Modifier la Livraison</h2>
+
+<form [formGroup]="livraisonForm" (ngSubmit)="editLivraison()">
+
+  <div>
+    <label for="dateLivraison">Date Livraison:</label>
+    <input id="dateLivraison" formControlName="dateLivraison" type="date" required>
+  </div>
+  <div>
+    <label for="statut">Statut:</label>
+    <select id="statut" formControlName="statut" required>
+        <option value="EN_ATTENTE">En Attente</option>
+        <option value="LIVRE">Livré</option>
+        <option value="ANNULE">Annulé</option>
+    </select> 
+  </div>
+  
+  <button mat-button color="primary" type="submit" (click)="editLivraison()">Enregistrer</button>
+  <button mat-button color="warn" type="button" (click)="cancel()">Annuler</button>
+</form>

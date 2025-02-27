@@ -1,0 +1,11 @@
+<h2>Détails de la Livraison</h2>
+
+
+<p><strong>Date Livraison:</strong> {{ data?.dateLivraison || 'Non définie' }}</p>
+<p><strong>Statut:</strong> {{ data?.statut || 'Non défini' }}</p>
+
+<div class="button-group">
+  <button mat-button color="primary" (click)="editLivraison()">Modifier</button>
+  <button mat-button color="warn" (click)="deleteLivraison()">Supprimer</button>
+  <button mat-button (click)="closeDialog()">Fermer</button>
+</div>

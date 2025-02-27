@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajouter une Livraison</title>
+</head>
+<body>
+    <div class="event-form">
+        <h2>Ajouter une Livraison</h2>
+        <form [formGroup]="addLivraisonForm" (ngSubmit)="addLivraison()">
+            <label for="livraison-id">ID Livraison</label>
+            <input type="text" id="livraison-id" formControlName="livraisonId" required>
+        
+            <label for="commande-num">Numéro Commande</label>
+            <select id="commande-num" formControlName="commandeId" required>
+                <option *ngFor="let commande of commandes" [value]="commande.id">
+                    {{ commande.numero }}
+                </option>
+            </select>
+            
+
+            <label for="date-commande">Date Livraison</label>
+            <input type="date" id="date" formControlName="date" required>
+        
+            <label for="date-commande">Date Commande</label>
+            <input type="date" id="date-commande" formControlName="dateCommande" required>
+        
+            <label for="statut">Statut</label>
+            <select id="statut" name="statut" formControlName="statut">
+                <option value="EN_ATTENTE">En Attente</option>
+                <option value="LIVRE">Livré</option>
+                <option value="ANNULE">Annulé</option>
+            </select>
+            
+            
+        
+            <button type="submit" [disabled]="addLivraisonForm.invalid">Ajouter une Livraison</button>
+        
+            <button style="color: brown;" type="button" onclick="window.location.href='livraisons'">Annuler</button>
+        </form>

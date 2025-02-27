@@ -1,0 +1,13 @@
+<app-header2></app-header2>
+
+<app-dash-receptionnaire></app-dash-receptionnaire>
+<button class="button" (click)="openAddLivraisonDialog()">Ajouter un événement</button>
+<full-calendar [options]="calendarOptions"
+
+[plugins]="calendarOptions.plugins"
+[headerToolbar]="calendarOptions.headerToolbar"
+[initialView]="calendarOptions.initialView"
+[events]="calendarOptions.events"
+(eventClick)="handleEventClick($event)">
+</full-calendar>
+

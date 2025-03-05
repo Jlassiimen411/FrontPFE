@@ -1,56 +1,17 @@
-<app-header2></app-header2>
-<app-dash-receptionnaire></app-dash-receptionnaire>
-<section class="service_section layout_padding">
-    <div class="container">
-      <div class="heading_container heading_center">
-        <h2 class="lo">
-          Nos Produits
-        </h2>
-        <button 
-        class="single_page_btn d-none d-sm-block add btn btn-outline-warning" (click)="openAddProduitDialog()" >
-        <i class="fa fa-plus-circle">&nbsp;&nbsp;</i><b>Ajouter un produit</b>
-        </button>
-        <br>
-      </div>
-      <div class="row">
-        <div class="col-lg-4" *ngFor="let elt of allProduits">
-          <div class=" b1 lo">
-            
-            <div class="detail-box ">
-              
-              <h3>
-                &nbsp;*&nbsp;<b>Nom de produit : </b> <span>{{ elt.name }}</span>
-              </h3>
-              <h3>
-                &nbsp;*&nbsp;<b>Décription de produit : </b><span>{{ elt.description }}</span>
-              </h3>
-              <h3>
-                &nbsp;*&nbsp;<b>Date de produit : </b><span>{{ elt.date }}</span>
-              </h3>
-              <h3>
-                &nbsp;*&nbsp;<b>Prix par Litre : </b><span>{{ elt.price }} DT</span>
-              </h3>
-              <br>
-              <div class=" d-flex flex-row  align-items-center custom-button-group">
-                <button type="button" 
-                    class="single_page_btn btn btn-outline-warning mx-1" 
-                    (click)="goToEdit(elt.id)">
-                    <i class="fas fa-pen"></i>
-                </button>&nbsp;
-                <button class="single_page_btn btn btn-outline-warning mx-1" 
-                    (click)="deleteProduitById(elt.id)">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
+<section class="produits_section">
+  <div class="container">
+    <div class="heading_container heading_center">
+      <h2>Produits de type : {{ typeName }}</h2>
+    </div>
 
-          </div>
-
-                  
-            </div>
-            
-          </div>
+    <div class="row">
+      <div class="col-lg-4" *ngFor="let produit of produits">
+        <div class="produit-card">
+          <h3>{{ produit.name }}</h3>
+          <p>{{ produit.description }}</p>
+          <p><b>Prix : </b>{{ produit.price }}</p>
         </div>
-        
       </div>
-
-  </section>
+    </div>
+  </div>
+</section>

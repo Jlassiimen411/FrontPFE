@@ -26,6 +26,10 @@ import { EditCommandeComponent } from './components/edit-commande/edit-commande.
 import { DialogLivraisonDetailsComponent } from './components/dialog-livraison-details/dialog-livraison-details.component';
 import { EditLivraisonComponent } from './components/edit-livraison/edit-livraison.component';
 
+import { AddTypeProduitComponent } from './components/add-type-produit/add-type-produit.component';
+import { TypeProduitComponent } from './components/type-produit/type-produit.component';
+import { EditTypeProduitComponent } from './components/edit-type-produit/edit-type-produit.component';
+
 
 
 @NgModule({
@@ -48,6 +52,9 @@ import { EditLivraisonComponent } from './components/edit-livraison/edit-livrais
     EditCommandeComponent,
     DialogLivraisonDetailsComponent,
     EditLivraisonComponent,
+    TypeProduitComponent,
+    EditTypeProduitComponent,
+    AddTypeProduitComponent,
   
   ],
   imports: [

@@ -1,68 +1,42 @@
-import { Component } from '@angular/core';
-import { MatDialog } from '@angular/material/dialog';
-import { Router } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { ProduitService } from 'src/app/services/produit.service';
-import { AddProduitComponent } from '../add-produit/add-produit.component';
 
 @Component({
   selector: 'app-produits',
   templateUrl: './produits.component.html',
   styleUrls: ['./produits.component.css']
 })
-export class ProduitsComponent {
- allProduits: any = [];
+export class ProduitsComponent implements OnInit {
+  produits: any[] = [];
+  typeName: string = '';
 
   constructor(
-    private pService: ProduitService,
-    private router: Router,
-    private dialog: MatDialog // Import MatDialog
+    private route: ActivatedRoute,
+    private produitService: ProduitService
   ) {}
 
   ngOnInit(): void {
-    this.loadProduits();
-  }
-
-  loadProduits(): void {
-    this.pService.getAllProduits().subscribe({
-      next: (data) => {
-        this.allProduits = data;
-      },
-      error: (err) => {
-        console.error('Error loading s', err);
-      },
-    });
-  }
-
-  deleteProduitById(id: number): void {
-    this.pService.deleteProduitById(id).subscribe({
-      next: (data) => {
-        console.log('Produit deleted', data);
-        this.loadProduits();
-      },
-      error: (err) => {
-        console.error('Error deleting produit', err);
+    this.route.queryParams.subscribe((params) => {
+      const typeId = params['typeId'];
+      this.typeName = params['typeName'];
+  
+      if (typeId) {
+        this.loadProduitsByType(typeId);
+      } else {
+        console.error('TypeId is undefined!');
       }
     });
   }
   
 
-  goToEdit(id: number): void {
-    this.router.navigate(['editproduit', id]);
-  }
-
-  // Fonction pour afficher le popup Add Food
-  openAddProduitDialog(): void {
-    const dialogRef = this.dialog.open(AddProduitComponent, {
-     
-      width: '900px', // Vous pouvez ajuster la largeur
-      height:'500px',
-      disableClose: true, // Empêche la fermeture en cliquant à l'extérieur
-    });
-
-    // Action après fermeture du modal
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.loadProduits(); // Recharger la liste après ajout
+  loadProduitsByType(typeId: number): void {
+    this.produitService.getProduitsByType(typeId).subscribe({
+      next: (data) => {
+        this.produits = data;
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des produits', err);
       }
     });
   }

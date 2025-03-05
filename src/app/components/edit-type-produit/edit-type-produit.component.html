@@ -1,0 +1,60 @@
+<app-header2></app-header2>
+<body>
+  <div class="container mt-4">
+    <div class="row">
+      <div class="col"><br><br><br>
+        <p class="h3 fw-bold gradient-text">
+          &nbsp;<i class="fa fa-pen">&nbsp;</i> Edit produit
+        </p>
+        <br>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <div class="row">
+      <div class="col-sm-4">
+        <form #editPlatForm="ngForm" (ngSubmit)="editTypeProduit()">
+          <div class="mb-2">
+            <input [(ngModel)]="typeProduit.name" 
+                   [ngModelOptions]="{standalone: true}" 
+                   name="name" 
+                   type="text" 
+                   class="form-control" 
+                   placeholder="Nom du produit">
+          </div>
+          <br>
+          <div class="mb-2">
+            <input [(ngModel)]="typeProduit.description" 
+                   [ngModelOptions]="{standalone: true}" 
+                   name="description" 
+                   type="text" 
+                   class="form-control" 
+                   placeholder="Description">
+          </div>
+
+          <br>
+          <input *ngIf="typeProduit.date"
+          [(ngModel)]="typeProduit.date"
+          name="date"
+          type="date"
+          class="form-control"
+          placeholder="Date du produit">
+   
+  
+          <br>
+          <br>
+
+          <div class="mb-2">
+            <input type="submit" class="custom-btn" value="Edit Produit">
+            <a routerLink="/type_produit" class="custom-btn-outline ms-2">Fermer</a>
+          </div>
+        </form>
+      </div>
+      
+      <div class="col-sm-6">
+        <img src="assets/img/a2.jpg" alt="Produit" class="produit-img">
+      </div>
+    </div>
+  </div>
+</body>

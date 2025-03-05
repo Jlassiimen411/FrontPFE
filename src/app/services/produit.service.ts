@@ -44,6 +44,10 @@ export class ProduitService {
     );
   }
 
+  getProduitsByType(typeId: number): Observable<any[]> {
+    return this.httpClient.get<any[]>(`${this.produitURL}/type/${typeId}`);
+  }
+
   private handleError<T>(operation = 'operation', result?: T) {
     return (error: any): Observable<T> => {
       console.error(`${operation} failed: ${error.message}`);
@@ -52,5 +56,7 @@ export class ProduitService {
       return of(result as T);
     };
   }
+
+
   
 }

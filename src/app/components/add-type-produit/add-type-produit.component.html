@@ -1,0 +1,61 @@
+<body>
+  <div class="container mt-4 text-center">
+      <div class="row">
+          <div class="col">
+              <br><br>
+              <p class="h3 fw-bold gradient-text">
+                &nbsp;&nbsp;&nbsp;<i class="fa fa-plus-circle"></i>&nbsp;&nbsp;&nbsp;&nbsp;Ajouter un Type du Produit
+              </p>
+              <br>
+          </div>
+      </div>
+  </div>
+
+  <div class="container">
+      <div class="row">
+          <div class="col-sm-6">
+              <form [formGroup]="addProduitForm" (ngSubmit)="addProduit()">
+                  <!-- Champ Nom -->
+                  <div class="mb-3">
+                      <input formControlName="name" type="text" class="form-control" placeholder="Nom du produit">
+                      <div *ngIf="addProduitForm.get('name')?.invalid && addProduitForm.get('name')?.touched" class="text-danger">
+                          Nom du produit est requis.
+                      </div>
+                  </div>
+
+                  <!-- Champ Description -->
+                  <div class="mb-3">
+                      <input formControlName="description" type="text" class="form-control" placeholder="Description">
+                      <div *ngIf="addProduitForm.get('description')?.invalid && addProduitForm.get('description')?.touched" class="text-danger">
+                          La description est requise.
+                      </div>
+                  </div>
+
+                  <!-- Champ Date -->
+                  <div class="mb-3">
+                      <label for="dateProduit">Date du Type :</label>
+                      <input formControlName="date" type="date" class="form-control">
+                      <div *ngIf="addProduitForm.get('date')?.invalid && addProduitForm.get('date')?.touched" class="text-danger">
+                          La date du produit est obligatoire.
+                      </div>
+                  </div>
+
+                  <br>
+
+                  <!-- Boutons -->
+                  <div class="mb-3">
+                      <button type="submit" class="custom-btn" [disabled]="addProduitForm.invalid">Ajouter produit</button>&nbsp;&nbsp;&nbsp;
+                      <button type="button" class="custom-btn-outline ms-2" (click)="onNoClick()">Annuler</button>
+                  </div>
+
+                  <!-- Message de succès / échec -->
+                  <div class="alert alert-success" *ngIf="isSuccessful">Type ajouté avec succès !</div>
+                  <div class="alert alert-danger" *ngIf="isFailed">Erreur lors de l'ajout du Type.</div>
+              </form>
+          </div>
+          <div class="col-sm-6">
+              <img src="assets/img/lub.jpg" alt="" class="produit-img">
+          </div>
+      </div>
+  </div>
+</body>

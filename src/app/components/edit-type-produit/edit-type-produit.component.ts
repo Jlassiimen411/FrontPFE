@@ -50,7 +50,7 @@ export class EditTypeProduitComponent implements OnInit {
   
   editTypeProduit() {
     if (this.typeProduit.date) {
-      // Format the date for submission to the backend (yyyy-MM-dd)
+      // Formatage de la date pour s'assurer qu'elle est dans le bon format
       const formattedDate = new Date(this.typeProduit.date).toISOString().split('T')[0];
       this.typeProduit.date = formattedDate;
     }
@@ -67,4 +67,8 @@ export class EditTypeProduitComponent implements OnInit {
       }
     );
   }
+  
+  
+  
+  
 }  

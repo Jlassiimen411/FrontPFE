@@ -19,7 +19,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { AddLivraisonComponent } from './components/add-livraison/add-livraison.component';
 import { FormsModule } from '@angular/forms';
-import { ProduitsComponent } from './components/produits/produits.component';
+
 import { AddProduitComponent } from './components/add-produit/add-produit.component';
 import { EditProduitComponent } from './components/edit-produit/edit-produit.component';
 import { EditCommandeComponent } from './components/edit-commande/edit-commande.component';
@@ -29,6 +29,7 @@ import { EditLivraisonComponent } from './components/edit-livraison/edit-livrais
 import { AddTypeProduitComponent } from './components/add-type-produit/add-type-produit.component';
 import { TypeProduitComponent } from './components/type-produit/type-produit.component';
 import { EditTypeProduitComponent } from './components/edit-type-produit/edit-type-produit.component';
+import { ProduitsParTypeComponent } from './components/produits-par-type/produits-par-type.component';
 
 
 
@@ -46,7 +47,7 @@ import { EditTypeProduitComponent } from './components/edit-type-produit/edit-ty
     ReceptionnairePageComponent,
     AddCommandeComponent,
     AddLivraisonComponent,
-    ProduitsComponent,
+ 
     AddProduitComponent,
     EditProduitComponent,
     EditCommandeComponent,
@@ -55,6 +56,7 @@ import { EditTypeProduitComponent } from './components/edit-type-produit/edit-ty
     TypeProduitComponent,
     EditTypeProduitComponent,
     AddTypeProduitComponent,
+    ProduitsParTypeComponent,
   
   ],
   imports: [
@@ -67,8 +69,13 @@ import { EditTypeProduitComponent } from './components/edit-type-produit/edit-ty
     MatDialogModule,
     HttpClientModule,
     
+
+    
+    
+    
   ],
   providers: [],
+
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AppComponent]
 })

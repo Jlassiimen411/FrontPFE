@@ -66,14 +66,16 @@ export class TypeProduitComponent {
     });
   }
 
-  
   viewProduitsByType(typeId: number, typeName: string): void {
-    if (typeId) {
-      this.router.navigate(['produits', typeId], { queryParams: { typeName } });
-    } else {
-      console.error('typeId is undefined');
+    if (!typeId) {
+      console.error('Erreur: typeId est undefined');
+      return;
     }
+  
+    // Redirection vers la page avec les produits du type sélectionné
+    this.router.navigate(['produits', typeId], { queryParams: { typeName } });
   }
+  
   
   
   

@@ -12,19 +12,18 @@ import { AddLivraisonComponent } from './components/add-livraison/add-livraison.
 import { EditLivraisonComponent } from './components/edit-livraison/edit-livraison.component';
 import { TypeProduitComponent } from './components/type-produit/type-produit.component';
 import { EditTypeProduitComponent } from './components/edit-type-produit/edit-type-produit.component';
-import { ProduitsComponent } from './components/produits/produits.component';
 
-
-
-
+import { ProduitsParTypeComponent } from './components/produits-par-type/produits-par-type.component';
+import { AddProduitComponent } from './components/add-produit/add-produit.component';
 
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
-  { path: 'receptionnairepage', component: ReceptionnairePageComponent},
+  { path: 'receptionnairepage', component: ReceptionnairePageComponent },
   { path: 'commandes', component: CommandesComponent },
   
-  { path: 'produits/:typeId', component: ProduitsComponent },
+
+  { path: 'produits/:id', component: ProduitsParTypeComponent },
 
   { path: 'livraisons', component: LivraisonsComponent },
   { path: 'addcommande', component: AddCommandeComponent },
@@ -33,8 +32,14 @@ const routes: Routes = [
   { path: 'editproduit/:id', component: EditProduitComponent },
   { path: 'edit-livraison/:id', component: EditLivraisonComponent },
   { path: 'type_produit', component: TypeProduitComponent },
+
   { path: 'edit_type_produit/:id', component: EditTypeProduitComponent },
-  
+
+  { path: 'addProduit/:typeId', component: AddProduitComponent },
+
+ 
+
+  { path: '**', redirectTo: '' } // Redirection si la route est inconnue
 ];
 
 @NgModule({

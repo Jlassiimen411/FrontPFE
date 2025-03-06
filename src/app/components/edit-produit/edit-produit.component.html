@@ -16,7 +16,13 @@
           <form #editPlatForm="ngForm" (ngSubmit)="editProduit()">
               <div class="mb-2">
                  &nbsp;&nbsp;&nbsp;&nbsp;
-              <input [(ngModel)]="produit.name" [ngModelOptions]="{standalone: true}" name="name" type="text" class="form-control" placeholder="Nom du produit" >
+                 <div class="mb-2">
+                    <input [(ngModel)]="produit.codeProduit" [ngModelOptions]="{standalone: true}" name="description" type="text" class="form-control" placeholder="description">
+                </div><br>
+                <div class="mb-2">
+                    <input [(ngModel)]="produit.libelle" [ngModelOptions]="{standalone: true}" name="description" type="text" class="form-control" placeholder="description">
+                </div><br>
+              <input [(ngModel)]="produit.nomProduit" [ngModelOptions]="{standalone: true}" name="name" type="text" class="form-control" placeholder="Nom du produit" >
               </div>
               <br>
               <div class="mb-2">
@@ -26,9 +32,12 @@
                   <input [(ngModel)]="produit.date" [ngModelOptions]="{standalone: true}" name="date" type="date" class="form-control" >
               </div><br>
               <div class="mb-2 form-group">
-                  <input [(ngModel)]="produit.price" [ngModelOptions]="{standalone: true}" name="price"type="number" class="form-control" placeholder="Price">
+                  <input [(ngModel)]="produit.prix" [ngModelOptions]="{standalone: true}" name="price"type="number" class="form-control" placeholder="Price">
                 </div><br>
-    
+
+
+        
+                  
 
               <div class="mb-2">
                   <input type="submit" class="custom-btn" value="Edit Produit" >

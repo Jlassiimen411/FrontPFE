@@ -1,0 +1,86 @@
+.produits-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.produit-card {
+    position: relative;
+    width: 350px; /* Increased width for larger cards */
+    background-image: url('/assets/img/a1.jpg');
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+    padding: 25px; /* Increased padding */
+    color: white;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 20px; /* Added margin to ensure space between cards */
+}
+
+/* Calque semi-transparent */
+.produit-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(128, 128, 128, 0.4);
+    z-index: 1;
+}
+
+.produit-card > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* Style du texte */
+.produit-card b {
+    font-size: 1.4em; /* Increased font size */
+}
+
+.produit-card span {
+    color: red;
+    font-size: 1.4em; /* Increased font size */
+}
+
+/* Style des boutons */
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 12px; /* Increased gap between buttons */
+    margin-top: 15px; /* Increased margin top */
+}
+
+.button-group button {
+    background: transparent;
+    border: 2px solid yellow;
+    padding: 10px 12px; /* Increased padding */
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    font-size: 1.2em; /* Slightly larger font */
+}
+
+/* Retour Button below the card */
+.btn {
+    display: block;
+    margin-left: 43em; /* This will push the button to the right */
+    width: 15%; /* You can adjust this to control the button size */
+    background-color: yellow;
+    border: 2px solid yellow;
+    padding: 10px;
+    border-radius: 5px;
+    color: black;
+    cursor: pointer;
+    font-size: 1.2em;
+    text-align: center;
+}
+
+/* Title */
+.title-text {
+    text-align: center;
+    margin-bottom: 20px; /* Added space below the title */
+}

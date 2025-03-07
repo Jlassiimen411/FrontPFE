@@ -1,0 +1,17 @@
+<section class="produits_section">
+  <div class="container">
+    <div class="heading_container heading_center">
+      <h2>Produits de type : {{ typeName }}</h2>
+    </div>
+
+    <div class="row">
+      <div class="col-lg-4" *ngFor="let produit of produits">
+        <div class="produit-card">
+          <h3>{{ produit.name }}</h3>
+          <p>{{ produit.description }}</p>
+          <p><b>Prix : </b>{{ produit.price }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

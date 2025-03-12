@@ -20,15 +20,15 @@
                             N° est obligatoire.
                         </div>
                     </div>
+
   
-                    <!-- Liste des Produits -->
-                    <label>Produits :</label>
-                    <div formArrayName="produits" class="d-flex gap-3 flex-wrap">
-                        <div *ngFor="let produit of produits; let i = index" class="form-check">
-                            <input type="checkbox" class="form-check-input" [formControlName]="i">
-                            <label class="form-check-label">{{ produit.name }}</label>
-                        </div>
-                    </div><br>
+        <div formArrayName="produits" class="d-flex gap-3 flex-wrap">
+    <div *ngFor="let produit of produits; let i = index" class="form-check">
+        <input type="checkbox" class="form-check-input" [formControlName]="i">
+        <label class="form-check-label">{{ produit.name }}</label>
+    </div>
+</div>
+
   
                     <!-- Champ Quantité -->
                     <div class="mb-3">
@@ -39,14 +39,15 @@
                     </div>
   
                     <!-- Champ Date -->
-                    <div class="mb-3">
-                        <label>Date de commande :</label>
-                        <input formControlName="date" type="date" class="form-control">
-                        <div *ngIf="addCommandeForm.get('dateCommande')?.invalid && addCommandeForm.get('dateCommande')?.touched" class="text-danger">
-                            La date est obligatoire.
-                        </div>
-                    </div>
-  
+                 <!-- Champ Date -->
+<div class="mb-3">
+    <label>Date de commande :</label>
+    <input formControlName="dateCommande" type="date" class="form-control">
+    <div *ngIf="addCommandeForm.get('dateCommande')?.invalid && addCommandeForm.get('dateCommande')?.touched" class="text-danger">
+        La date est obligatoire.
+    </div>
+</div>
+
                     <!-- Champ Price -->
                     <div class="mb-3">
                         <label>Prix :</label>

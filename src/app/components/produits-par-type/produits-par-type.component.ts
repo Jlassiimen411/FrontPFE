@@ -39,24 +39,37 @@ export class ProduitsParTypeComponent implements OnInit {
     });
   }
 
-  // Charger les produits pour le type sélectionné
   loadProduits(): void {
-    this.produitService.getProduitsByType(this.typeId).subscribe({
-      next: (data) => {
-        this.produits = data;
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des produits', err);
-        alert('Une erreur est survenue lors du chargement des produits.');
-      }
-    });
+    if (this.typeId) {
+      this.produitService.getProduitsByType(this.typeId).subscribe({
+        next: (data) => {
+          console.log('Produits récupérés:', data);
+          this.produits = data;
+        },
+        error: (err) => {
+          console.error('Erreur lors du chargement des produits:', err);
+        }
+      });
+    } else {
+      console.error('TypeId non valide:', this.typeId);
+    }
   }
-
+  
+  
   // Méthode pour ajouter un produit
   addProduit(): void {
-    this.router.navigate(['/addProduit', this.typeId]);  // Rediriger vers la page d'ajout avec l'ID du type
-    console.log('Produit ajouté pour le typeId:', this.typeId);
-  }
+    const dialogRef = this.dialog.open(AddProduitComponent, {
+      width: '500px', // Taille du popup
+      data: { typeId: this.typeId } // Passer l'ID du type de produit au popup
+    });
+  
+    // Mettre à jour la liste après fermeture du popup
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadProduits(); // Recharge la liste des produits
+      }
+    });}
+  
 
   // Méthode pour éditer un produit
   editProduit(produitId: number): void {

@@ -13,7 +13,7 @@
         <div class="col-lg-4" *ngFor="let elt of allTypeProduits">
           <div class=" b1 lo">
             
-            <div class="detail-box ">
+            <div class="detail-box">
               
               <h3>
                 &nbsp;*&nbsp;<b>Type de produit : </b> <span>{{ elt.name }}</span>
@@ -26,7 +26,7 @@
               </h3>
                 <br>
                 <button class="single_page_btn btn btn-outline-warning mx-9" 
-                (click)="viewProduitsByType(elt.id, elt.name)">
+                (click)="viewProduitsByType(elt.id)">
                 <i class="fas fa-sign-in-alt"></i>
         </button>
         

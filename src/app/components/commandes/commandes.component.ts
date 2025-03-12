@@ -22,19 +22,22 @@ export class CommandesComponent implements OnInit {
     this.loadCommandes();
   }
 
-  loadCommandes(): void {
-    this.cService.getAllCommandes().subscribe({
-      next: (data) => {
-        console.log(data);  // Log les données pour vérifier leur structure
-        this.allCommandes = data;
-      },
-      error: (err) => {
-        console.error('Error loading commandes', err);
-      },
-    });
-  }
-  
-  
+
+loadCommandes(): void {
+  this.cService.getAllCommandes().subscribe({
+    next: (data) => {
+      console.log('Commandes récupérées:', data); // Affiche toutes les commandes
+      if (data.length > 0) {
+        console.log('Exemple commande:', data[0]); // Affiche la première commande
+      }
+      this.allCommandes = data;
+    },
+    error: (err) => {
+      console.error('Erreur lors du chargement des commandes', err);
+    },
+  });
+}
+
 
   deleteCommandeById(id: number): void {
     this.cService.deleteCommandeById(id).subscribe({

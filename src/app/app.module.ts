@@ -30,6 +30,12 @@ import { AddTypeProduitComponent } from './components/add-type-produit/add-type-
 import { TypeProduitComponent } from './components/type-produit/type-produit.component';
 import { EditTypeProduitComponent } from './components/edit-type-produit/edit-type-produit.component';
 import { ProduitsParTypeComponent } from './components/produits-par-type/produits-par-type.component';
+import { CategorieUserComponent } from './components/categorie-user/categorie-user.component';
+import { CartComponent } from './components/cart/cart.component';
+
+import { BuyProductComponent } from './components/buy-product/buy-product.component';
+import { ProduitUserComponent } from './components/produit-user/produit-user.component';
+
 
 
 
@@ -47,7 +53,6 @@ import { ProduitsParTypeComponent } from './components/produits-par-type/produit
     ReceptionnairePageComponent,
     AddCommandeComponent,
     AddLivraisonComponent,
- 
     AddProduitComponent,
     EditProduitComponent,
     EditCommandeComponent,
@@ -57,6 +62,11 @@ import { ProduitsParTypeComponent } from './components/produits-par-type/produit
     EditTypeProduitComponent,
     AddTypeProduitComponent,
     ProduitsParTypeComponent,
+    CategorieUserComponent,
+    CartComponent,
+    BuyProductComponent,
+    ProduitUserComponent,
+  
   
   ],
   imports: [

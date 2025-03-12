@@ -27,9 +27,9 @@ export class CategorieUserComponent {
   }
 
 
-  viewProduitsByType(typeId: number, typeName: string): void {
+  viewProduitsByType(typeId: number): void {
     if (typeId) {
-      this.router.navigate(['produits', typeId], { queryParams: { typeName } });
+      this.router.navigate(['produits_user', typeId]); // Enlève `typeName`, l'ID suffit
     } else {
       console.error('typeId is undefined');
     }

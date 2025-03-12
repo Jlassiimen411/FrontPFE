@@ -7,7 +7,7 @@ import { catchError } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class CommandeService {
-  private commandeURL: string = 'http://localhost:8081/api/commandes/v1';
+  private commandeURL: string = 'http://localhost:8080/api/commandes/v1';
 
   constructor(private httpClient: HttpClient) { }
 

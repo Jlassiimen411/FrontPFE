@@ -1,0 +1,54 @@
+<app-header2></app-header2>
+
+<section class="h-100 h-custom">
+  <div class="container h-100 py-5">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+      <div class="col">
+        <div class="table-responsive">
+          <div class="container mt-5">
+            <div align="right" class="mb-3">
+              <button (click)="checkout()" color="warning" mat-raised-button>Vérifier</button>
+            </div>
+          </div><br>
+          <table class="table">
+            <thead>
+              <tr>
+                <th scope="col">Code Produit</th>
+                <th scope="col">Nom</th>
+                <th scope="col">Libellé</th>
+                <th scope="col">Prix Unitaire</th>
+                <th scope="col">Quantité</th>
+                <th scope="col">Prix Total</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of cartItems">
+                <td class="align-middle">{{ item.product.codeProduit }}</td>
+                <td class="align-middle">{{ item.product.nomProduit }}</td>
+                <td class="align-middle">{{ item.product.libelle }}</td>
+                <td class="align-middle">{{ item.product.prix }} TND</td>
+                <td class="align-middle">
+                  <div class="d-flex">
+                    <input type="number" min="1" class="form-control w-auto mx-2" 
+                      [(ngModel)]="item.quantity" 
+                      (ngModelChange)="updateQuantity(item.product.codeProduit, item.quantity)">
+                  </div>
+                </td>
+                <td class="align-middle">{{ item.product.prix * item.quantity }} TND</td>
+                <td class="align-middle">
+                    <button class="btn btn-danger" (click)="removeItem(item.product.id)">Supprimer</button>
+
+
+                  </td>
+                  
+                  
+              </tr>
+            </tbody>
+          </table>
+          <h4>Total: {{ total }} TND</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

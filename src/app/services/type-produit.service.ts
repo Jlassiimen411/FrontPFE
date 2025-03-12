@@ -7,7 +7,7 @@ import { catchError, Observable, of, tap } from 'rxjs';
 })
 export class TypeProduitService {
 
-  private typeproduitURL: string = 'http://localhost:8081/api/typeproduits/v1';
+  private typeproduitURL: string = 'http://localhost:8080/api/typeproduits/v1';
 
   constructor(private httpClient: HttpClient) {}
 

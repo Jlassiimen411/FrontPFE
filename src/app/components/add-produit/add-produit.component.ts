@@ -1,6 +1,9 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Inject, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { ActivatedRoute } from '@angular/router';
 import { ProduitService } from 'src/app/services/produit.service';
+import { TypeProduitService } from 'src/app/services/type-produit.service'; // Make sure to import the service to fetch types
 
 @Component({
   selector: 'app-add-produit',
@@ -10,14 +13,17 @@ import { ProduitService } from 'src/app/services/produit.service';
 export class AddProduitComponent implements OnInit {
 
   produitForm!: FormGroup;
+  typesProduit: any[] = [];  // This will hold the list of types
   loading: boolean = false;
   errorMessage: string = '';
 
   constructor(
     private fb: FormBuilder,
-    private produitService: ProduitService
+    private produitService: ProduitService,
+    private dialogRef: MatDialogRef<AddProduitComponent>, // Gérer le popup
+    @Inject(MAT_DIALOG_DATA) public data: { typeId: number } // Récupérer l'ID du type
   ) {}
-
+  
   ngOnInit(): void {
     this.produitForm = this.fb.group({
       codeProduit: ['', Validators.required],
@@ -25,31 +31,34 @@ export class AddProduitComponent implements OnInit {
       libelle: [''],
       prix: ['', [Validators.required, Validators.min(0)]],
       date: [''],
-      description: ['']
+      description: [''],
+      typeProduit: { id: this.data.typeId } // Mettre le type par défaut
     });
   }
-
+  
+  // Fermer le popup après l'ajout du produit
   saveProduit(): void {
     if (this.produitForm.valid) {
-      this.loading = true;
-      this.produitService.addProduit(this.produitForm.value).subscribe({
+      const produitData = { 
+        ...this.produitForm.value, 
+        typeProduit: { id: this.produitForm.value.typeProduit.id }
+      };
+  
+      this.produitService.addProduit(produitData).subscribe({
         next: () => {
           console.log('Produit ajouté avec succès');
-          // Optionnel : rediriger ou afficher une notification de succès
-          this.produitForm.reset();  // Réinitialise le formulaire après soumission
+          this.dialogRef.close(true); // Fermer le popup et rafraîchir la liste
         },
         error: (err) => {
-          this.loading = false;
-          this.errorMessage = 'Une erreur est survenue lors de l\'ajout du produit.';
           console.error('Erreur lors de l\'ajout du produit:', err);
         }
       });
-    } else {
-      this.errorMessage = 'Veuillez remplir tous les champs correctement.';
     }
   }
-
+  
+  // Annuler et fermer le popup
   cancelAdd(): void {
-    this.produitForm.reset();  // Réinitialise le formulaire si l'utilisateur annule
+    this.dialogRef.close(false);
   }
+
 }

@@ -27,22 +27,27 @@ export class AddCommandeComponent implements OnInit {
       numero: [null, Validators.required],
       produits: this.fb.array([], Validators.required),
       quantite: [null, [Validators.required, Validators.min(1)]],
-      date: [null, Validators.required],
+      dateCommande: [null, Validators.required],  // Add the date field here
       price: ['', [Validators.required, Validators.pattern('^[0-9]+(\\.[0-9]{1,2})?$')]]
     });
+    
+    
 
     this.loadProduits();
   }
+
 
   loadProduits() {
     this.pService.getAllProduits().subscribe(
       (res: any[]) => {
         this.produits = res;
+        console.log(this.produits);  // Log pour vérifier si 'nomProduit' est présent
         this.populateProduitsCheckbox();
       },
       (error) => console.error('Erreur lors du chargement des produits:', error)
     );
   }
+  
 
   populateProduitsCheckbox() {
     const produitsArray = this.addCommandeForm.get('produits') as FormArray;
@@ -60,10 +65,16 @@ export class AddCommandeComponent implements OnInit {
     // Sélectionner les produits avec la quantité correspondante
     const produitsSelectionnes = this.produits
       .filter((_, index) => (this.addCommandeForm.get('produits') as FormArray).at(index).value)
-      .map((p, index) => ({
-        id: p.id,
-        quantite: this.addCommandeForm.get('quantite')?.value // Assurez-vous que chaque produit a une quantité associée
-      }));
+      .map((p, index) => {
+        if (!p.nomProduit) {
+          console.error("Nom du produit introuvable pour l'ID : " + p.id);
+        }
+        return {
+          id: p.id,
+          nomProduit: p.nomProduit,  // Assure-toi que le nom du produit est bien récupéré
+          quantite: this.addCommandeForm.get('quantite')?.value
+        };
+      });
   
     if (produitsSelectionnes.length === 0) {
       console.error("Aucun produit sélectionné !");
@@ -74,7 +85,7 @@ export class AddCommandeComponent implements OnInit {
     const commandeData = {
       numero: this.addCommandeForm.get('numero')?.value,
       quantite: this.addCommandeForm.get('quantite')?.value,
-      dateCommande: this.addCommandeForm.get('date')?.value,
+      dateCommande: this.addCommandeForm.get('dateCommande')?.value,
       price: this.addCommandeForm.get('price')?.value,
       produits: produitsSelectionnes // Ajouter la structure complète des produits et quantités
     };
@@ -91,7 +102,4 @@ export class AddCommandeComponent implements OnInit {
       }
     );
   }
-  
-
-  
-}
+}  

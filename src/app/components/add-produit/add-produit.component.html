@@ -12,19 +12,11 @@
   </div>
 
   <div class="container mt-4">
-    <h2 class="title-text">Ajouter un Produit</h2>
-
-    <!-- Formulaire d'ajout de produit -->
     <div class="add-produit-form">
-      <form [formGroup]="produitForm" (ngSubmit)="saveProduit()">
+      <form *ngIf="produitForm" [formGroup]="produitForm" (ngSubmit)="saveProduit()">
         <div class="mb-3">
           <label for="codeProduit" class="form-label">Code du produit</label>
-          <input 
-            type="text" 
-            id="codeProduit" 
-            formControlName="codeProduit"
-            class="form-control" 
-          />
+          <input type="text" id="codeProduit" formControlName="codeProduit" class="form-control" />
           <div *ngIf="produitForm.get('codeProduit')?.invalid && (produitForm.get('codeProduit')?.touched)" class="invalid-feedback">
             Le code du produit est requis.
           </div>
@@ -32,12 +24,7 @@
     
         <div class="mb-3">
           <label for="nomProduit" class="form-label">Nom du produit</label>
-          <input 
-            type="text" 
-            id="nomProduit" 
-            formControlName="nomProduit"
-            class="form-control" 
-          />
+          <input type="text" id="nomProduit" formControlName="nomProduit" class="form-control" />
           <div *ngIf="produitForm.get('nomProduit')?.invalid && (produitForm.get('nomProduit')?.touched)" class="invalid-feedback">
             Le nom du produit est requis.
           </div>
@@ -45,23 +32,12 @@
     
         <div class="mb-3">
           <label for="libelle" class="form-label">Libellé</label>
-          <input 
-            type="text" 
-            id="libelle" 
-            formControlName="libelle"
-            class="form-control" 
-          />
+          <input type="text" id="libelle" formControlName="libelle" class="form-control" />
         </div>
     
         <div class="mb-3">
           <label for="prix" class="form-label">Prix</label>
-          <input 
-            type="number" 
-            id="prix" 
-            formControlName="prix"
-            min="0"
-            class="form-control" 
-          />
+          <input type="number" id="prix" formControlName="prix" min="0" class="form-control" />
           <div *ngIf="produitForm.get('prix')?.invalid && (produitForm.get('prix')?.touched)" class="invalid-feedback">
             Le prix doit être un nombre positif.
           </div>
@@ -69,31 +45,19 @@
     
         <div class="mb-3">
           <label for="date" class="form-label">Date</label>
-          <input 
-            type="date" 
-            id="date" 
-            formControlName="date"
-            class="form-control" 
-          />
+          <input type="date" id="date" formControlName="date" class="form-control" />
         </div>
     
         <div class="mb-3">
           <label for="description" class="form-label">Description</label>
-          <textarea 
-            id="description" 
-            formControlName="description"
-            class="form-control w-100"
-          ></textarea>
+          <textarea id="description" formControlName="description" class="form-control w-100"></textarea>
         </div>
     
         <div class="d-flex justify-content-between">
-          <button type="submit" class="btn btn-primary" [disabled]="produitForm.invalid">Ajouter</button>
-          <button type="button" class="btn btn-secondary" (click)="cancelAdd()">Annuler</button>
+          <button type="submit" class="custom-btn" [disabled]="produitForm.invalid">Ajouter</button>
+          <button type="button" class="custom-btn-outline" (click)="cancelAdd()">Annuler</button>
         </div>
       </form>
     </div>
-    
-    <!-- Retour button -->
-    <button class="btn btn-link" routerLink="/type_produit">Retour</button>
   </div>
 </body>

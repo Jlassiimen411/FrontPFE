@@ -7,7 +7,7 @@ import { catchError } from 'rxjs/operators';
 })
 export class LivraisonService  {
 
-  private livraisonURL: string = 'http://localhost:8081/api/livraisons';
+  private livraisonURL: string = 'http://localhost:8080/api/livraisons';
 
   constructor(private httpClient: HttpClient) { }
 

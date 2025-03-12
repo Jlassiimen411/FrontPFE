@@ -15,16 +15,19 @@ import { EditTypeProduitComponent } from './components/edit-type-produit/edit-ty
 
 import { ProduitsParTypeComponent } from './components/produits-par-type/produits-par-type.component';
 import { AddProduitComponent } from './components/add-produit/add-produit.component';
+import { CategorieUserComponent } from './components/categorie-user/categorie-user.component';
+import { CartComponent } from './components/cart/cart.component';
+import { BuyProductComponent } from './components/buy-product/buy-product.component';
+
+import { BuyProductResolverService } from './services/buy-product-resolver.service';
+import { ProduitUserComponent } from './components/produit-user/produit-user.component';
 
 
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'receptionnairepage', component: ReceptionnairePageComponent },
   { path: 'commandes', component: CommandesComponent },
-  
-
   { path: 'produits/:id', component: ProduitsParTypeComponent },
-
   { path: 'livraisons', component: LivraisonsComponent },
   { path: 'addcommande', component: AddCommandeComponent },
   { path: 'addlivraison', component: AddLivraisonComponent },
@@ -32,14 +35,23 @@ const routes: Routes = [
   { path: 'editproduit/:id', component: EditProduitComponent },
   { path: 'edit-livraison/:id', component: EditLivraisonComponent },
   { path: 'type_produit', component: TypeProduitComponent },
-
   { path: 'edit_type_produit/:id', component: EditTypeProduitComponent },
-
   { path: 'addProduit/:typeId', component: AddProduitComponent },
+  
 
+
+  /////////////client///
+  { path: 'categories', component: CategorieUserComponent },
+  { path: 'produits_user/:typeId', component: ProduitUserComponent },
+  { path: 'cart', component: CartComponent },
+  { path: 'buyProduct', component: BuyProductComponent ,
+  resolve:{
+    productDetails:BuyProductResolverService
+  }
+}
  
 
-  { path: '**', redirectTo: '' } // Redirection si la route est inconnue
+
 ];
 
 @NgModule({

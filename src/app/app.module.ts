@@ -35,6 +35,7 @@ import { CartComponent } from './components/cart/cart.component';
 
 import { BuyProductComponent } from './components/buy-product/buy-product.component';
 import { ProduitUserComponent } from './components/produit-user/produit-user.component';
+import { CamionsComponent } from './components/camions/camions.component';
 
 
 
@@ -66,6 +67,7 @@ import { ProduitUserComponent } from './components/produit-user/produit-user.com
     CartComponent,
     BuyProductComponent,
     ProduitUserComponent,
+    CamionsComponent,
   
   
   ],

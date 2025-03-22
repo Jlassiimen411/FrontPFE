@@ -35,13 +35,13 @@ body {
     margin-bottom: 15px;
 }
 .event-form button {
-    background-color: #28a745;
-    color: #fff;
+  
+    color: black;
     padding: 10px 15px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
 }
 .event-form button:hover {
-    background-color: #218838;
+    background-color: white;
 }

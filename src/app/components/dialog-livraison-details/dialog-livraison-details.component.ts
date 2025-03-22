@@ -9,6 +9,7 @@ import { LivraisonService } from 'src/app/services/livraison.service';
   styleUrls: ['./dialog-livraison-details.component.css']
 })
 export class DialogLivraisonDetailsComponent implements OnInit {
+  livaisons: any[] = [];  // Initialisation de la propriété directement ici
 
   constructor(
     public dialogRef: MatDialogRef<DialogLivraisonDetailsComponent>,
@@ -25,15 +26,36 @@ export class DialogLivraisonDetailsComponent implements OnInit {
       return;
     }
 
+    // Vérifier et attribuer des valeurs par défaut pour les champs 'marque', 'immatriculation' et 'statut'
+    this.data.marque = this.data.marque || 'Non définie';
+    this.data.immatriculation = this.data.immatriculation || 'Non définie';
+    this.data.statut = this.data.statut || 'Non défini';  // Mettre aussi une valeur par défaut pour 'statut'
+    
     console.log('Données reçues:', this.data);
+}
 
-    this.data.nmrCommande = this.data.nmrCommande || 'Non défini';
-    this.data.statut = this.data.statut || 'Non défini';
-  }
+  
+  
+  
+  
 
   closeDialog(): void {
+    // Retirer le focus du bouton ou de tout élément en focus
+    const button = document.querySelector('button');
+    if (button) {
+      button.blur(); // Retirer le focus
+    }
+  
+    // Appliquer aria-hidden à l'élément racine
+    const appRoot = document.querySelector('app-root');
+    if (appRoot) {
+      appRoot.setAttribute('aria-hidden', 'true');
+    }
+  
+    // Fermer le dialogue
     this.dialogRef.close();
   }
+  
 
   deleteLivraison(): void {
     const livraisonId = this.data?.livraisonId;
@@ -77,13 +99,19 @@ export class DialogLivraisonDetailsComponent implements OnInit {
     }
   }
 
+  
+
   editLivraison(): void {
     const livraisonId = this.data?.livraisonId;
     if (!livraisonId) {
-      alert('L\'ID de livraison est manquant pour l\'édition.');
+      alert("L'ID de livraison est manquant pour l'édition.");
       return;
     }
-    console.log('Modification de la livraison avec l\'ID:', livraisonId);
+
+    console.log("Modification de la livraison avec l'ID:", livraisonId);
+
+    // Fermer le dialogue avant la redirection
+    this.dialogRef.close();
 
     // Rediriger vers la page de modification de la livraison
     this.router.navigate(['/edit-livraison', livraisonId]);

@@ -37,7 +37,9 @@ import { BuyProductComponent } from './components/buy-product/buy-product.compon
 import { ProduitUserComponent } from './components/produit-user/produit-user.component';
 import { CamionsComponent } from './components/camions/camions.component';
 
-
+import { MatTableModule } from '@angular/material/table';
+import { CiternesComponent } from './components/citernes/citernes.component';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 
 @NgModule({
@@ -68,6 +70,7 @@ import { CamionsComponent } from './components/camions/camions.component';
     BuyProductComponent,
     ProduitUserComponent,
     CamionsComponent,
+    CiternesComponent
   
   
   ],
@@ -80,6 +83,8 @@ import { CamionsComponent } from './components/camions/camions.component';
     BrowserAnimationsModule,
     MatDialogModule,
     HttpClientModule,
+    MatTableModule,
+    MatSnackBarModule
     
 
     

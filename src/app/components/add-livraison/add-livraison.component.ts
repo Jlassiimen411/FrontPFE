@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
-import { CommandeService } from 'src/app/services/commande.service';
+import { MatDialogRef } from '@angular/material/dialog'; // Pour gérer la fermeture du popup
 import { LivraisonService } from 'src/app/services/livraison.service';
+import { CommandeService } from 'src/app/services/commande.service';
+import { CamionService } from 'src/app/services/camion.service';
+import { MatSnackBar } from '@angular/material/snack-bar';
 
 @Component({
   selector: 'app-add-livraison',
@@ -11,107 +13,126 @@ import { LivraisonService } from 'src/app/services/livraison.service';
 })
 export class AddLivraisonComponent implements OnInit {
   addLivraisonForm!: FormGroup;
-  isSuccessful: boolean = false;
-  isFailed: boolean = false;
-  selectedFile: File | null = null;
-  allLivraisons: any[] = [];  // Declare the property to hold all livraisons
-  calendarEvents: any[] = []; 
-  commandes: any[] = [];  // Declare the property for calendar events
+  marquesCamion: string[] = [];
+  immatriculations: string[] = [];
+  commandes: any[] = [];
+  camions: any[] = [];
+
 
   constructor(
     private fb: FormBuilder,
     private lService: LivraisonService,
     private cService: CommandeService,
-    public _dialogRef: MatDialogRef<AddLivraisonComponent> // Keep as public for dialog interaction
+    private camionService: CamionService,
+    public dialogRef: MatDialogRef<AddLivraisonComponent>,  // Pour fermer le popup
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
-    // Initialisation du formulaire réactif
+    // Initialisation du formulaire
     this.addLivraisonForm = this.fb.group({
       livraisonId: ['', Validators.required],
       commandeId: ['', Validators.required],
       date: ['', Validators.required],
-      dateCommande: ['', Validators.required],
-      statut: ['', Validators.required]
+      statut: ['', Validators.required],
+      marque: ['', Validators.required],
+      immatriculation: ['', Validators.required],
     });
+
+    // Chargement des commandes et des marques de camions
     this.loadCommandes();
+    this.loadMarquesCamions();
   }
 
-  // Gestion du changement de fichier
-  onFileChange(event: any) {
-    if (event.target.files && event.target.files.length > 0) {
-      this.selectedFile = event.target.files[0];
-      this.addLivraisonForm.patchValue({ file: this.selectedFile });
-    }
+  // Fonction pour charger les commandes
+  loadCommandes(): void {
+    this.cService.getAllCommandes().subscribe({
+      next: (data) => this.commandes = data,
+      error: (err) => console.error('Erreur lors du chargement des commandes', err)
+    });
+  }
+  getCamionIdByImmatriculation(immatriculation: string): number | null {
+    const camionTrouve = this.camions.find(c => c.immatriculation === immatriculation);
+    return camionTrouve ? camionTrouve.id : null;
+  }
+  
+  // Fonction pour charger les marques de camions
+  loadMarquesCamions(): void {
+    this.camionService.getCamions().subscribe({
+      next: (data: any) => {
+        this.camions = data; // Stocker tous les camions
+        this.marquesCamion = Array.from(new Set(data.map((camion: any) => camion.marque)));
+      },
+      error: (err) => console.error('Erreur lors du chargement des camions', err)
+    });
+  }
+  
+
+  // Fonction appelée lorsqu'une marque de camion est sélectionnée
+  onMarqueSelectionChange(event: Event): void {
+    const target = event.target as HTMLSelectElement;
+    const marque = target.value;
+
+    // Charger les immatriculations basées sur la marque sélectionnée
+    this.camionService.getCamionsByMarque(marque).subscribe({
+      next: (data: any[]) => {
+        this.immatriculations = data.map((camion: any) => camion.immatriculation);
+        this.addLivraisonForm.get('immatriculation')?.setValue('');  // Réinitialiser l'immatriculation
+      },
+      error: (err) => console.error('Erreur lors du chargement des camions pour cette marque', err)
+    });
   }
 
-  // Ajout d'une Livraison
-  addLivraison() {
+  // Fonction pour ajouter une livraison
+  addLivraison(): void {
     if (this.addLivraisonForm.invalid) {
-      this.isFailed = true;
       return;
     }
   
-    const statut = this.addLivraisonForm.get('statut')?.value;
+    const camionId = this.getCamionIdByImmatriculation(this.addLivraisonForm.get('immatriculation')?.value);
+    if (!camionId) {
+      this.snackBar.open('Erreur : Camion non trouvé.', 'Fermer', { duration: 3000 });
+      return;
+    }
   
-    // Mapping des valeurs avant l'envoi
-    const statutMapped = statut === 'en-attente' ? 'EN_ATTENTE' : statut === 'livre' ? 'LIVRE' : 'ANNULE';
-  
-    const dateCommande = this.addLivraisonForm.get('dateCommande')?.value;
-    const dateLivraison = this.addLivraisonForm.get('date')?.value;
-  
-    // Si ce sont des chaînes, on les envoie directement, sinon on les convertit en format string
     const livraisonData = {
       commandeId: this.addLivraisonForm.get('commandeId')?.value,
-      dateCommande: (dateCommande instanceof Date ? dateCommande.toISOString().split('T')[0] : dateCommande),
-      dateLivraison: (dateLivraison instanceof Date ? dateLivraison.toISOString().split('T')[0] : dateLivraison),
-      statut: statutMapped
+      dateLivraison: this.addLivraisonForm.get('date')?.value,
+      camion: { id: camionId }, // Envoie uniquement l'ID du camion
+      statut: this.addLivraisonForm.get('statut')?.value
     };
   
-    this.lService.addLivraison(livraisonData).subscribe(
-      (res) => {
-        this.isSuccessful = true;
-        this._dialogRef.close(true);
-        console.log('Livraison ajoutée avec succès', res);
-        this.loadLivraisons();
+    console.log('Données envoyées au backend :', livraisonData); // Debug
+  
+    fetch('http://localhost:8080/api/livraisons', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
       },
-      (error) => {
-        this.isFailed = true;
-        console.error('Erreur lors de l\'ajout de la livraison:', error);
-      }
-    );
-  }
-  
-  
-  
-  loadLivraisons(): void {
-    this.lService.getAllLivraisons().subscribe({
-        next: (data) => {
-            this.allLivraisons = data;
-            // Mettre à jour les événements du calendrier avec les nouvelles livraisons
-            this.calendarEvents = data.map((livraison: any) => {
-                return {
-                    title: "Livraison ${livraison.commandeId}",
-                    start: livraison.dateLivraison, // Assurez-vous que cette date est au bon format
-                    description: livraison.statut
-                };
-            });
-        },
-        error: (err) => {
-            console.error('Error loading livraisons', err);
+      body: JSON.stringify(livraisonData)
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Erreur dans la réponse du serveur');
         }
-    });
+        return response.json();
+      })
+      .then(data => {
+        console.log('Livraison ajoutée avec succès', data);
+        this.dialogRef.close(true);
+      })
+      .catch(error => {
+        console.error('Erreur lors de l\'ajout de la livraison', error);
+        this.snackBar.open(`Erreur: ${error.message || 'Une erreur inconnue est survenue.'}`, 'Fermer', { duration: 3000 });
+      });
   }
+  
+        
+  
+  
 
-  loadCommandes(): void {
-    this.cService.getAllCommandes().subscribe({
-      next: (data) => {
-        this.commandes = data;  // Récupérer toutes les commandes et les assigner à commandes
-      },
-      error: (err) => {
-        console.error('Error loading commandes', err);
-      }
-    });
+  // Fonction pour annuler l'ajout de la livraison
+  onCancel(): void {
+    this.dialogRef.close();  // Fermer le pop-up sans soumettre
   }
-
 }

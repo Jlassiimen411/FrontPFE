@@ -1,14 +1,24 @@
+
+.container{
+  margin-top: -35em;
+}
 form {
     display: flex;
     flex-direction: column;
     gap: 15px;
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
     margin: 20px auto;
     padding: 20px;
     background: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  .lo{
+    margin-left: -190px;
+  }
+  .la{
+    margin-left: -260px;
   }
   
   label {
@@ -25,8 +35,8 @@ form {
   
   button {
     padding: 10px;
-    background-color: #007BFF;
-    color: white;
+    
+    color: black;
     border: none;
     border-radius: 4px;
     font-size: 1rem;
@@ -37,3 +47,4 @@ form {
     background-color: #cccccc;
     cursor: not-allowed;
   }
+  

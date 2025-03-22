@@ -1,7 +1,12 @@
 <app-header2></app-header2>
-
 <app-dash-receptionnaire></app-dash-receptionnaire>
-<button class="button" (click)="openAddLivraisonDialog()">Ajouter un événement</button>
+<div class="heading_container heading_center container">
+    <h2 class="lo">
+      Gestion des livraisons
+    </h2>
+    </div><br><br><br><br>
+
+<button class="button" class="btn btn-warning" (click)="openAddLivraisonDialog()"><b>Ajouter une livraison</b></button><br><br><br><br>
 <full-calendar [options]="calendarOptions"
 
 [plugins]="calendarOptions.plugins"
@@ -11,3 +16,4 @@
 (eventClick)="handleEventClick($event)">
 </full-calendar>
 
+ 

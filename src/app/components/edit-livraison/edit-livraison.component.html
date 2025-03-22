@@ -1,20 +1,28 @@
-<h2>Modifier la Livraison</h2>
-
+<app-header2></app-header2>
+<div class="heading_container heading_center container   ">
+  <h2 class="li">
+    Edit Livraison
+  </h2>
 <form [formGroup]="livraisonForm" (ngSubmit)="editLivraison()">
-
-  <div>
-    <label for="dateLivraison">Date Livraison:</label>
+<br>
+  <div class="lo">
+    <label for="dateLivraison">Date Livraison:</label>&nbsp;
     <input id="dateLivraison" formControlName="dateLivraison" type="date" required>
   </div>
-  <div>
-    <label for="statut">Statut:</label>
+  
+  <div class="la">
+    <label for="statut">Statut:</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <select id="statut" formControlName="statut" required>
         <option value="EN_ATTENTE">En Attente</option>
         <option value="LIVRE">Livré</option>
         <option value="ANNULE">Annulé</option>
     </select> 
   </div>
+  <br>
+  <div class="button-container">
+    <button mat-button class="btn btn-warning" type="submit" (click)="editLivraison()"><b>Enregistrer</b></button>&nbsp;
+    <button mat-button class="btn btn-warning" type="button" (click)="cancel()"><b>Annuler</b></button>
+  </div>
   
-  <button mat-button color="primary" type="submit" (click)="editLivraison()">Enregistrer</button>
-  <button mat-button color="warn" type="button" (click)="cancel()">Annuler</button>
 </form>
+</div>

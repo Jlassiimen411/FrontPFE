@@ -14,6 +14,7 @@ export class AddCommandeComponent implements OnInit {
   isSuccessful: boolean = false;
   isFailed: boolean = false;
   produits: any[] = [];
+  totalPrice: number = 0;
 
   constructor(
     private fb: FormBuilder,
@@ -27,26 +28,46 @@ export class AddCommandeComponent implements OnInit {
       numero: [null, Validators.required],
       produits: this.fb.array([], Validators.required),
       quantite: [null, [Validators.required, Validators.min(1)]],
-      dateCommande: [null, Validators.required],  // Add the date field here
-      price: ['', [Validators.required, Validators.pattern('^[0-9]+(\\.[0-9]{1,2})?$')]]
+      dateCommande: [null, Validators.required],
+      price: ['', [Validators.required, Validators.pattern('^[0-9]+(\\.[0-9]{1,2})?$')]],
+      totalPrice: [{ value: 0, disabled: true }]  // Make totalPrice field read-only
     });
-    
-    
-
+  
     this.loadProduits();
+  
+    // Automatically calculate the total price when quantity or price changes
+    this.addCommandeForm.get('quantite')?.valueChanges.subscribe(() => {
+      this.calculateTotalPrice();
+    });
+  
+    this.addCommandeForm.get('price')?.valueChanges.subscribe(() => {
+      this.calculateTotalPrice();
+    });
   }
+  
+// Vous avez déjà un champ totalPrice dans votre formulaire, assurez-vous qu'il est bien calculé :
+calculateTotalPrice() {
+  const quantity = this.addCommandeForm.get('quantite')?.value;
+  const price = this.addCommandeForm.get('price')?.value;
 
-
-  loadProduits() {
-    this.pService.getAllProduits().subscribe(
-      (res: any[]) => {
-        this.produits = res;
-        console.log(this.produits);  // Log pour vérifier si 'nomProduit' est présent
-        this.populateProduitsCheckbox();
-      },
-      (error) => console.error('Erreur lors du chargement des produits:', error)
-    );
+  if (quantity && price) {
+    this.totalPrice = quantity * price;  // Calcul du prix total
+    this.addCommandeForm.get('totalPrice')?.setValue(this.totalPrice);  // Mettre à jour le champ totalPrice
   }
+}
+
+  
+loadProduits() {
+  this.pService.getAllProduits().subscribe(
+    (res: any[]) => {
+      this.produits = res;
+      console.log(this.produits);  // Vérifiez ici que chaque produit a bien un prix
+      this.populateProduitsCheckbox();
+    },
+    (error) => console.error('Erreur lors du chargement des produits:', error)
+  );
+}
+
   
 
   populateProduitsCheckbox() {
@@ -54,6 +75,8 @@ export class AddCommandeComponent implements OnInit {
     produitsArray.clear();
     this.produits.forEach(() => produitsArray.push(this.fb.control(false)));
   }
+
+
 
   addCommande() {
     if (this.addCommandeForm.invalid) {
@@ -71,7 +94,7 @@ export class AddCommandeComponent implements OnInit {
         }
         return {
           id: p.id,
-          nomProduit: p.nomProduit,  // Assure-toi que le nom du produit est bien récupéré
+          nomProduit: p.nomProduit,  // Ensure the product name is correctly included
           quantite: this.addCommandeForm.get('quantite')?.value
         };
       });

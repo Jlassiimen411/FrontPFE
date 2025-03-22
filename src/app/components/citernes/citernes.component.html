@@ -1,0 +1,64 @@
+<app-header2></app-header2>
+<app-dash-receptionnaire></app-dash-receptionnaire>
+
+<div class="heading_container heading_center container">
+    <h2 class="lo">Gestion des Citernes</h2>
+    <br>
+
+    <!-- Formulaire -->
+    <div class="form">
+        <input type="text" placeholder="Référence" [(ngModel)]="nouvelleCiterne.reference">
+        <input type="number" placeholder="Capacité" [(ngModel)]="nouvelleCiterne.capacite">
+    
+      
+        <button type="button" class="btn btn-warning" (click)="ajouterCiterne()">
+          <i class="fa fa-plus-circle">&nbsp;&nbsp;</i><b>Ajouter</b>
+        </button>
+      </div>
+      
+
+    <!-- Tableau des citernes -->
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Référence</th>
+                <th>Capacité</th>
+         
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let citerne of citernes">
+                <td>{{ citerne.id }}</td>
+                <td>{{ citerne.reference }}</td>
+                <td>{{ citerne.capacite }}</td>
+
+                <td>
+                    <button type="button" class="btn btn-warning" (click)="editCiterne(citerne.id)">
+                        <i class="fa-solid fa-pen"></i>
+                    </button>
+                    &nbsp;
+                    <button type="button" class="btn btn-warning" (click)="supprimerCiterne(citerne.id)">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Modal for editing citerne -->
+    <div *ngIf="citerneEnCours" class="modal">
+        <div class="modal-content">
+            <span class="close" (click)="closeModal()">&times;</span>
+            <h2>Modifier la Citerne</h2>
+
+            <input type="text" [(ngModel)]="citerneEnCours.reference" placeholder="Référence">
+            <input type="number" [(ngModel)]="citerneEnCours.capacite" placeholder="Capacité">
+            
+            <button type="button" class="btn btn-warning" (click)="sauvegarderModification()">
+                <b>Enregistrer</b>
+            </button>
+        </div>
+    </div>
+</div>

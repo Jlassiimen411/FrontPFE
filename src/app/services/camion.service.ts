@@ -30,4 +30,17 @@ export class CamionService {
   deleteCamion(id: number): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
+    // Récupérer les informations du camion par ID de livraison
+    getCamionByLivraisonId(livraisonId: string): Observable<any> {
+      return this.http.get<any>(`${this.apiUrl}/${livraisonId}`);
+
+}
+// Méthode dans le CamionService pour récupérer les camions par marque
+// CamionService
+getCamionsByMarque(marque: string): Observable<any[]> {
+  return this.http.get<any[]>(`${this.apiUrl}/marques/${marque}`);
+}
+
+
+
 }

@@ -50,7 +50,7 @@ export class LivraisonsComponent implements OnInit {
   openAddLivraisonDialog(): void {
     const dialogRef = this.dialog.open(AddLivraisonComponent, {
       width: '30em',
-      height: '55em',
+      height: '41em',
       disableClose: true, // Empêche la fermeture en cliquant à l'extérieur
     });
 
@@ -65,27 +65,35 @@ export class LivraisonsComponent implements OnInit {
   loadLivraisons(): void {
     this.lService.getAllLivraisons().subscribe({
       next: (data) => {
-        console.log('All deliveries:', data); // Check if id is present
+        console.log('Livraisons récupérées :', data);
         this.allLivraisons = data;
-        this.calendarEvents = data.map((livraison: any) => ({
-          title: `Livraison ${livraison.id}`,
-
-          start: livraison.dateLivraison,
-          description: livraison.statut,
-          id: livraison.id, // id is included here
-          extendedProps: {
-            commandeId: livraison.commandeId,  // Ensure commandeId is correctly passed
-            statut: livraison.statut           // Ensure statut is passed as well
-          }
-        }));
-        
+  
+        this.calendarEvents = data.map((livraison: any) => {
+          console.log('Livraison spécifique:', livraison); // Inspecter la livraison
+  
+          return {
+            title: `Livraison ${livraison.id}`,
+            start: livraison.dateLivraison,
+            description: livraison.statut,
+            id: livraison.id,
+            extendedProps: {
+              commandeId: livraison.commandeId,
+              statut: livraison.statut,
+              marque: livraison.camion ? livraison.camion.marque : 'Non définie',
+              immatriculation: livraison.camion ? livraison.camion.immatriculation : 'Non définie'
+            }
+          };
+        });
+  
         this.updateCalendarEvents();
       },
       error: (err) => {
-        console.error('Error loading livraisons', err);
+        console.error('Erreur lors du chargement des livraisons :', err);
       }
     });
   }
+  
+  
   
 
   // Mettre à jour les événements du calendrier après l'ajout de la livraison
@@ -95,18 +103,21 @@ export class LivraisonsComponent implements OnInit {
 
   handleEventClick(clickInfo: any): void {
     const data = {
-      livraisonId: clickInfo.event.id,  // Vérifiez que event.id contient bien l'ID de livraison
+      livraisonId: clickInfo.event.id,
       commandeId: clickInfo.event.extendedProps.commandeId,
-      dateLivraison: clickInfo.event.startStr,  
-      statut: clickInfo.event.extendedProps.statut
+      dateLivraison: clickInfo.event.startStr,
+      statut: clickInfo.event.extendedProps.statut,
+      marque: clickInfo.event.extendedProps.marque, // Marque ajoutée
+      immatriculation: clickInfo.event.extendedProps.immatriculation // Immatriculation ajoutée
     };
-    console.log('Données envoyées au dialogue:', data); // Ajoutez un log pour vérifier les données
-    
+  
     const dialogRef = this.dialog.open(DialogLivraisonDetailsComponent, {
-      width: '400px',
-      data: data
+      width: '600px',
+      height: '310px',
+      data: data // Données passées au composant de détails
     });
   }
+  
   
   
   

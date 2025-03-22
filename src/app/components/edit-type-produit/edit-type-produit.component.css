@@ -50,9 +50,9 @@ body{
     transform: translateY(-2px);
 }
 .produit-img{
-    /*margin-top: 5em;*/
-    height: 20em;
-    width: 25em;
+    margin-top: -5em;
+    height: 25em;
+    width: 40em;
     border-radius: 30px;
     opacity: 80%;
     

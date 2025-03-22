@@ -1,68 +1,95 @@
 <app-header2></app-header2>
 <app-dash-receptionnaire></app-dash-receptionnaire>
 
-    <div class="heading_container heading_center container">
-        <h2 class="lo">
-          Gestion des camions
-        </h2>
-        <br>
-    <!-- Formulaire -->
-    <div class="form">
-        <input type="text" placeholder="Marque" [(ngModel)]="nouveauCamion.marque">
-        <input type="text" placeholder="Modèle" [(ngModel)]="nouveauCamion.modele">
-        <input type="text" placeholder="Immatriculation" [(ngModel)]="nouveauCamion.immatriculation">
-        <input type="number" placeholder="Kilométrage" [(ngModel)]="nouveauCamion.kilometrage">
+<div class="heading_container heading_center container">
+  <h2 class="lo">Gestion des camions</h2>
+  <br>
 
-        <!-- Liste déroulante pour le statut -->
-        <select [(ngModel)]="nouveauCamion.statut">
-            <option *ngFor="let statut of statuts" [value]="statut">{{ statut }}</option>
-        </select>
+  <!-- Formulaire -->
+  <div class="form">
+    <input type="text" placeholder="Marque" [(ngModel)]="nouveauCamion.marque" required>
+    <input type="text" placeholder="Modèle" [(ngModel)]="nouveauCamion.modele" required>
+    <input type="text" placeholder="Immatriculation" [(ngModel)]="nouveauCamion.immatriculation" required>
+    <input type="number" placeholder="Kilométrage" [(ngModel)]="nouveauCamion.kilometrage" required min="0">
 
-        <button type="button" class="btn btn-warning" (click)="ajouterCamion()"><i class="fa fa-plus-circle">&nbsp;&nbsp;</i><b>Ajouter</b></button>
+    <!-- Liste déroulante pour le statut -->
+    <select [(ngModel)]="nouveauCamion.statut" required>
+      <option *ngFor="let statut of statuts" [value]="statut">{{ statut }}</option>
+    </select>
+
+    <!-- Liste déroulante pour sélectionner la citerne -->
+    <select [(ngModel)]="nouveauCamion.citerneId" required>
+        <option *ngFor="let citerne of citernes" [value]="citerne.id">{{ citerne.reference }}</option>
+      </select>
+      
+
+    <!-- Ajouter le bouton uniquement si tous les champs sont remplis -->
+    <button type="button" class="btn btn-warning" (click)="ajouterCamion()" [disabled]="!isFormValid() || !nouveauCamion.citerneId">
+        <i class="fa fa-plus-circle">&nbsp;&nbsp;</i><b>Ajouter</b>
+      </button>
+      
+  </div>
+
+  <!-- Tableau des camions -->
+<!-- Tableau des camions -->
+<table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Marque</th>
+        <th>Modèle</th>
+        <th>Immatriculation</th>
+        <th>Kilométrage</th>
+        <th>Statut</th>
+        <th>Citerne</th> <!-- Nouvelle colonne -->
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let camion of camions">
+        <td>{{ camion.id }}</td>
+        <td>{{ camion.marque }}</td>
+        <td>{{ camion.modele }}</td>
+        <td>{{ camion.immatriculation }}</td>
+        <td>{{ camion.kilometrage }}</td>
+        <td>{{ camion.statut }}</td>
+        <td>{{ camion.citerne ? camion.citerne.reference : 'Pas de citerne associée' }}</td>
+
+        <!-- Affichage citerne -->
+        <td>
+          <button type="button" class="btn btn-warning" (click)="editCamion(camion.id)">
+            <i class="fa-solid fa-pen"></i>
+          </button> &nbsp;
+          <button type="button" class="btn btn-warning" (click)="supprimerCamion(camion.id)">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  
+
+  <!-- Modale d'édition -->
+  <div *ngIf="camionEnCours" class="modal">
+    <div class="modal-content">
+      <span class="close" (click)="closeModal()">&times;</span>
+      <h2>Modifier le Camion</h2>
+      <input type="text" [(ngModel)]="camionEnCours.marque" placeholder="Marque" required>
+      <input type="text" [(ngModel)]="camionEnCours.modele" placeholder="Modèle" required>
+      <input type="text" [(ngModel)]="camionEnCours.immatriculation" placeholder="Immatriculation" required>
+      <input type="number" [(ngModel)]="camionEnCours.kilometrage" placeholder="Kilométrage" required min="0">
+      <select [(ngModel)]="camionEnCours.statut" required>
+        <option *ngFor="let statut of statuts" [value]="statut">{{ statut }}</option>
+      </select>
+
+      <!-- Liste déroulante pour sélectionner la citerne -->
+      <select [(ngModel)]="camionEnCours.citerneId" required>
+        <option *ngFor="let citerne of citernes" [value]="citerne.id">{{ citerne.reference }}</option>
+      </select>
+
+      <button type="button" class="btn btn-warning" (click)="sauvegarderModification()">
+        <b>Enregistrer</b>
+      </button>
     </div>
-
-    <!-- Tableau des camions -->
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Marque</th>
-                <th>Modèle</th>
-                <th>Immatriculation</th>
-                <th>Kilométrage</th>
-                <th>Statut</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let camion of camions">
-                <td>{{ camion.id }}</td>
-                <td>{{ camion.marque }}</td>
-                <td>{{ camion.modele }}</td>
-                <td>{{ camion.immatriculation }}</td>
-                <td>{{ camion.kilometrage }}</td>
-                <td>{{ camion.statut }}</td>
-                <td>
-                    <button type="button" class="btn btn-warning" (click)="editCamion(camion.id)"><i class="fa-solid fa-pen"></i></button> &nbsp;
-                    <button type="button" class="btn btn-warning" (click)="supprimerCamion(camion.id)"><i class="fa-solid fa-trash"></i></button>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-
-    <!-- Modale d'édition -->
-    <div *ngIf="camionEnCours" class="modal">
-        <div class="modal-content">
-            <span class="close" (click)="closeModal()">&times;</span>
-            <h2>Modifier le Camion</h2>
-            <input type="text" [(ngModel)]="camionEnCours.marque" placeholder="Marque">
-            <input type="text" [(ngModel)]="camionEnCours.modele" placeholder="Modèle">
-            <input type="text" [(ngModel)]="camionEnCours.immatriculation" placeholder="Immatriculation">
-            <input type="number" [(ngModel)]="camionEnCours.kilometrage" placeholder="Kilométrage">
-            <select [(ngModel)]="camionEnCours.statut">
-                <option *ngFor="let statut of statuts" [value]="statut">{{ statut }}</option>
-            </select>
-            <button type="button" class="btn btn-warning" (click)="sauvegarderModification()"><b>Enregistrer</b></button>
-        </div>
-    </div>
+  </div>
 </div>

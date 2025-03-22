@@ -25,7 +25,8 @@
         <div formArrayName="produits" class="d-flex gap-3 flex-wrap">
     <div *ngFor="let produit of produits; let i = index" class="form-check">
         <input type="checkbox" class="form-check-input" [formControlName]="i">
-        <label class="form-check-label">{{ produit.name }}</label>
+        <label class="form-check-label">{{ produit.nomProduit }}</label>
+
     </div>
 </div>
 
@@ -49,14 +50,23 @@
 </div>
 
                     <!-- Champ Price -->
-                    <div class="mb-3">
-                        <label>Prix :</label>
-                        <input formControlName="price" type="number" class="form-control" placeholder="Prix">
-                        <div *ngIf="addCommandeForm.get('price')?.invalid && addCommandeForm.get('price')?.touched" class="text-danger">
-                            Le prix est obligatoire.
-                        </div>
-                    </div>
-  
+<!-- Champ Prix -->
+<div class="mb-3">
+    <label>Prix :</label>
+    <input formControlName="price" type="number" class="form-control" placeholder="Prix">
+    <div *ngIf="addCommandeForm.get('price')?.invalid && addCommandeForm.get('price')?.touched" class="text-danger">
+        Le prix est obligatoire.
+    </div>
+</div>
+
+<!-- Champ Prix Total -->
+<div class="mb-3">
+    <label>Prix Total :</label>
+    <input formControlName="totalPrice" type="number" class="form-control" [value]="totalPrice" readonly>
+</div>
+
+
+
                     <!-- Boutons -->
                     <div class="mb-3">
                         <button type="submit" class="custom-btn">Ajouter commande</button>

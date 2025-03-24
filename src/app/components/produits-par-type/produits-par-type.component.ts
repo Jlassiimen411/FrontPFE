@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ProduitService } from 'src/app/services/produit.service';
 import { AddProduitComponent } from '../add-produit/add-produit.component';
 import { MatDialog } from '@angular/material/dialog';
-
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-produits-par-type',
   templateUrl: './produits-par-type.component.html',
@@ -80,20 +80,42 @@ export class ProduitsParTypeComponent implements OnInit {
   }
   
   deleteProduit(produitId: number): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
-      this.produitService.deleteProduitById(produitId).subscribe(
-        () => {
-          // Supprimer le produit de la liste localement
-          this.produits = this.produits.filter(produit => produit.id !== produitId);
-          alert('Produit supprimé avec succès !');
-        },
-        error => {
-          console.error('Erreur lors de la suppression du produit:', error);
-          alert('Une erreur est survenue lors de la suppression du produit.');
-        }
-      );
-    }
+    Swal.fire({
+      title: 'Êtes-vous sûr de vouloir supprimer ce produit ?',
+      text: `ID du produit : ${produitId}`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Oui, supprimer',
+      cancelButtonText: 'Annuler'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.produitService.deleteProduitById(produitId).subscribe(
+          () => {
+            // Supprimer le produit de la liste localement
+            this.produits = this.produits.filter(produit => produit.id !== produitId);
+            Swal.fire({
+              title: 'Supprimé !',
+              text: 'Produit supprimé avec succès.',
+              icon: 'success',
+              confirmButtonColor: '#28a745'
+            });
+          },
+          (error) => {
+            console.error('Erreur lors de la suppression du produit:', error);
+            Swal.fire({
+              title: 'Erreur !',
+              text: 'Une erreur est survenue lors de la suppression du produit.',
+              icon: 'error',
+              confirmButtonColor: '#d33'
+            });
+          }
+        );
+      }
+    });
   }
+  
   
 
   openDialog(): void {

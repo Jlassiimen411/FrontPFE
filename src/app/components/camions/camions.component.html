@@ -18,21 +18,18 @@
     </select>
 
     <!-- Liste déroulante pour sélectionner la citerne -->
-    <select [(ngModel)]="nouveauCamion.citerneId" required>
-        <option *ngFor="let citerne of citernes" [value]="citerne.id">{{ citerne.reference }}</option>
-      </select>
-      
+    <select [(ngModel)]="nouveauCamion.citerne.id" required>
+      <option *ngFor="let citerne of citernes" [value]="citerne.id">{{ citerne.reference }} - {{ citerne.capacite }} L</option>
+    </select>
 
     <!-- Ajouter le bouton uniquement si tous les champs sont remplis -->
-    <button type="button" class="btn btn-warning" (click)="ajouterCamion()" [disabled]="!isFormValid() || !nouveauCamion.citerneId">
-        <i class="fa fa-plus-circle">&nbsp;&nbsp;</i><b>Ajouter</b>
-      </button>
-      
+    <button type="button" class="btn btn-warning" (click)="ajouterCamion()" [disabled]="!isFormValid()">
+      <i class="fa fa-plus-circle">&nbsp;&nbsp;</i><b>Ajouter</b>
+    </button>
   </div>
 
   <!-- Tableau des camions -->
-<!-- Tableau des camions -->
-<table>
+  <table>
     <thead>
       <tr>
         <th>ID</th>
@@ -41,7 +38,7 @@
         <th>Immatriculation</th>
         <th>Kilométrage</th>
         <th>Statut</th>
-        <th>Citerne</th> <!-- Nouvelle colonne -->
+        <th>Citerne</th>
         <th>Action</th>
       </tr>
     </thead>
@@ -53,9 +50,10 @@
         <td>{{ camion.immatriculation }}</td>
         <td>{{ camion.kilometrage }}</td>
         <td>{{ camion.statut }}</td>
-        <td>{{ camion.citerne ? camion.citerne.reference : 'Pas de citerne associée' }}</td>
-
-        <!-- Affichage citerne -->
+        <td>
+          <!-- Affichage de la référence et capacité de la citerne -->
+          {{ camion.citerne ? camion.citerne.reference + ' - ' + camion.citerne.capacite + ' L' : 'Pas de citerne associée' }}
+        </td>
         <td>
           <button type="button" class="btn btn-warning" (click)="editCamion(camion.id)">
             <i class="fa-solid fa-pen"></i>
@@ -67,29 +65,30 @@
       </tr>
     </tbody>
   </table>
-  
+</div>
 
-  <!-- Modale d'édition -->
-  <div *ngIf="camionEnCours" class="modal">
+<!-- Modal d'édition -->
+
+<div *ngIf="camionEnCours" class="modal">
     <div class="modal-content">
       <span class="close" (click)="closeModal()">&times;</span>
       <h2>Modifier le Camion</h2>
-      <input type="text" [(ngModel)]="camionEnCours.marque" placeholder="Marque" required>
-      <input type="text" [(ngModel)]="camionEnCours.modele" placeholder="Modèle" required>
-      <input type="text" [(ngModel)]="camionEnCours.immatriculation" placeholder="Immatriculation" required>
-      <input type="number" [(ngModel)]="camionEnCours.kilometrage" placeholder="Kilométrage" required min="0">
-      <select [(ngModel)]="camionEnCours.statut" required>
-        <option *ngFor="let statut of statuts" [value]="statut">{{ statut }}</option>
-      </select>
-
+  
+      <input type="text" [(ngModel)]="camionEnCours.marque" placeholder="Marque" />
+      <input type="text" [(ngModel)]="camionEnCours.modele" placeholder="Modèle" />
+      <input type="text" [(ngModel)]="camionEnCours.immatriculation" placeholder="Immatriculation" />
+      <input type="number" [(ngModel)]="camionEnCours.kilometrage" placeholder="Kilométrage" min="0"/>
+  
       <!-- Liste déroulante pour sélectionner la citerne -->
-      <select [(ngModel)]="camionEnCours.citerneId" required>
-        <option *ngFor="let citerne of citernes" [value]="citerne.id">{{ citerne.reference }}</option>
+      <select [(ngModel)]="camionEnCours.citerne" required>
+        <option *ngFor="let citerne of citernes" [ngValue]="citerne">
+          {{ citerne.reference }} - {{ citerne.capacite }} L
+        </option>
       </select>
-
+  
       <button type="button" class="btn btn-warning" (click)="sauvegarderModification()">
         <b>Enregistrer</b>
       </button>
     </div>
   </div>
-</div>
+  

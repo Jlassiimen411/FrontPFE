@@ -2,7 +2,7 @@ import { Component, Inject, OnInit } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { LivraisonService } from 'src/app/services/livraison.service';
-
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-dialog-livraison-details',
   templateUrl: './dialog-livraison-details.component.html',
@@ -59,27 +59,54 @@ export class DialogLivraisonDetailsComponent implements OnInit {
 
   deleteLivraison(): void {
     const livraisonId = this.data?.livraisonId;
-
+  
     if (!livraisonId || livraisonId === 'ID inconnu') {
-      alert('ID de livraison invalide');
+      Swal.fire({
+        title: 'Erreur !',
+        text: 'ID de livraison invalide.',
+        icon: 'error',
+        confirmButtonColor: '#d33'
+      });
       return;
     }
-
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette livraison ?')) {
-      this.livraisonService.deleteLivraisonById(livraisonId).subscribe({
-        next: () => {
-          alert('Livraison supprimée avec succès.');
-          this.dialogRef.close({ deleted: true, livraisonId: livraisonId });
-          this.removeLivraisonFromCalendar(livraisonId);
-        },
-        error: (err) => {
-          console.error('Erreur lors de la suppression:', err);
-          const errorMessage = err?.message || 'Inconnu';
-          alert(`Erreur lors de la suppression. Détails: ${errorMessage}`);
-        }
-      });
-    }
+  
+    Swal.fire({
+      title: 'Êtes-vous sûr de vouloir supprimer cette livraison ?',
+      text: `ID de livraison : ${livraisonId}`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d33',
+      cancelButtonColor: '#3085d6',
+      confirmButtonText: 'Oui, supprimer',
+      cancelButtonText: 'Annuler'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.livraisonService.deleteLivraisonById(livraisonId).subscribe({
+          next: () => {
+            Swal.fire({
+              title: 'Supprimée !',
+              text: 'La livraison a été supprimée avec succès.',
+              icon: 'success',
+              confirmButtonColor: '#28a745'
+            });
+            this.dialogRef.close({ deleted: true, livraisonId: livraisonId });
+            this.removeLivraisonFromCalendar(livraisonId);
+          },
+          error: (err) => {
+            console.error('Erreur lors de la suppression:', err);
+            const errorMessage = err?.message || 'Inconnu';
+            Swal.fire({
+              title: 'Erreur !',
+              text: `Erreur lors de la suppression. Détails: ${errorMessage}`,
+              icon: 'error',
+              confirmButtonColor: '#d33'
+            });
+          }
+        });
+      }
+    });
   }
+  
 
   removeLivraisonFromCalendar(livraisonId: number): void {
     if (!this.data?.calendarApi) {

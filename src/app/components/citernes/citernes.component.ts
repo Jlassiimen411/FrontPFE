@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CamionService } from 'src/app/services/camion.service';
 import { CiterneService } from 'src/app/services/citerne.service';
-
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-citernes',
   templateUrl: './citernes.component.html',
@@ -85,7 +85,13 @@ export class CiternesComponent implements OnInit {
     });
   }
   
+  /*
   
+  this.camionService.getCamion(id).subscribe(data => {
+      this.camionEnCours = data;
+      console.log('Fetched camion:', this.camionEnCours);
+  
+  */ 
 
   // Save the modified citerne
   sauvegarderModification(): void {
@@ -108,15 +114,51 @@ export class CiternesComponent implements OnInit {
 
   // Delete a citerne
   supprimerCiterne(id: number): void {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette citerne ?')) {
-      this.citerneService.deleteCiterne(id).subscribe(() => {
-        this.getCiternes(); // Refresh the list of citernes after deletion
-      }, error => {
-        console.error('Erreur lors de la suppression de la citerne:', error);
-        alert('Une erreur est survenue lors de la suppression de la citerne.');
+    const citerne = this.citernes.find(c => c.id === id);
+    if (citerne) {
+      Swal.fire({
+        title: `Êtes-vous sûr de vouloir supprimer ?`,
+        text: `Citerne: ${citerne.marque} - ${citerne.immatriculation}`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Oui, supprimer',
+        cancelButtonText: 'Annuler'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.citerneService.deleteCiterne(id).subscribe(
+            () => {
+              this.citernes = this.citernes.filter(c => c.id !== id); // Update the list after deletion
+              Swal.fire({
+                title: 'Supprimé !',
+                text: 'La citerne a été supprimée avec succès.',
+                icon: 'success',
+                confirmButtonColor: '#28a745'
+              });
+            },
+            (error) => {
+              console.error('Erreur lors de la suppression de la citerne:', error);
+              Swal.fire({
+                title: 'Erreur !',
+                text: "Une erreur s'est produite lors de la suppression.",
+                icon: 'error',
+                confirmButtonColor: '#d33'
+              });
+            }
+          );
+        }
+      });
+    } else {
+      Swal.fire({
+        title: 'Erreur !',
+        text: "Citerne introuvable.",
+        icon: 'error',
+        confirmButtonColor: '#d33'
       });
     }
   }
+  
 
   // Reset form for adding a new citerne
   resetForm(): void {

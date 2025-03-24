@@ -3,7 +3,9 @@
         <div class="row">
             <div class="col">
                 <br><br>
-                <p class="h3 fw-bold gradient-text">&nbsp;&nbsp;&nbsp;<i class="fa fa-plus-circle"></i>&nbsp;&nbsp;&nbsp;&nbsp;Ajouter une commande</p>
+                <p class="h3 fw-bold gradient-text">
+                    &nbsp;&nbsp;&nbsp;<i class="fa fa-plus-circle"></i>&nbsp;&nbsp;&nbsp;&nbsp;Ajouter une commande
+                </p>
                 <br>
             </div>
         </div>
@@ -15,24 +17,29 @@
                 <form [formGroup]="addCommandeForm" (ngSubmit)="addCommande()">
                     <!-- Champ Numéro -->
                     <div class="mb-3">
+                        <label for="numero" class="form-label">N° de commande</label>
                         <input formControlName="numero" type="number" class="form-control" placeholder="N° de commande">
                         <div *ngIf="addCommandeForm.get('numero')?.invalid && addCommandeForm.get('numero')?.touched" class="text-danger">
                             N° est obligatoire.
                         </div>
                     </div>
 
-  
-        <div formArrayName="produits" class="d-flex gap-3 flex-wrap">
-    <div *ngFor="let produit of produits; let i = index" class="form-check">
-        <input type="checkbox" class="form-check-input" [formControlName]="i">
-        <label class="form-check-label">{{ produit.nomProduit }}</label>
+                    <!-- Sélectionner un produit -->
+                    <div class="mb-3">
+                        <label for="produitSelect" class="form-label">Sélectionner un produit</label>
+                        <select id="produitSelect" class="form-select" formControlName="produit">
+                          <option *ngFor="let produit of produits" [value]="produit.id">
+                            {{ produit.nomProduit }}
+                          </option>
+                        </select>
+                        <div *ngIf="addCommandeForm.get('produit')?.invalid && addCommandeForm.get('produit')?.touched" class="text-danger">
+                            Produit est obligatoire.
+                        </div>
+                    </div>
 
-    </div>
-</div>
-
-  
                     <!-- Champ Quantité -->
                     <div class="mb-3">
+                        <label for="quantite" class="form-label">Quantité</label>
                         <input formControlName="quantite" type="number" class="form-control" placeholder="Quantité">
                         <div *ngIf="addCommandeForm.get('quantite')?.invalid && addCommandeForm.get('quantite')?.touched" class="text-danger">
                             Quantité est obligatoire.
@@ -40,32 +47,20 @@
                     </div>
   
                     <!-- Champ Date -->
-                 <!-- Champ Date -->
-<div class="mb-3">
-    <label>Date de commande :</label>
-    <input formControlName="dateCommande" type="date" class="form-control">
-    <div *ngIf="addCommandeForm.get('dateCommande')?.invalid && addCommandeForm.get('dateCommande')?.touched" class="text-danger">
-        La date est obligatoire.
-    </div>
-</div>
+                    <div class="mb-3">
+                        <label>Date de commande :</label>
+                        <input formControlName="dateCommande" type="date" class="form-control">
+                        <div *ngIf="addCommandeForm.get('dateCommande')?.invalid && addCommandeForm.get('dateCommande')?.touched" class="text-danger">
+                            La date est obligatoire.
+                        </div>
+                    </div>
 
-                    <!-- Champ Price -->
-<!-- Champ Prix -->
-<div class="mb-3">
-    <label>Prix :</label>
-    <input formControlName="price" type="number" class="form-control" placeholder="Prix">
-    <div *ngIf="addCommandeForm.get('price')?.invalid && addCommandeForm.get('price')?.touched" class="text-danger">
-        Le prix est obligatoire.
-    </div>
-</div>
-
-<!-- Champ Prix Total -->
-<div class="mb-3">
-    <label>Prix Total :</label>
-    <input formControlName="totalPrice" type="number" class="form-control" [value]="totalPrice" readonly>
-</div>
-
-
+                    <!-- Champ Prix total -->
+                    <div class="mb-3">
+                        <label>Prix total :</label>
+                        <input formControlName="totalPrice" type="number" class="form-control" placeholder="Prix total" readonly>
+                    </div>
+                    
 
                     <!-- Boutons -->
                     <div class="mb-3">
@@ -80,8 +75,8 @@
                 </form>
             </div>
             <div class="col-sm-6">
-              <img src="assets/img/lub.jpg" alt="" class="commande-img">
-          </div>
+                <img src="assets/img/lub.jpg" alt="" class="commande-img">
+            </div>
         </div>
     </div>
-  </body>
+</body>

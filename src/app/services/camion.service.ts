@@ -15,6 +15,9 @@ export class CamionService {
   getCamions(): Observable<any[]> {
     return this.http.get<any[]>(this.apiUrl);
   }
+  getCamion(id: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
 
   // Ajouter un nouveau camion
   addCamion(camion: any): Observable<any> {

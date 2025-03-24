@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CamionService } from 'src/app/services/camion.service';
 import { CiterneService } from 'src/app/services/citerne.service';
-
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-camions',
   templateUrl: './camions.component.html',
@@ -12,6 +12,7 @@ export class CamionsComponent implements OnInit {
   statuts: string[] = ['Disponible', 'En maintenance', 'En livraison', 'Hors service'];
   citernes: any[] = [];
 
+  // Modifications ici : remplacer 'citerneId' par 'citerne' et ajouter un objet citerne avec un id
   nouveauCamion = {
     id: 0,
     marque: '',
@@ -19,7 +20,7 @@ export class CamionsComponent implements OnInit {
     immatriculation: '',
     kilometrage: 0,
     statut: 'Disponible',
-    citerneId: null
+    citerne: { id: null } // Modifié : 'citerne' au lieu de 'citerneId' avec un objet contenant l'ID
   };
 
   camionEnCours: any = null;
@@ -32,23 +33,24 @@ export class CamionsComponent implements OnInit {
   ngOnInit(): void {
     this.loadCiternes(); // Charger les citernes en premier
     setTimeout(() => {
-      this.loadCamions(); // Charger les camions après un léger délai
-    }, 500); // Attendre 500ms pour s'assurer que les citernes sont bien chargées
+      if (this.citernes.length > 0) {
+        this.loadCamions(); // Charger les camions seulement après avoir vérifié les citernes
+      }
+    }, 500);
   }
-  
 
   loadCamions(): void {
     this.camionService.getCamions().subscribe(
       (data) => {
-        console.log("Camions chargés :", data);
-        console.log("Citernes disponibles :", this.citernes);
+        console.log('Camions:', data);
+        console.log('Citernes:', this.citernes);
+        
+        // Ajout des informations complètes sur la citerne pour chaque camion
         this.camions = data.map(camion => {
-          console.log(`Traitement du camion ID ${camion.id}, citerneId = ${camion.citerneId}`);
-          const citerneAssociee = this.citernes.find(c => c.id === camion.citerneId);
-          console.log(`Citerne trouvée pour le camion ${camion.id} :`, citerneAssociee);
-          return {
-            ...camion,
-            citerne: citerneAssociee || null
+          const citerneAssociee = this.citernes.find(c => c.id === camion.citerne?.id); 
+          return { 
+            ...camion, 
+            citerne: citerneAssociee ? { reference: citerneAssociee.reference, capacite: citerneAssociee.capacite } : null 
           };
         });
       },
@@ -58,111 +60,134 @@ export class CamionsComponent implements OnInit {
     );
   }
   
-
   loadCiternes(): void {
     this.citerneService.getCiternes().subscribe(
       (data) => {
         this.citernes = data;
-        console.log("Citernes chargées :", this.citernes); // Vérification
       },
       (error) => {
         console.error('Erreur lors du chargement des citernes:', error);
       }
     );
   }
-  
-  
 
   isFormValid(): boolean {
     return !!(this.nouveauCamion.marque && this.nouveauCamion.modele && this.nouveauCamion.immatriculation &&
-              this.nouveauCamion.kilometrage > 0 && this.nouveauCamion.statut && this.nouveauCamion.citerneId);
+              this.nouveauCamion.kilometrage > 0 && this.nouveauCamion.statut && this.nouveauCamion.citerne.id != null);
   }
 
- // Après l'ajout d'un camion, chargez à nouveau les camions pour vous assurer que la citerne est bien associée.
- ajouterCamion() {
-  if (this.isFormValid()) {
-    this.camionService.addCamion(this.nouveauCamion).subscribe(
-      (data) => {
-        // Vérifie que la citerneId est bien prise en compte
-        const citerneAssociee = this.citernes.find(c => c.id === data.citerneId);
-        console.log(`Ajouté: ID camion ${data.id}, citerneId: ${data.citerneId}, Citerne trouvée:`, citerneAssociee);
+  ajouterCamion() {
+    if (this.isFormValid()) {
+      // Créer l'objet à envoyer, avec la structure requise dans Postman (citerne avec id)
+      const camionData = {
+        ...this.nouveauCamion,
+        citerne: { id: this.nouveauCamion.citerne.id }
+      };
 
-        const camionAvecCiterne = { ...data, citerne: citerneAssociee || null };
-        this.camions.push(camionAvecCiterne); 
+      this.camionService.addCamion(camionData).subscribe(
+        (data) => {
+          const citerneAssociee = this.citernes.find(c => c.id === data.citerne.id);
+          const camionAvecCiterne = { 
+            ...data, 
+            citerne: citerneAssociee ? { reference: citerneAssociee.reference, capacite: citerneAssociee.capacite } : null 
+          };
+          this.camions.push(camionAvecCiterne);
 
-        this.nouveauCamion = { id: 0, marque: '', modele: '', immatriculation: '', kilometrage: 0, statut: 'Disponible', citerneId: null };
-        this.loadCiternes();  
-      },
-      (error) => {
-        console.error("Erreur lors de l'ajout du camion:", error);
-      }
-    );
+          // Réinitialiser le formulaire
+          this.nouveauCamion = { id: 0, marque: '', modele: '', immatriculation: '', kilometrage: 0, statut: 'Disponible', citerne: { id: null } };
+        },
+        (error) => {
+          console.error("Erreur lors de l'ajout du camion:", error);
+        }
+      );
+    }
   }
-}
-
 
   supprimerCamion(id: number) {
     const camion = this.camions.find(c => c.id === id);
-    if (!camion) {
-      alert("Erreur: Camion introuvable !");
-      return;
-    }
-
-    const confirmation = confirm(`Êtes-vous sûr de vouloir supprimer le camion ${camion.marque} - ${camion.immatriculation} ?`);
-
-    if (confirmation) {
-      this.camionService.deleteCamion(id).subscribe(
-        () => {
-          this.camions = this.camions.filter(c => c.id !== id);
-          alert("Camion supprimé avec succès !");
-        },
-        (error) => {
-          console.error("Erreur lors de la suppression du camion:", error);
-          alert("Une erreur s'est produite lors de la suppression.");
+    if (camion) {
+      Swal.fire({
+        title: `Êtes-vous sûr de vouloir supprimer ?`,
+        text: `Camion: ${camion.marque} - ${camion.immatriculation}`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Oui, supprimer',
+        cancelButtonText: 'Annuler'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          this.camionService.deleteCamion(id).subscribe(
+            () => {
+              this.camions = this.camions.filter(c => c.id !== id);
+              Swal.fire({
+                title: 'Supprimé !',
+                text: 'Le camion a été supprimé avec succès.',
+                icon: 'success',
+                confirmButtonColor: '#28a745'
+              });
+            },
+            (error) => {
+              console.error("Erreur lors de la suppression du camion:", error);
+              Swal.fire({
+                title: 'Erreur !',
+                text: "Une erreur s'est produite lors de la suppression.",
+                icon: 'error',
+                confirmButtonColor: '#d33'
+              });
+            }
+          );
         }
-      );
+      });
+    } else {
+      Swal.fire({
+        title: 'Erreur !',
+        text: "Camion introuvable.",
+        icon: 'error',
+        confirmButtonColor: '#d33'
+      });
     }
   }
 
   sauvegarderModification() {
-    if (this.camionEnCours) {
-      this.camionService.updateCamion(this.camionEnCours).subscribe(
-        (data) => {
-          const index = this.camions.findIndex(c => c.id === this.camionEnCours.id);
-          if (index !== -1) {
-            const citerneAssociee = this.citernes.find(c => c.id === data.citerneId);
-            console.log(`Mise à jour: ID camion ${data.id}, citerneId: ${data.citerneId}, Citerne trouvée:`, citerneAssociee);
-  
-            this.camions[index] = { ...data, citerne: citerneAssociee || null };
-          }
-          this.closeModal();
-          alert("Modifications sauvegardées avec succès !");
-        },
-        (error) => {
-          console.error('Erreur lors de la mise à jour du camion:', error);
-          alert("Une erreur s'est produite lors de la mise à jour.");
-        }
-      );
+    if (!this.camionEnCours.marque || !this.camionEnCours.modele || !this.camionEnCours.immatriculation || this.camionEnCours.kilometrage <= 0) {
+      alert('Veuillez remplir tous les champs valides.');
+      return;
     }
+  
+    // Vérifier si une citerne est bien sélectionnée
+    const citerneId = this.camionEnCours.citerne ? this.camionEnCours.citerne.id : null;
+  
+    const camionModifie = {
+      ...this.camionEnCours,
+      citerne: citerneId ? { id: citerneId } : null
+    };
+  
+    this.camionService.updateCamion(camionModifie).subscribe(
+      () => {
+        this.loadCamions();
+        this.closeModal();
+      },
+      (error) => {
+        console.error('Erreur lors de la mise à jour du camion:', error);
+        alert("Une erreur est survenue lors de la modification du camion.");
+      }
+    );
   }
   
 
-  editCamion(id: number) {
-    const camion = this.camions.find(c => c.id === id);
-    if (camion) {
-      this.camionEnCours = { ...camion };
+  editCamion(id: number): void {
+    this.camionService.getCamion(id).subscribe(data => {
+      this.camionEnCours = data;
+      console.log('Fetched camion:', this.camionEnCours);
       const modal = document.querySelector('.modal') as HTMLElement;
       if (modal) {
-        modal.style.display = 'block';
+        modal.style.display = 'block'; // Display the modal after fetching the citerne
       }
-    }
+    });
   }
 
   closeModal() {
     this.camionEnCours = null;
-    const modal = document.querySelector('.modal') as HTMLElement;
-    if (modal) {
-      modal.style.display = 'none';
-    }
   }
 }

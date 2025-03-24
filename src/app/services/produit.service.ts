@@ -14,8 +14,12 @@ export class ProduitService {
 
   //Méthode pour récupérer toutes les commandes
   getAllProduits(): Observable<any[]> {
-    return this.httpClient.get<any[]>(this.produitURL);
+    return this.httpClient.get<any[]>('http://localhost:8080/api/produits/v1')
+      .pipe(
+        catchError(this.handleError<any[]>('getAllProduits', []))
+      );
   }
+  
 
 
   addProduit(produit: any): Observable<any> {

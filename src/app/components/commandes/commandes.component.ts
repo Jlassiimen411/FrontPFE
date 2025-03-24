@@ -3,7 +3,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { CommandeService } from 'src/app/services/commande.service';
 import { AddCommandeComponent } from '../add-commande/add-commande.component';
-
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-commandes',
   templateUrl: './commandes.component.html',
@@ -39,17 +39,43 @@ loadCommandes(): void {
 }
 
 
-  deleteCommandeById(id: number): void {
-    this.cService.deleteCommandeById(id).subscribe({
-      next: (data) => {
-        console.log('Commande deleted', data);
-        this.loadCommandes();
-      },
-      error: (err) => {
-        console.error('Error deleting commande', err);
-      }
-    });
-  }
+deleteCommandeById(id: number): void {
+  Swal.fire({
+    title: 'Êtes-vous sûr de vouloir supprimer cette commande ?',
+    text: `ID de la commande : ${id}`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Oui, supprimer',
+    cancelButtonText: 'Annuler'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.cService.deleteCommandeById(id).subscribe({
+        next: (data) => {
+          console.log('Commande supprimée', data);
+          Swal.fire({
+            title: 'Supprimée !',
+            text: 'La commande a été supprimée avec succès.',
+            icon: 'success',
+            confirmButtonColor: '#28a745'
+          });
+          this.loadCommandes();
+        },
+        error: (err) => {
+          console.error('Erreur lors de la suppression de la commande', err);
+          Swal.fire({
+            title: 'Erreur !',
+            text: `Erreur lors de la suppression de la commande. Détails: ${err?.message || 'Inconnu'}`,
+            icon: 'error',
+            confirmButtonColor: '#d33'
+          });
+        }
+      });
+    }
+  });
+}
+
   
 
   goToEdit(id: number): void {

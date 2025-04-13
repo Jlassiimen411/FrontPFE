@@ -2,66 +2,71 @@
 <body>
   <div class="container mt-4">
     <div class="row">
-      <div class="col"><br><br><br>
-        <p class="h3 fw-bold gradient-text">&nbsp;<i class="fa fa-pen">&nbsp;</i> Edit commande</p>
+      <div class="col">
+        <br><br><br>
+        <p class="h3 fw-bold gradient-text1">
+          <i class="fa fa-pen"></i> Modifier une commande
+        </p>
         <br>
       </div>
     </div>
   </div>
-
+  
   <div class="container">
     <div class="row">
-      <div class="col-sm-4">
-        <form #editPlatForm="ngForm" (ngSubmit)="editCommande()">
-          <div class="mb-2">
-            &nbsp;&nbsp;&nbsp;&nbsp;
-            <input [(ngModel)]="commande.numero" [ngModelOptions]="{standalone: true}" name="numero" type="number" class="form-control" placeholder="Numéro de commande">
+      <div class="col-sm-5">
+        <form [formGroup]="commandeForm" (ngSubmit)="editCommande()">
+  
+          <!-- Code commande -->
+          <div class="mb-3">
+            <label  class="form-label gradient-text">Code de code :</label>
+            <input formControlName="codeCommande" type="text" class="form-control" placeholder="Code de commande" readonly>
           </div>
-          <br>
-
-          <div class="mb-2">
-            <label>Produits</label>
-          
-            <!-- Vérification si produits existe et boucle sur chaque produit -->
-            <div *ngFor="let produit of commande.produits; let i = index">
-              <!-- Liaison bidirectionnelle pour chaque produit -->
-              <input
-                [(ngModel)]="produit.nomProduit"
-                class="form-control"
-                placeholder="Nom du produit"
-                name="produit{{i}}"
-                required
-              />
-            </div>
+  
+          <!-- Produit -->
+          <div class="mb-3">
+            <label for="produitSelect" class="form-label gradient-text">Produit :</label>
+            <select formControlName="produitId" id="produitSelect" class="form-select">
+              <option value="" disabled>Choisissez un produit</option>
+              <option *ngFor="let produit of produits" [value]="produit.id">
+                {{ produit.nomProduit }}
+              </option>
+            </select>
           </div>
-          
-          
-
-          <br>
-
-          <div class="mb-2">
-            <input [(ngModel)]="commande.quantite" [ngModelOptions]="{standalone: true}" name="quantite" type="number" class="form-control" placeholder="Quantité">
-          </div><br>
-
-          <div class="mb-2">
-            <input [(ngModel)]="commande.dateCommande" [ngModelOptions]="{standalone: true}" name="dateCommande" type="date" class="form-control">
-          </div><br>
-
-          <div class="mb-2 form-group">
-            <input [(ngModel)]="commande.price" [ngModelOptions]="{standalone: true}" type="text" class="form-control" placeholder="Price">
-          </div><br>
-
-          <div class="mb-2">
-            <input type="submit" class="custom-btn" value="Edit Produit">
-            <a routerLink="/commandes" class="custom-btn-outline ms-2">Close</a>
+  
+          <!-- Quantité -->
+          <div class="mb-3">
+            <label  class="form-label gradient-text">Quantité :</label>
+            <input formControlName="quantite" type="number" min="1" class="form-control" placeholder="Quantité">
           </div>
+  
+          <!-- Date de commande -->
+          <div class="mb-3">
+            <label  class="form-label gradient-text">Date systéme :</label>
+            <input formControlName="dateCommande" type="date" class="form-control"  readonly>
+          </div>
+  
+          <!-- Prix total -->
+          <div class="mb-3">
+            <label  class="form-label gradient-text">Prix total :</label>
+            <input formControlName="totalPrice" type="text" class="form-control" placeholder="Prix total" readonly>
+          </div>
+  
+          <!-- Boutons -->
+          <div class="mb-3">
+            <input type="submit" class="custom-btn" value="Modifier la commande">
+            <a routerLink="/commandes" class="custom-btn-outline ms-2">Annuler</a>
+          </div>
+  
         </form>
       </div>
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-      <div class="col-sm-6 ll">
-        <img src="assets/img/a2.jpg" alt="" class="commande-img">
+  &nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;
+      <!-- Image -->
+      <div class="col-sm-6 text-center">
+        <img src="assets/img/a2.jpg" alt="Commande Image" class="commande-img">
       </div>
     </div>
   </div>
+  
+  
 </body>

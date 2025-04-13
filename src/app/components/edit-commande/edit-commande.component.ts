@@ -1,7 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CommandeService } from 'src/app/services/commande.service';
+import { ProduitService } from 'src/app/services/produit.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-edit-commande',
@@ -9,97 +11,123 @@ import { CommandeService } from 'src/app/services/commande.service';
   styleUrls: ['./edit-commande.component.css']
 })
 export class EditCommandeComponent implements OnInit {
-  commandeForm: FormGroup;  // Formulaire réactif pour la commande
-  commande: any = {};
+  commandeForm: FormGroup;
   id!: number;
+  produits: any[] = [];
+  totalPrice: number = 0;
 
   constructor(
-    private activatedRoute: ActivatedRoute,
-    private cService: CommandeService,
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
     private router: Router,
-    private formBuilder: FormBuilder  // Injection du formBuilder
+    private commandeService: CommandeService,
+    private produitService: ProduitService
   ) {
-    // Initialisation du formulaire
-    this.commandeForm = this.formBuilder.group({
-      numero: ['', Validators.required],
-      quantite: ['', [Validators.required, Validators.min(1)]],
+    this.commandeForm = this.fb.group({
+      codeCommande: [{ value: '', disabled: true }],
+      produitId: ['', Validators.required],
+      quantite: [1, [Validators.required, Validators.min(1)]],
       dateCommande: ['', Validators.required],
-      produits: [[]]  // Produits par défaut, tu pourrais avoir une logique de validation plus avancée ici
+      totalPrice: [{ value: '', disabled: true }]
     });
   }
 
   ngOnInit(): void {
-    this.id = this.activatedRoute.snapshot.params['id'];
-  
-    this.cService.getCommandeById(this.id).subscribe(
-      (res) => {
-        console.log('Commande récupérée :', res);
-        this.commande = res;
-  
-        // Si les produits ne sont pas définis, initialiser à un tableau vide
-        if (!this.commande.produits) {
-          this.commande.produits = [];
-        }
-  
-        // Initialisation du formulaire avec les données récupérées
-        this.commandeForm.patchValue({
-          numero: this.commande.numero,
-          quantite: this.commande.quantite,
-          dateCommande: this.commande.dateCommande,
-          price: this.commande.price
-        });
-  
-        console.log('Produits récupérés :', this.commande.produits); // Vérifier si les produits sont récupérés correctement
-      },
-      (err) => {
-        console.error('Erreur lors de la récupération de la commande', err);
-      }
-    );
+    this.id = this.route.snapshot.params['id'];
+    this.loadProduits();
+    this.loadCommande();
+
+    this.commandeForm.get('produitId')?.valueChanges.subscribe(() => this.calculateTotalPrice());
+    this.commandeForm.get('quantite')?.valueChanges.subscribe(() => this.calculateTotalPrice());
   }
-  
+
+  loadCommande(): void {
+    this.commandeService.getCommandeById(this.id).subscribe({
+      next: (commande) => {
+        this.commandeForm.patchValue({
+          codeCommande: commande.codeCommande,
+          produitId: commande.produits?.[0]?.id || '',
+          quantite: commande.quantite,
+          dateCommande: commande.dateCommande,
+          totalPrice: commande.totalPrice
+        });
+        this.totalPrice = commande.totalPrice;
+      },
+      error: () => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: 'Commande introuvable.',
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    });
+  }
+
+  loadProduits(): void {
+    this.produitService.getAllProduits().subscribe({
+      next: (res) => this.produits = res,
+      error: () => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: 'Impossible de charger les produits.',
+          confirmButtonColor: '#dc3545'
+        });
+      }
+    });
+  }
+
+  calculateTotalPrice(): void {
+    const produitId = this.commandeForm.get('produitId')?.value;
+    const quantite = this.commandeForm.get('quantite')?.value;
+    const produit = this.produits.find(p => p.id == produitId);
+
+    if (produit && quantite > 0) {
+      this.totalPrice = produit.prix * quantite;
+      this.commandeForm.get('totalPrice')?.setValue(this.totalPrice);
+    }
+  }
 
   editCommande(): void {
-    console.log('Commande à éditer:', this.commande); // Vérifier si le produit a bien un nom
     if (this.commandeForm.invalid) {
-      alert("Tous les champs obligatoires doivent être remplis.");
-      return;
-    }
-  
-    // Vérifier si les produits existent et qu'ils ont un ID et un nom
-    if (this.commande.produits && this.commande.produits.length > 0) {
-      this.commande.produits = this.commande.produits.map((produit: any) => {
-        // Vérifie si l'id et le nom du produit existent
-        if (!produit.id || !produit.nomProduit) {
-          alert("Chaque produit doit avoir un ID et un nom.");
-          return produit;  // Retourne le produit sans modification si manquant
-        }
-        
-        // Si tous les champs sont valides, retourne un produit mis à jour
-        return {
-          id: produit.id,
-          nomProduit: produit.nomProduit,  // Assurez-vous que le champ est 'nomProduit' dans votre modèle
-          description: produit.description,
-          price: produit.prix,  // Remplace 'prix' par le bon champ si nécessaire
-          date: produit.date
-        };
+      Swal.fire({
+        icon: 'warning',
+        title: 'Formulaire incomplet',
+        text: 'Veuillez remplir tous les champs obligatoires.',
+        confirmButtonColor: '#ffc107'
       });
-    } else {
-      alert("Aucun produit trouvé pour cette commande.");
       return;
     }
-  
-    // Continuer avec la mise à jour de la commande...
-    this.cService.updateCommande(this.commande).subscribe(
-      (response) => {
-        console.log('Commande mise à jour avec succès:', response);
-        alert("Commande mise à jour avec succès !");
-        this.router.navigate(['/commandes']); // Redirige vers la liste des commandes
+
+    const formValues = this.commandeForm.getRawValue();
+
+    const commandeToUpdate = {
+      id: this.id,
+      codeCommande: formValues.codeCommande,
+      dateCommande: formValues.dateCommande,
+      quantite: formValues.quantite,
+      totalPrice: this.totalPrice,
+      produits: [{ id: formValues.produitId }]
+    };
+
+    this.commandeService.updateCommande(commandeToUpdate).subscribe({
+      next: () => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Succès',
+          text: 'Commande mise à jour avec succès !',
+          confirmButtonColor: '#198754'
+        }).then(() => this.router.navigate(['/commandes']));
       },
-      (error) => {
-        console.error('Erreur lors de la mise à jour de la commande:', error);
-        alert("Une erreur est survenue lors de la mise à jour de la commande.");
+      error: () => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: 'Échec de la mise à jour de la commande.',
+          confirmButtonColor: '#dc3545'
+        });
       }
-    );
+    });
   }
-  
-}  
+}

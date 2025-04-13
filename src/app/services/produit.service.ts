@@ -19,6 +19,9 @@ export class ProduitService {
         catchError(this.handleError<any[]>('getAllProduits', []))
       );
   }
+  checkCodeProduitExists(code: string) {
+    return this.httpClient.get<boolean>(`${this.produitURL}/produits/check-code?code=${code}`);
+  }
   
 
 
@@ -28,7 +31,7 @@ export class ProduitService {
   
   updateProduit(produitObj: any): Observable<any> {
     return this.httpClient.put<any>(this.produitURL, produitObj).pipe(
-      catchError(this.handleError<any>('updateProduit'))  // Corrected here
+      catchError(this.handleError<any>('updateProduit'))  
     );
   }
   

@@ -23,10 +23,18 @@ import { BuyProductResolverService } from './services/buy-product-resolver.servi
 import { ProduitUserComponent } from './components/produit-user/produit-user.component';
 import { CamionsComponent } from './components/camions/camions.component';
 import { CiternesComponent } from './components/citernes/citernes.component';
+import { AdminPageComponent } from './components/admin-page/admin-page.component';
+import { CreerDispatcheurComponent } from './components/creer-dispatcheur/creer-dispatcheur.component';
+import { SignupAdminComponent } from './components/signup-admin/signup-admin.component';
 
+import { GestionDispatcheurComponent } from './components/gestion-dispatcheur/gestion-dispatcheur.component';
+import { GestionAdminComponent } from './components/gestion-admin/gestion-admin.component';
+import { CompartimentsComponent } from './components/compartiments/compartiments.component';
 
+ 
 const routes: Routes = [
   { path: '', component: HomeComponent },
+  //////////receptionnaire////////////////
   { path: 'receptionnairepage', component: ReceptionnairePageComponent },
   { path: 'commandes', component: CommandesComponent },
   { path: 'produits/:id', component: ProduitsParTypeComponent },
@@ -41,10 +49,19 @@ const routes: Routes = [
   { path: 'edit_type_produit/:id', component: EditTypeProduitComponent },
   { path: 'addProduit/:typeId', component: AddProduitComponent },
   { path: 'citernes', component: CiternesComponent },
+  { path: 'compartiments', component: CompartimentsComponent },
   
+  
+  //////////////////admin////////////
+  { path: 'adminpage', component: AdminPageComponent},
+  { path: 'creerdispatcheur', component: CreerDispatcheurComponent},
+  { path: 'signupadmin', component: SignupAdminComponent},
+ 
+  { path: 'gestiondispatcheur', component: GestionDispatcheurComponent},
+  { path: 'gestionadmin', component: GestionAdminComponent},
 
 
-  /////////////client///
+  /////////////client//////////
   { path: 'categories', component: CategorieUserComponent },
   { path: 'produits_user/:typeId', component: ProduitUserComponent },
   { path: 'cart', component: CartComponent },

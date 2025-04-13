@@ -40,6 +40,16 @@ import { CamionsComponent } from './components/camions/camions.component';
 import { MatTableModule } from '@angular/material/table';
 import { CiternesComponent } from './components/citernes/citernes.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { DashAdminComponent } from './components/dash-admin/dash-admin.component';
+import { AdminPageComponent } from './components/admin-page/admin-page.component';
+import { CreerDispatcheurComponent } from './components/creer-dispatcheur/creer-dispatcheur.component';
+import { CollapsibleInscrireComponent } from './components/collapsible-inscrire/collapsible-inscrire.component';
+import { SignupAdminComponent } from './components/signup-admin/signup-admin.component';
+
+import { GestionAdminComponent } from './components/gestion-admin/gestion-admin.component';
+import { GestionDispatcheurComponent } from './components/gestion-dispatcheur/gestion-dispatcheur.component';
+import { CompartimentsComponent } from './components/compartiments/compartiments.component';
+
 
 
 @NgModule({
@@ -70,7 +80,16 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
     BuyProductComponent,
     ProduitUserComponent,
     CamionsComponent,
-    CiternesComponent
+    CiternesComponent,
+    DashAdminComponent,
+    AdminPageComponent,
+    CreerDispatcheurComponent,
+    CollapsibleInscrireComponent,
+    SignupAdminComponent,
+    GestionAdminComponent,
+    GestionDispatcheurComponent,
+    CompartimentsComponent,
+ 
   
   
   ],

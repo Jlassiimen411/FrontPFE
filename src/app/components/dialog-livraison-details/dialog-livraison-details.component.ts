@@ -19,21 +19,21 @@ export class DialogLivraisonDetailsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    console.log('Données reçues:', this.data);
+  
     if (!this.data) {
       console.error('Aucune donnée reçue dans le dialogue!');
       alert('Données manquantes pour afficher les détails de la livraison.');
       this.dialogRef.close();
       return;
     }
+  
 
-    // Vérifier et attribuer des valeurs par défaut pour les champs 'marque', 'immatriculation' et 'statut'
     this.data.marque = this.data.marque || 'Non définie';
     this.data.immatriculation = this.data.immatriculation || 'Non définie';
-    this.data.statut = this.data.statut || 'Non défini';  // Mettre aussi une valeur par défaut pour 'statut'
-    
-    console.log('Données reçues:', this.data);
-}
-
+    this.data.statut = this.data.statut || 'Non défini';
+  }
+  
   
   
   

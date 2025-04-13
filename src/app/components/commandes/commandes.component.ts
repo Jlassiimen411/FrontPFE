@@ -86,8 +86,8 @@ deleteCommandeById(id: number): void {
   openAddCommandeDialog(): void {
     const dialogRef = this.dialog.open(AddCommandeComponent, {
      
-      width: '900px', // Vous pouvez ajuster la largeur
-      height:'600px',
+      width: '600px', // Vous pouvez ajuster la largeur
+      height:'750px',
       disableClose: true, // Empêche la fermeture en cliquant à l'extérieur
     });
 

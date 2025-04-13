@@ -1,77 +1,118 @@
 <!DOCTYPE html>
 <html lang="fr">
-<head>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Ajouter une Livraison</title>
-</head>
+
+  
 <body>
-  <div class="event-form">
-    <h2>Ajouter une Livraison</h2>
-    <form [formGroup]="addLivraisonForm" (ngSubmit)="addLivraison()">
-      
-      <!-- ID Livraison -->
-      <label for="livraison-id">ID Livraison</label>
-      <input type="text" id="livraison-id" formControlName="livraisonId" required>
-      <div *ngIf="addLivraisonForm.get('livraisonId')?.invalid && addLivraisonForm.get('livraisonId')?.touched">
-        <small style="color:red;">L'ID Livraison est requis.</small>
-      </div>
-
-      <!-- Commande Numéro -->
-      <label for="commande-num">Numéro Commande</label>
-      <select id="commande-num" formControlName="commandeId" required>
-        <option *ngFor="let commande of commandes" [value]="commande.id">
-          {{ commande.numero }}
-        </option>
-      </select>
-      <div *ngIf="addLivraisonForm.get('commandeId')?.invalid && addLivraisonForm.get('commandeId')?.touched">
-        <small style="color:red;">Le numéro de commande est requis.</small>
-      </div>
-
-      <!-- Date Livraison -->
-      <label for="date-commande">Date Livraison</label>
-      <input type="date" id="date" formControlName="date" required>
-      <div *ngIf="addLivraisonForm.get('date')?.invalid && addLivraisonForm.get('date')?.touched">
-        <small style="color:red;">La date de livraison est requise.</small>
-      </div>
-
-      <!-- Marque du Camion -->
-      <label for="marque-camion">Marque du Camion</label>
-      <select id="marque-camion" formControlName="marque" (change)="onMarqueSelectionChange($event)" required>
-        <option *ngFor="let marque of marquesCamion" [value]="marque">
-          {{ marque }}
-        </option>
-      </select>
-      <div *ngIf="addLivraisonForm.get('marque')?.invalid && addLivraisonForm.get('marque')?.touched">
-        <small style="color:red;">La marque du camion est requise.</small>
-      </div>
-
-      <!-- Immatriculation -->
-      <label for="immatriculation">Immatriculation</label>
-      <select id="immatriculation" formControlName="immatriculation" required>
-        <option *ngFor="let immatriculation of immatriculations" [value]="immatriculation">
-          {{ immatriculation }}
-        </option>
-      </select>
-      <div *ngIf="addLivraisonForm.get('immatriculation')?.invalid && addLivraisonForm.get('immatriculation')?.touched">
-        <small style="color:red;">L'immatriculation est requise.</small>
-      </div>
-
-      <!-- Statut -->
-      <label for="statut">Statut</label>
-      <select id="statut" formControlName="statut" required>
-        <option value="EN_ATTENTE">En Attente</option>
-        <option value="LIVRE">Livré</option>
-        <option value="ANNULE">Annulé</option>
-      </select>
-      <div *ngIf="addLivraisonForm.get('statut')?.invalid && addLivraisonForm.get('statut')?.touched">
-        <small style="color:red;">Le statut est requis.</small>
-      </div>
-
-      <!-- Boutons -->
-      <button type="submit" class="btn btn-warning" [disabled]="addLivraisonForm.invalid"><b>Ajouter une Livraison</b></button>
-      <button type="button" class="btn btn-warning" (click)="onCancel()"><b>Annuler</b></button>
-    </form>
+  <div class="livraison-container card-effect">
+    <div class="livraison-header">
+      <h2><i class="fas fa-truck"></i> Ajouter une Livraison</h2>
+      <p>Veuillez remplir tous les champs requis pour créer une nouvelle livraison</p>
+    </div>
+    
+    <div class="livraison-form">
+      <form [formGroup]="addLivraisonForm" (ngSubmit)="addLivraison()">
+        
+        <div class="form-group">
+          <label for="livraison-id"><i class="fas fa-hashtag"></i> ID Livraison</label>
+          <div class="input-container">
+            <input type="text" id="livraison-id" class="form-control" formControlName="livraisonId" required placeholder="Entrez l'identifiant unique">
+            <i class="fas fa-fingerprint input-icon"></i>
+          </div>
+          <div *ngIf="addLivraisonForm.get('livraisonId')?.invalid && addLivraisonForm.get('livraisonId')?.touched" class="error-message">
+            <i class="fas fa-exclamation-circle"></i> L'ID Livraison est requis.
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="commande-num"><i class="fas fa-shopping-cart"></i> Numéro Commande</label>
+          <div class="input-container">
+            <select id="commande-num" class="form-control" formControlName="commandeId" required>
+              <option value="" disabled selected>Sélectionnez une commande</option>
+              <option *ngFor="let commande of commandes" [value]="commande.id">
+                {{ commande.codeCommande }}
+              </option>
+            </select>
+            <i class="fas fa-clipboard-list input-icon"></i>
+          </div>
+          <div *ngIf="addLivraisonForm.get('commandeId')?.invalid && addLivraisonForm.get('commandeId')?.touched" class="error-message">
+            <i class="fas fa-exclamation-circle"></i> Le numéro de commande est requis.
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="date"><i class="fas fa-calendar-alt"></i> Date Livraison</label>
+          <div class="input-container">
+            <input type="date" id="date" class="form-control" formControlName="date" required>
+            <i class="fas fa-calendar-check input-icon"></i>
+          </div>
+          <div *ngIf="addLivraisonForm.get('date')?.invalid && addLivraisonForm.get('date')?.touched" class="error-message">
+            <i class="fas fa-exclamation-circle"></i> La date de livraison est requise.
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="marque-camion"><i class="fas fa-truck-moving"></i> Marque du Camion</label>
+          <div class="input-container">
+            <select id="marque-camion" class="form-control" formControlName="marque" (change)="onMarqueSelectionChange($event)" required>
+              <option value="" disabled selected>Sélectionnez une marque</option>
+              <option *ngFor="let marque of marquesCamion" [value]="marque">
+                {{ marque }}
+              </option>
+            </select>
+            <i class="fas fa-building input-icon"></i>
+          </div>
+          <div *ngIf="addLivraisonForm.get('marque')?.invalid && addLivraisonForm.get('marque')?.touched" class="error-message">
+            <i class="fas fa-exclamation-circle"></i> La marque du camion est requise.
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="immatriculation"><i class="fas fa-id-card"></i> Immatriculation</label>
+          <div class="input-container">
+            <select id="immatriculation" class="form-control" formControlName="immatriculation" required>
+              <option value="" disabled selected>Sélectionnez une immatriculation</option>
+              <option *ngFor="let immatriculation of immatriculations" [value]="immatriculation">
+                {{ immatriculation }}
+              </option>
+            </select>
+            <i class="fas fa-barcode input-icon"></i>
+          </div>
+          <div *ngIf="addLivraisonForm.get('immatriculation')?.invalid && addLivraisonForm.get('immatriculation')?.touched" class="error-message">
+            <i class="fas fa-exclamation-circle"></i> L'immatriculation est requise.
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="statut"><i class="fas fa-info-circle"></i> Statut</label>
+          <div class="input-container">
+            <select id="statut" class="form-control" formControlName="statut" required>
+              <option value="" disabled selected>Sélectionnez un statut</option>
+              <option value="EN_ATTENTE"><span class="status-indicator status-en-attente"></span> En Attente</option>
+              <option value="LIVRE"><span class="status-indicator status-livre"></span> Livré</option>
+              <option value="ANNULE"><span class="status-indicator status-annule"></span> Annulé</option>
+            </select>
+            <i class="fas fa-toggle-on input-icon"></i>
+          </div>
+          <div *ngIf="addLivraisonForm.get('statut')?.invalid && addLivraisonForm.get('statut')?.touched" class="error-message">
+            <i class="fas fa-exclamation-circle"></i> Le statut est requis.
+          </div>
+        </div>
+        
+        <div class="btn-group">
+          <button type="button" class="btn btn-secondary" (click)="onCancel()">
+            <i class="fas fa-times"></i> Annuler
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="addLivraisonForm.invalid">
+            <i class="fas fa-check"></i> Ajouter la Livraison
+          </button>
+        </div>
+        
+      </form>
+    </div>
   </div>
 </body>
 </html>

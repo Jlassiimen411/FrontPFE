@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import Swal from 'sweetalert2';
 
 import { ProduitService } from 'src/app/services/produit.service';
 
@@ -39,24 +40,35 @@ export class EditProduitComponent {
   
  
   editProduit() {
-
-  
     if (!this.produit.id) {
       alert('L\'ID du produit est manquant.');
       return;
     }
   
-    console.log(this.produit); // Vérifiez que le typeProduit est bien présent ici
-  
     this.pService.updateProduit(this.produit).subscribe(
       (res) => {
         console.log('Produit mis à jour avec succès:', res);
-        this.router.navigate(['/type_produit']);
+        Swal.fire({
+          icon: 'success',
+          title: 'Succès',
+          text: 'Le produit a été mis à jour avec succès !',
+          confirmButtonText: 'OK',
+          timer: 3000,
+          timerProgressBar: true
+        }).then(() => {
+          this.router.navigate(['/produits', this.id]);
+        });
       },
       (error) => {
         console.error('Erreur lors de la mise à jour du produit', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Erreur',
+          text: 'Une erreur est survenue lors de la mise à jour du produit.'
+        });
       }
     );
   }
+  
   
 }  

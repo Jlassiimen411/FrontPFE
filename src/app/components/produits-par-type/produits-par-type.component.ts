@@ -59,7 +59,8 @@ export class ProduitsParTypeComponent implements OnInit {
   // Méthode pour ajouter un produit
   addProduit(): void {
     const dialogRef = this.dialog.open(AddProduitComponent, {
-      width: '500px', // Taille du popup
+      width: '650px', // Taille du popup
+      height: '750px',
       data: { typeId: this.typeId } // Passer l'ID du type de produit au popup
     });
   

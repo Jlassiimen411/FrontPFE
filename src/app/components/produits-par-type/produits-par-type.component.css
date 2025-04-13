@@ -1,86 +1,206 @@
-.produits-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-    justify-content: center;
+section{
+    margin-top: -45em;
+   
+}
+.foul{
+    margin-left: 20em;
+}
+.lo{
+    font-weight: bold;
 }
 
-.produit-card {
+ 
+  .add{
+    margin-left: 50em;
+    background-color: black;
+    text-align: center;
+   
+}
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    
+    gap: 20px;
+    padding: 20px;
+}
+
+.col-sm-6.col-lg-6 {
+    flex: 1 1 calc(50% - 20px); /* Pour s'adapter sur deux colonnes */
+    max-width: 500px;
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.col-sm-6.col-lg-6:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.15);
+}
+.detail-box {
     position: relative;
-    width: 350px; /* Increased width for larger cards */
-    background-image: url('/assets/img/a1.jpg');
+    background-image: url('/assets/img/12.jpg');
     background-repeat: no-repeat;
     background-size: cover;
     background-position: center;
-    padding: 25px; /* Increased padding */
-    color: white;
-    border-radius: 10px;
-    overflow: hidden;
-    margin-bottom: 20px; /* Added margin to ensure space between cards */
+    padding: 20px;
+    color: white; /* Le texte reste noir */
+ 
+}
+button{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.single_page_btn {
+    margin-top: 10px; /* Ajoute un petit espace au-dessus si nécessaire */
 }
 
-/* Calque semi-transparent */
-.produit-card::before {
+/* Calque semi-transparent sur l'image */
+.detail-box::before {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(128, 128, 128, 0.4);
+    background: rgba(128, 128, 128, 0.4); /* Gris avec une transparence de 40% */
+    z-index: 1; /* Met le calque au-dessus de l'image */
+}
+
+.detail-box > * {
+    position: relative;
+    z-index: 2; /* Le texte passe au-dessus du calque transparent */
+}
+
+h3{
+    font-family: 'Times New Roman', Times, serif;
+}
+
+b{
+    font-size: 1.2em;
+}
+span{
+    color: red;
+    font-size: 1.2em;
+
+}
+.custom-button-group {
+    display: flex;
+    justify-content: center; /* Centre les éléments horizontalement */
+    align-items: center; /* Centre les éléments verticalement */
+    gap: 1rem; /* Espace entre les boutons */
+    background-color: war;
+}
+.single_page_btn {
+    display: block;
+    margin:  auto; /* Centre le bouton horizontalement */
+}
+section{
+    margin-top: -45em;
+    margin-left: 2em;
+}
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    
+    gap: 20px;
+    padding: 20px;
+}
+
+.col-sm-6.col-lg-6 {
+    flex: 1 1 calc(50% - 20px); /* Pour s'adapter sur deux colonnes */
+    max-width: 500px;
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.col-sm-6.col-lg-6:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.15);
+}
+
+.single_food_item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+}
+
+.media-body {
+    flex: 1;
+}
+
+h3, h5, p {
+    margin: 7px 0;
+    font-family: 'Times New Roman', Times, serif;
+    color: white;
+}
+
+h3 b, h5 b, p b {
+    color: rgb(247, 183, 51);; /* Couleur d'accentuation */
+}
+
+span {
+    color: white;
+    font-weight: 500;
+}
+.sin{
+    left: 40em;
+}
+
+
+
+
+
+@media (max-width: 768px) {
+    .col-sm-6.col-lg-6 {
+        flex: 1 1 100%;
+    }
+
+    .single_food_item {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+.detail-box {
+    position: relative;
+    background-image: url('/assets/img/12.jpg');
+    background-repeat: no-repeat;
+    background-size: cover; /* Assure que l'image couvre toute la zone */
+    background-position: center center; /* Centre l'image */
+    padding: 20px; /* Ajoute du padding pour éviter que le texte colle aux bords */
+    min-height: 250px; /* Définit une hauteur minimale pour afficher correctement l'image */
+    color: white;
+    border-radius: 15px; /* Ajoute des coins arrondis */
+    overflow: hidden; /* Empêche le dépassement */
+}
+
+.detail-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5); /* Ajoute un calque sombre pour améliorer la lisibilité du texte */
     z-index: 1;
 }
 
-.produit-card > * {
+.detail-box > * {
     position: relative;
-    z-index: 2;
+    z-index: 2; /* Place le texte au-dessus du calque sombre */
 }
 
-/* Style du texte */
-.produit-card b {
-    font-size: 1.4em; /* Increased font size */
-}
 
-.produit-card span {
-    color: red;
-    font-size: 1.4em; /* Increased font size */
-}
 
-/* Style des boutons */
-.button-group {
-    display: flex;
-    justify-content: center;
-    gap: 12px; /* Increased gap between buttons */
-    margin-top: 15px; /* Increased margin top */
-}
 
-.button-group button {
-    background: transparent;
-    border: 2px solid yellow;
-    padding: 10px 12px; /* Increased padding */
-    border-radius: 5px;
-    color: white;
-    cursor: pointer;
-    font-size: 1.2em; /* Slightly larger font */
-}
 
-/* Retour Button below the card */
-.btn {
-    display: block;
-    margin-left: 43em; /* This will push the button to the right */
-    width: 15%; /* You can adjust this to control the button size */
-    background-color: yellow;
-    border: 2px solid yellow;
-    padding: 10px;
-    border-radius: 5px;
-    color: black;
-    cursor: pointer;
-    font-size: 1.2em;
-    text-align: center;
-}
+   
 
-/* Title */
-.title-text {
-    text-align: center;
-    margin-bottom: 20px; /* Added space below the title */
-}
+
+

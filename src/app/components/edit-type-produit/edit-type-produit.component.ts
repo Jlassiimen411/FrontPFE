@@ -8,8 +8,12 @@ import { TypeProduitService } from 'src/app/services/type-produit.service';
   styleUrls: ['./edit-type-produit.component.css']
 })
 export class EditTypeProduitComponent implements OnInit {
-  typeProduit: any = {};  
+  typeProduit: any = {};
   id!: number;
+  originalDate: string = '';
+  showAlert: boolean = false;
+  alertMessage: string = '';
+  alertType: 'success' | 'error' = 'success';
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -20,12 +24,12 @@ export class EditTypeProduitComponent implements OnInit {
   ngOnInit(): void {
     this.id = Number(this.activatedRoute.snapshot.params['id']);
     console.log("ID récupéré depuis l'URL :", this.id);
-  
+    
     if (!this.id) {
       console.error("Erreur : ID du produit invalide !");
       return;
     }
-  
+    
     this.pService.getTypeProduitById(this.id).subscribe(
       (res) => {
         console.log('Données récupérées du backend :', res);
@@ -34,11 +38,11 @@ export class EditTypeProduitComponent implements OnInit {
           return;
         }
         this.typeProduit = res;
-  
+        
         if (this.typeProduit && this.typeProduit.date) {
-          // Reformatting the date to "yyyy-MM-dd"
           const date = new Date(this.typeProduit.date);
-          this.typeProduit.date = date.toISOString().split('T')[0];  // Converts to yyyy-MM-dd format
+          this.typeProduit.date = date.toISOString().split('T')[0];
+          this.originalDate = this.typeProduit.date;
         }
       },
       (err) => {
@@ -47,28 +51,37 @@ export class EditTypeProduitComponent implements OnInit {
     );
   }
   
-  
   editTypeProduit() {
-    if (this.typeProduit.date) {
-      // Formatage de la date pour s'assurer qu'elle est dans le bon format
-      const formattedDate = new Date(this.typeProduit.date).toISOString().split('T')[0];
-      this.typeProduit.date = formattedDate;
-    }
-  
+    this.typeProduit.date = this.originalDate;
+    
     console.log("Données envoyées pour mise à jour :", this.typeProduit);
-  
+    
     this.pService.updateTypeProduit(this.typeProduit).subscribe(
       (res) => {
         console.log('Type Produit mis à jour avec succès:', res);
-        this.router.navigate(['/type_produit']);
+        
+        // Afficher l'alerte de succès
+        this.alertType = 'success';
+        this.alertMessage = `Le type de produit "${this.typeProduit.name}" a été modifié avec succès!`;
+        this.showAlert = true;
+        
+        // Rediriger après un délai
+        setTimeout(() => {
+          this.router.navigate(['/type_produit']);
+        }, 2000);
       },
       (error) => {
         console.error('Erreur lors de la mise à jour du type de produit', error);
+        
+        // Afficher l'alerte d'erreur
+        this.alertType = 'error';
+        this.alertMessage = 'Une erreur est survenue lors de la mise à jour du type de produit.';
+        this.showAlert = true;
       }
     );
   }
   
-  
-  
-  
-}  
+  closeAlert() {
+    this.showAlert = false;
+  }
+}

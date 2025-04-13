@@ -4,13 +4,22 @@ body{
   height: 100vh;
   
   }
-  .gradient-text {
+  .gradient-text1 {
       color: rgb(247, 183, 51); /* Couleur principale dorée */
       text-shadow: 2px 2px 5px rgba(150, 100, 20, 0.5), /* Ombre principale foncée */
                    -1px -1px 3px rgba(255, 215, 0, 0.6), /* Reflet doré */
                    1px 1px 2px rgba(0, 0, 0, 0.3); /* Ombre subtile pour profondeur */
       font-weight: bold;
   }
+  .gradient-text {
+    color: rgb(41, 37, 36); /* Couleur principale dorée */
+    text-shadow: 2px 2px 5px rgba(150, 100, 20, 0.5), /* Ombre principale foncée */
+                 -1px -1px 3px rgba(255, 215, 0, 0.6), /* Reflet doré */
+                 1px 1px 2px rgba(0, 0, 0, 0.3); /* Ombre subtile pour profondeur */
+    font-weight: bold;
+}
+
+
   .custom-btn {
       background-color: rgb(247, 183, 51); /* Couleur dorée */
       color: white; /* Texte en blanc pour contraste */

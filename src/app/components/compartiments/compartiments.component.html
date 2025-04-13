@@ -1,0 +1,70 @@
+<app-header2></app-header2>
+<app-dash-receptionnaire></app-dash-receptionnaire>
+
+<div class="container">
+  <h2>Gestion des Compartiments</h2>
+
+  <!-- Formulaire pour ajouter un nouveau compartiment -->
+  <div class="form">
+    <input type="text" placeholder="Référence" [(ngModel)]="nouveauCompartiment.reference">
+    <input type="number" placeholder="Capacité Max" [(ngModel)]="nouveauCompartiment.capaciteMax">
+    <select [(ngModel)]="nouveauCompartiment.statut">
+      <option value="VIDE">VIDE</option>
+      <option value="EN_COURS">EN_COURS</option>
+      <option value="PLEIN">PLEIN</option>
+    </select>
+
+    <button type="button" class="btn btn-warning" (click)="ajouterCompartiment()">
+      <i class="fa fa-plus-circle">&nbsp;&nbsp;</i><b>Ajouter</b>
+    </button>
+  </div>
+
+  <!-- Table pour afficher les compartiments -->
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Référence</th>
+        <th>Capacité Max</th>
+        <th>Statut</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let compartiment of compartiments">
+        <td>{{ compartiment.id }}</td>
+        <td>{{ compartiment.reference }}</td>
+        <td>{{ compartiment.capaciteMax }}</td>
+        <td>{{ compartiment.statut }}</td>
+        <td>
+          <button type="button" class="btn btn-warning" (click)="editCompartiment(compartiment.id)">
+            <i class="fa-solid fa-pen"></i>
+          </button>
+          &nbsp;
+          <button type="button" class="btn btn-warning" (click)="supprimerCompartiment(compartiment.id)">
+            <i class="fa-solid fa-trash"></i>
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Modal pour modifier un compartiment -->
+  <div *ngIf="compartimentEnCours" class="modal show">
+    <div class="modal-content">
+      <span class="close" (click)="closeModal()">&times;</span>
+      <h2>Modifier le Compartiment</h2>
+
+      <input type="text" [(ngModel)]="compartimentEnCours.reference" placeholder="Référence" />
+      <input type="number" [(ngModel)]="compartimentEnCours.capaciteMax" placeholder="Capacité Max" />
+      <select [(ngModel)]="compartimentEnCours.statut">
+        <option value="VIDE">VIDE</option>
+        <option value="EN_COURS">EN_COURS</option>
+        <option value="PLEIN">PLEIN</option>
+      </select>
+
+      <!-- Le champ pour la citerne est supprimé -->
+      <button (click)="sauvegarderModification()">Enregistrer</button>
+    </div>
+  </div>
+</div>

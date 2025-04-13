@@ -39,4 +39,9 @@ span{
   font-size: 15px; /* Ajuste la taille selon ton besoin */
   font-weight: bold; /* Optionnel : mettre en gras */
 }
+.small-image {
+  width: -20em;  /* Vous pouvez ajuster cette valeur pour obtenir la taille désirée */
+  height: 2em;  /* Gardez le ratio de l'image intact */
+}
+
 

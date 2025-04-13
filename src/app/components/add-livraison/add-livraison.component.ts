@@ -96,7 +96,7 @@ export class AddLivraisonComponent implements OnInit {
     }
   
     const livraisonData = {
-      commandeId: this.addLivraisonForm.get('commandeId')?.value,
+      commandes: [{ id: this.addLivraisonForm.get('commandeId')?.value }],
       dateLivraison: this.addLivraisonForm.get('date')?.value,
       camion: { id: camionId }, // Envoie uniquement l'ID du camion
       statut: this.addLivraisonForm.get('statut')?.value

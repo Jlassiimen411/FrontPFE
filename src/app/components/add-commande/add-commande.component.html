@@ -1,82 +1,117 @@
+<!DOCTYPE html>
 <body>
-    <div class="container mt-4">
+    <div class="container page-container outer">
         <div class="row">
-            <div class="col">
-                <br><br>
-                <p class="h3 fw-bold gradient-text">
-                    &nbsp;&nbsp;&nbsp;<i class="fa fa-plus-circle"></i>&nbsp;&nbsp;&nbsp;&nbsp;Ajouter une commande
-                </p>
-                <br>
+            <div class="col-12">
+                <div class="header-container">
+                    <h1 class="gradient-text">
+                        <i class="fa fa-plus-circle me-2"></i> Ajouter une commande
+                    </h1>
+                </div>
             </div>
         </div>
+        
+        
+            <div class="col-lg-6 mb-5">
+                <div class="form-card h-100">
+                    <form [formGroup]="addCommandeForm" (ngSubmit)="addCommande()">
+                         <!-- Code commande avec bouton de génération -->
+<div class="mb-3 form-group">
+    <label for="codeCommande" class="form-label">Code du commande</label>
+    <div class="input-group">
+        <input type="text" id="codeCommande" formControlName="codeCommande" class="form-control"
+        placeholder="Entrez le code unique du commande" />
+      
+      <button type="button" class="btn btn-outline-secondary" (click)="genererCodeCommande()">
+        Générer
+      </button>
     </div>
-    <br>
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-6">
-                <form [formGroup]="addCommandeForm" (ngSubmit)="addCommande()">
-                    <!-- Champ Numéro -->
-                    <div class="mb-3">
-                        <label for="numero" class="form-label">N° de commande</label>
-                        <input formControlName="numero" type="number" class="form-control" placeholder="N° de commande">
-                        <div *ngIf="addCommandeForm.get('numero')?.invalid && addCommandeForm.get('numero')?.touched" class="text-danger">
-                            N° est obligatoire.
-                        </div>
-                    </div>
+    <div *ngIf="addCommandeForm.get('codeCommande')?.touched">
+      <div *ngIf="addCommandeForm.get('codeCommande')?.hasError('required')" class="invalid-feedback">
+        Le code du commande est requis.
+      </div>
+      <div *ngIf="addCommandeForm.get('codeCommande')?.hasError('pattern')" class="invalid-feedback">
+        Le code ne doit contenir que lettres, chiffres, tirets ou underscores.
+      </div>
+      <div *ngIf="addCommandeForm.get('codeCommande')?.hasError('codeCommandeExists')" class="invalid-feedback">
+        Ce code de commande est déjà utilisé.
+      </div>
+    </div>
+  </div>
 
-                    <!-- Sélectionner un produit -->
-                    <div class="mb-3">
-                        <label for="produitSelect" class="form-label">Sélectionner un produit</label>
-                        <select id="produitSelect" class="form-select" formControlName="produit">
-                          <option *ngFor="let produit of produits" [value]="produit.id">
-                            {{ produit.nomProduit }}
-                          </option>
-                        </select>
-                        <div *ngIf="addCommandeForm.get('produit')?.invalid && addCommandeForm.get('produit')?.touched" class="text-danger">
-                            Produit est obligatoire.
+                        <!-- Sélectionner un produit -->
+                        <div class="mb-4">
+                            <label for="produitSelect" class="form-label">
+                                <i class="fa fa-box me-2"></i>Sélectionner un produit
+                            </label>
+                            <select id="produitSelect" class="form-select" formControlName="produit">
+                                <option value="" disabled selected>Choisissez un produit</option>
+                                <option *ngFor="let produit of produits" [value]="produit.id">
+                                    {{ produit.nomProduit }}
+                                </option>
+                            </select>
+                            <div *ngIf="addCommandeForm.get('produit')?.invalid && addCommandeForm.get('produit')?.touched" class="text-danger">
+                                <i class="fa fa-exclamation-circle me-1"></i>Produit est obligatoire.
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Champ Quantité -->
-                    <div class="mb-3">
-                        <label for="quantite" class="form-label">Quantité</label>
-                        <input formControlName="quantite" type="number" class="form-control" placeholder="Quantité">
-                        <div *ngIf="addCommandeForm.get('quantite')?.invalid && addCommandeForm.get('quantite')?.touched" class="text-danger">
-                            Quantité est obligatoire.
+                        <!-- Champ Quantité -->
+                        <div class="mb-4">
+                            <label for="quantite" class="form-label">
+                                <i class="fa fa-sort-amount-up me-2"></i>Quantité
+                            </label>
+                            <input formControlName="quantite" type="number" class="form-control" placeholder="Entrez la quantité">
+                            <div *ngIf="addCommandeForm.get('quantite')?.invalid && addCommandeForm.get('quantite')?.touched" class="text-danger">
+                                <i class="fa fa-exclamation-circle me-1"></i>Quantité est obligatoire.
+                            </div>
                         </div>
-                    </div>
   
-                    <!-- Champ Date -->
-                    <div class="mb-3">
-                        <label>Date de commande :</label>
-                        <input formControlName="dateCommande" type="date" class="form-control">
-                        <div *ngIf="addCommandeForm.get('dateCommande')?.invalid && addCommandeForm.get('dateCommande')?.touched" class="text-danger">
-                            La date est obligatoire.
+                        <!-- Champ Date -->
+                        <!-- Champ Date -->
+<div class="mb-4">
+  <label for="dateCommande" class="form-label">
+    <i class="fa fa-calendar-alt me-2"></i>Date de commande
+  </label>
+  <input formControlName="dateCommande" type="date" class="form-control" readonly>
+
+
+
+                            <div *ngIf="addCommandeForm.get('dateCommande')?.invalid && addCommandeForm.get('dateCommande')?.touched" class="text-danger">
+                                <i class="fa fa-exclamation-circle me-1"></i>La date est obligatoire.
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Champ Prix total -->
-                    <div class="mb-3">
-                        <label>Prix total :</label>
-                        <input formControlName="totalPrice" type="number" class="form-control" placeholder="Prix total" readonly>
-                    </div>
-                    
+                        <!-- Champ Prix total -->
+                        <div class="mb-4">
+                            <label for="totalPrice" class="form-label">
+                                <i class="fa fa-tags me-2"></i>Prix total
+                            </label>
+                            <input formControlName="totalPrice" type="number" class="form-control" placeholder="Prix total" readonly>
+                        </div>
 
-                    <!-- Boutons -->
-                    <div class="mb-3">
-                        <button type="submit" class="custom-btn">Ajouter commande</button>
-                        &nbsp;&nbsp;&nbsp;
-                        <button type="button" class="custom-btn-outline ms-2" (click)="_dialogRef.close()">Annuler</button>
-                    </div>
+                        <!-- Boutons -->
+                        <div class="mb-3 d-flex mt-4">
+                            <button type="submit" class="custom-btn">
+                                <i class="fa fa-save me-2"></i>Ajouter 
+                            </button>
+                            <button type="button" class="custom-btn-outline ms-3" (click)="_dialogRef.close()">
+                                <i class="fa fa-times me-2"></i>Annuler
+                            </button>
+                        </div>
   
-                    <!-- Message de succès / échec -->
-                    <div class="alert alert-success" *ngIf="isSuccessful">Commande ajoutée avec succès !</div>
-                    <div class="alert alert-danger" *ngIf="isFailed">Erreur lors de l'ajout de la commande.</div>
-                </form>
+                        <!-- Message de succès / échec -->
+                        <div class="alert alert-success" *ngIf="isSuccessful">
+                            <i class="fa fa-check-circle me-2"></i>Commande ajoutée avec succès !
+                        </div>
+                        <div class="alert alert-danger" *ngIf="isFailed">
+                            <i class="fa fa-exclamation-triangle me-2"></i>Erreur lors de l'ajout de la commande.
+                        </div>
+                    </form>
+                </div>
             </div>
-            <div class="col-sm-6">
-                <img src="assets/img/lub.jpg" alt="" class="commande-img">
-            </div>
+            
+        
         </div>
-    </div>
+ 
+
 </body>

@@ -18,7 +18,11 @@ export class LivraisonService  {
       catchError(this.handleError<any[]>('getAllLivraison', []))
     );
   }
-
+  checkCodeLivraisonExists(code: string) {
+    return this.httpClient.get<{ exists: boolean }>(`${this.livraisonURL}/check-code?codeLivraison=${code}`);
+  }
+  
+  
   addLivraison(livraison: any) {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json'

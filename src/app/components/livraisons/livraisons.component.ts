@@ -64,7 +64,9 @@ export class LivraisonsComponent implements OnInit {
           start: livraison.dateLivraison,
           description: livraison.statut,
           id: livraison.id,
+          codeLivraison: livraison.codeLivraison,
           extendedProps: {
+            codeLivraison: livraison.codeLivraison,
             commandeId: livraison.commandeId,
             statut: livraison.statut,
             marque: livraison.camion?.marque || 'Non définie',
@@ -87,6 +89,7 @@ export class LivraisonsComponent implements OnInit {
   handleEventClick(clickInfo: any): void {
     const data = {
       livraisonId: clickInfo.event.id,
+      codeLivraison: clickInfo.event.extendedProps.codeLivraison, // ✅ Ajouté ici
       commandeId: clickInfo.event.extendedProps.commandeId,
       dateLivraison: clickInfo.event.startStr,
       statut: clickInfo.event.extendedProps.statut,

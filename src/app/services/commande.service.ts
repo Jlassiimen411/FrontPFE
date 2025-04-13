@@ -15,6 +15,7 @@ export class CommandeService {
       catchError(this.handleError<any[]>('getAllCommandes', []))
     );
   }
+  
 
   addCommande(commandeObj: any): Observable<any> {
     return this.httpClient.post<any>(this.commandeURL, commandeObj).pipe(

@@ -1,11 +1,11 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AsyncValidatorFn, AbstractControl } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog'; // Pour gérer la fermeture du popup
 import { LivraisonService } from 'src/app/services/livraison.service';
 import { CommandeService } from 'src/app/services/commande.service';
 import { CamionService } from 'src/app/services/camion.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-
+import { debounceTime, switchMap, map, catchError, of, first } from 'rxjs';
 @Component({
   selector: 'app-add-livraison',
   templateUrl: './add-livraison.component.html',
@@ -31,7 +31,11 @@ export class AddLivraisonComponent implements OnInit {
   ngOnInit(): void {
     // Initialisation du formulaire
     this.addLivraisonForm = this.fb.group({
-      livraisonId: ['', Validators.required],
+      codeLivraison: ['', [
+        Validators.required,
+        Validators.maxLength(50),
+        Validators.pattern(/^[A-Za-z0-9\-_]+$/)
+      ], [this.codeLivraisonAsyncValidator()]],
       commandeId: ['', Validators.required],
       date: ['', Validators.required],
       statut: ['', Validators.required],
@@ -43,7 +47,33 @@ export class AddLivraisonComponent implements OnInit {
     this.loadCommandes();
     this.loadMarquesCamions();
   }
-
+  codeLivraisonAsyncValidator(): AsyncValidatorFn {
+    return (control: AbstractControl) => {
+      if (!control.value) {
+        return of(null); // ne pas valider si le champ est vide
+      }
+      return this.lService.checkCodeLivraisonExists(control.value).pipe(
+        debounceTime(300),
+        map(response => {
+          return response.exists ? { codeLivraisonExists: true } : null;
+        }),
+        catchError(() => of(null)),
+        first()
+      );
+    };
+  }
+  
+    genererCodeLivraison(): void {
+      const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let codeLivraison = '';
+      for (let i = 0; i < 10; i++) {
+        codeLivraison += charset.charAt(Math.floor(Math.random() * charset.length));
+      }
+    
+      this.addLivraisonForm.get('codeLivraison')?.setValue(codeLivraison);
+      this.addLivraisonForm.get('codeLivraison')?.markAsTouched();
+      console.log("Code généré :", codeLivraison); // ➤ Devrait s'afficher en console
+    }
   // Fonction pour charger les commandes
   loadCommandes(): void {
     this.cService.getAllCommandes().subscribe({
@@ -96,6 +126,7 @@ export class AddLivraisonComponent implements OnInit {
     }
   
     const livraisonData = {
+      codeLivraison:  this.addLivraisonForm.get('codeLivraison')?.value,
       commandes: [{ id: this.addLivraisonForm.get('commandeId')?.value }],
       dateLivraison: this.addLivraisonForm.get('date')?.value,
       camion: { id: camionId }, // Envoie uniquement l'ID du camion

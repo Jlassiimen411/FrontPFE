@@ -17,15 +17,28 @@
       <form [formGroup]="addLivraisonForm" (ngSubmit)="addLivraison()">
         
         <div class="form-group">
-          <label for="livraison-id"><i class="fas fa-hashtag"></i> ID Livraison</label>
+          <label for="codeLivraison"><i class="fas fa-hashtag"></i> Code Livraison</label>
           <div class="input-container">
-            <input type="text" id="livraison-id" class="form-control" formControlName="livraisonId" required placeholder="Entrez l'identifiant unique">
+            <input type="text" id="codeLivraison" class="form-control" formControlName="codeLivraison" required placeholder="Entrez l'identifiant unique">
             <i class="fas fa-fingerprint input-icon"></i>
           </div>
-          <div *ngIf="addLivraisonForm.get('livraisonId')?.invalid && addLivraisonForm.get('livraisonId')?.touched" class="error-message">
-            <i class="fas fa-exclamation-circle"></i> L'ID Livraison est requis.
-          </div>
+          <button type="button" class="btn btn-outline-secondary" (click)="genererCodeLivraison()">
+            Générer
+          </button>
         </div>
+        <div *ngIf="addLivraisonForm.get('codeLivraison')?.touched">
+          <div *ngIf="addLivraisonForm.get('codeLivraison')?.hasError('required')" class="invalid-feedback">
+            Le code livraison du commande est requis.
+          </div>
+          <div *ngIf="addLivraisonForm.get('codeLivraison')?.hasError('pattern')" class="invalid-feedback">
+            Le code livraison ne doit contenir que lettres, chiffres, tirets ou underscores.
+          </div>
+          <div *ngIf="addLivraisonForm.get('codeLivraison')?.hasError('codeLivraisonExists')" class="invalid-feedback">
+            Ce code livraison de commande est déjà utilisé.
+          </div>
+          
+        </div>
+    
         
         <div class="form-group">
           <label for="commande-num"><i class="fas fa-shopping-cart"></i> Numéro Commande</label>
@@ -106,7 +119,8 @@
           <button type="button" class="btn btn-secondary" (click)="onCancel()">
             <i class="fas fa-times"></i> Annuler
           </button>
-          <button type="submit" class="btn btn-primary" [disabled]="addLivraisonForm.invalid">
+          <button type="submit" class="btn btn-primary" [disabled]="addLivraisonForm.invalid"
+>
             <i class="fas fa-check"></i> Ajouter la Livraison
           </button>
         </div>

@@ -63,17 +63,18 @@ export class AddLivraisonComponent implements OnInit {
     };
   }
   
-    genererCodeLivraison(): void {
-      const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-      let codeLivraison = '';
-      for (let i = 0; i < 10; i++) {
-        codeLivraison += charset.charAt(Math.floor(Math.random() * charset.length));
-      }
-    
-      this.addLivraisonForm.get('codeLivraison')?.setValue(codeLivraison);
-      this.addLivraisonForm.get('codeLivraison')?.markAsTouched();
-      console.log("Code généré :", codeLivraison); // ➤ Devrait s'afficher en console
+  genererCodeLivraison(): void {
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let codeLivraison = 'LIV-';
+    for (let i = 0; i < 10; i++) {
+      codeLivraison += charset.charAt(Math.floor(Math.random() * charset.length));
     }
+  
+    this.addLivraisonForm.get('codeLivraison')?.setValue(codeLivraison);
+    this.addLivraisonForm.get('codeLivraison')?.markAsTouched();
+    console.log("Code généré :", codeLivraison); // ➤ Devrait s'afficher en console
+  }
+  
   // Fonction pour charger les commandes
   loadCommandes(): void {
     this.cService.getAllCommandes().subscribe({

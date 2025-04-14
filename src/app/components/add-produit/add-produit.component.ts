@@ -100,7 +100,7 @@ export class AddProduitComponent implements OnInit {
   }
   genererCodeProduit(): void {
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let code = '';
+    let code = 'PR-';
     for (let i = 0; i < 10; i++) {
       code += charset.charAt(Math.floor(Math.random() * charset.length));
     }

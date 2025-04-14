@@ -66,7 +66,7 @@ export class AddCommandeComponent implements OnInit {
   
     genererCodeCommande(): void {
       const charset = '0123456789';
-      let code = '';
+      let code = 'COMM-';
       for (let i = 0; i < 10; i++) {
         code += charset.charAt(Math.floor(Math.random() * charset.length));
       }
@@ -75,6 +75,7 @@ export class AddCommandeComponent implements OnInit {
       this.addCommandeForm.get('codeCommande')?.markAsTouched();
       console.log("Code généré :", code); // ➤ Devrait s'afficher en console
     }
+    
     
     
   // Récupérer la date du jour (format YYYY-MM-DD)

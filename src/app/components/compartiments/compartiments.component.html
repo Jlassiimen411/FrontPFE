@@ -6,11 +6,16 @@
 
   <!-- Formulaire pour ajouter un nouveau compartiment -->
   <div class="form">
-    <input type="text" placeholder="Référence" [(ngModel)]="nouveauCompartiment.reference">
+    <div class="position-relative">
+      <input type="text" class="form-control pe-5" placeholder="Référence" [(ngModel)]="nouveauCompartiment.reference"readonly>
+      <button type="button" class="btn btn-sm btn-outline-secondary position-absolute ss top-10 end-3 h-0" (click)="genererCodeCompartiment()">
+        Générer
+      </button>
+    </div>
+    
     <input type="number" placeholder="Capacité Max" [(ngModel)]="nouveauCompartiment.capaciteMax">
     <select [(ngModel)]="nouveauCompartiment.statut">
       <option value="VIDE">VIDE</option>
-      <option value="EN_COURS">EN_COURS</option>
       <option value="PLEIN">PLEIN</option>
     </select>
 
@@ -55,12 +60,12 @@
       <span class="close" (click)="closeModal()">&times;</span>
       <h2>Modifier le Compartiment</h2>
 
-      <input type="text" [(ngModel)]="compartimentEnCours.reference" placeholder="Référence" />
+      <input type="text" [(ngModel)]="compartimentEnCours.reference" placeholder="Référence" readonly/>
       <input type="number" [(ngModel)]="compartimentEnCours.capaciteMax" placeholder="Capacité Max" />
       <select [(ngModel)]="compartimentEnCours.statut">
         <option value="VIDE">VIDE</option>
         <option value="EN_COURS">EN_COURS</option>
-        <option value="PLEIN">PLEIN</option>
+       
       </select>
 
       <!-- Le champ pour la citerne est supprimé -->

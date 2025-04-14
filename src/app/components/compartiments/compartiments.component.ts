@@ -34,7 +34,26 @@ export class CompartimentsComponent implements OnInit {
       }
     });
   }
-
+  genererCodeCompartiment(): void {
+    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let code = '';
+    let isUnique = false;
+    const prefix = 'COMP-';
+  
+    while (!isUnique) {
+      code = prefix;
+      for (let i = 0; i < 10; i++) {
+        code += charset.charAt(Math.floor(Math.random() * charset.length));
+      }
+  
+      // Vérifie l'unicité par rapport aux références existantes
+      isUnique = !this.compartiments.some(c => c.reference === code);
+    }
+  
+    this.nouveauCompartiment.reference = code;
+  }
+  
+  
   getCiternes(): void {
     this.compartimentService.getCiternes().subscribe({
       next: data => this.citernes = data,

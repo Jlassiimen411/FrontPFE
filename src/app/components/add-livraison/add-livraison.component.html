@@ -19,10 +19,12 @@
         <div class="form-group">
           <label for="codeLivraison"><i class="fas fa-hashtag"></i> Code Livraison</label>
           <div class="input-container">
-            <input type="text" id="codeLivraison" class="form-control" formControlName="codeLivraison" required placeholder="Entrez l'identifiant unique">
+            <input type="text" id="codeLivraison" class="form-control" formControlName="codeLivraison" required placeholder="Entrez le code unique" readonly>
             <i class="fas fa-fingerprint input-icon"></i>
           </div>
-          <button type="button" class="btn btn-outline-secondary" (click)="genererCodeLivraison()">
+          <button type="button"
+        class="btn btn-sm btn-outline-secondary position-absolute end-4 h-1"
+        style="top: 30px;" (click)="genererCodeLivraison()">
             Générer
           </button>
         </div>

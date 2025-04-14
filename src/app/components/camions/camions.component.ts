@@ -18,7 +18,7 @@ export class CamionsComponent implements OnInit {
     marque: '',
     modele: '',
     immatriculation: '',
-    kilometrage: 0,
+    kilometrage: null,
     statut: 'Disponible',
     citerne: { id: null } // Modifié : 'citerne' au lieu de 'citerneId' avec un objet contenant l'ID
   };
@@ -29,6 +29,7 @@ export class CamionsComponent implements OnInit {
     private camionService: CamionService,
     private citerneService: CiterneService
   ) {}
+  
 
   ngOnInit(): void {
     this.loadCiternes(); // Charger les citernes en premier
@@ -73,7 +74,7 @@ export class CamionsComponent implements OnInit {
 
   isFormValid(): boolean {
     return !!(this.nouveauCamion.marque && this.nouveauCamion.modele && this.nouveauCamion.immatriculation &&
-              this.nouveauCamion.kilometrage > 0 && this.nouveauCamion.statut && this.nouveauCamion.citerne.id != null);
+              /*this.nouveauCamion.kilometrage > 0 &&*/ this.nouveauCamion.statut && this.nouveauCamion.citerne.id != null);
   }
 
   ajouterCamion() {
@@ -94,7 +95,7 @@ export class CamionsComponent implements OnInit {
           this.camions.push(camionAvecCiterne);
 
           // Réinitialiser le formulaire
-          this.nouveauCamion = { id: 0, marque: '', modele: '', immatriculation: '', kilometrage: 0, statut: 'Disponible', citerne: { id: null } };
+          this.nouveauCamion = { id: 0, marque: '', modele: '', immatriculation: '', kilometrage: null, statut: 'Disponible', citerne: { id: null } };
         },
         (error) => {
           console.error("Erreur lors de l'ajout du camion:", error);

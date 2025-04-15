@@ -15,31 +15,26 @@
     
     <div class="livraison-form">
       <form [formGroup]="addLivraisonForm" (ngSubmit)="addLivraison()">
-        
-        <div class="form-group">
+  
+        <div class="form-group position-relative">
           <label for="codeLivraison"><i class="fas fa-hashtag"></i> Code Livraison</label>
           <div class="input-container">
-            <input type="text" id="codeLivraison" class="form-control" formControlName="codeLivraison" required placeholder="Entrez le code unique" readonly>
+            <input type="text" id="codeLivraison" class="form-control" formControlName="codeLivraison" readonly placeholder="Entrez le code unique">
             <i class="fas fa-fingerprint input-icon"></i>
           </div>
-          <button type="button"
-        class="btn btn-sm btn-outline-secondary position-absolute end-4 h-1"
-        style="top: 30px;" (click)="genererCodeLivraison()">
+          <button type="button" class="btn btn-sm btn-outline-secondary" style="position: absolute; right: 10px; top: 30px;" (click)="genererCodeLivraison()">
             Générer
           </button>
+          <div *ngIf="addLivraisonForm.get('codeLivraison')?.touched">
+            <div *ngIf="addLivraisonForm.get('codeLivraison')?.hasError('required')" class="invalid-feedback">
+              Le code livraison est requis.
+            </div>
+            <div *ngIf="addLivraisonForm.get('codeLivraison')?.hasError('codeLivraisonExists')" class="invalid-feedback">
+              Ce code existe déjà.
+            </div>
+          </div>
         </div>
-        <div *ngIf="addLivraisonForm.get('codeLivraison')?.touched">
-          <div *ngIf="addLivraisonForm.get('codeLivraison')?.hasError('required')" class="invalid-feedback">
-            Le code livraison du commande est requis.
-          </div>
-          <div *ngIf="addLivraisonForm.get('codeLivraison')?.hasError('pattern')" class="invalid-feedback">
-            Le code livraison ne doit contenir que lettres, chiffres, tirets ou underscores.
-          </div>
-          <div *ngIf="addLivraisonForm.get('codeLivraison')?.hasError('codeLivraisonExists')" class="invalid-feedback">
-            Ce code livraison de commande est déjà utilisé.
-          </div>
-          
-        </div>
+        
     
         
         <div class="form-group">
@@ -88,12 +83,13 @@
         <div class="form-group">
           <label for="immatriculation"><i class="fas fa-id-card"></i> Immatriculation</label>
           <div class="input-container">
-            <select id="immatriculation" class="form-control" formControlName="immatriculation" required>
-              <option value="" disabled selected>Sélectionnez une immatriculation</option>
-              <option *ngFor="let immatriculation of immatriculations" [value]="immatriculation">
-                {{ immatriculation }}
-              </option>
-            </select>
+            <select id="immatriculation" class="form-control" formControlName="immatriculation" 
+            (change)="onImmatriculationSelectionChange($event)" required>
+      <option value="" disabled selected>Sélectionnez une immatriculation</option>
+      <option *ngFor="let immatriculation of immatriculations" [value]="immatriculation">
+        {{ immatriculation }}
+      </option>
+    </select>
             <i class="fas fa-barcode input-icon"></i>
           </div>
           <div *ngIf="addLivraisonForm.get('immatriculation')?.invalid && addLivraisonForm.get('immatriculation')?.touched" class="error-message">
@@ -101,26 +97,58 @@
           </div>
         </div>
         <!-- Champ pour sélectionner la citerne -->
+        <!-- Champ pour sélectionner la citerne -->
         <div class="form-group">
           <label for="citerne"><i class="fas fa-gas-pump"></i> Citerne</label>
           <div class="input-container">
-            <select id="citerne" class="form-control" formControlName="citerne" required>
-              <option value="" disabled selected>Sélectionnez une citerne</option>
-              <option *ngFor="let citerne of citernes" [value]="citerne.id">
-                {{ citerne.reference }}
-              </option>
-            </select>
-            
-            
+            <!-- Modifiez le sélecteur de citerne pour ajouter (change) -->
+<select id="citerne" class="form-control"
+[disabled]="citernes.length === 0"
+formControlName="citerne" 
+(change)="onCiterneSelectionChange($event)" required>
+<option value="" disabled selected>Sélectionnez une citerne</option>
+<option *ngFor="let citerne of citernes" [value]="citerne.id">
+{{ citerne.reference }} ({{ citerne.capacite }} L)
+</option>
+</select>
             <i class="fas fa-oil-can input-icon"></i>
           </div>
           <div *ngIf="addLivraisonForm.get('citerne')?.invalid && addLivraisonForm.get('citerne')?.touched" class="error-message">
             <i class="fas fa-exclamation-circle"></i> La citerne est requise.
           </div>
         </div>
-        
-
-        
+        <!-- Tableau des compartiments de la citerne sélectionnée -->
+        <div class="form-group" *ngIf="compartiments.length > 0">
+          <label class="table-title">
+            <i class="fas fa-database me-1"></i> Compartiments de la citerne
+          </label>
+          <div class="table-responsive compact-table shadow-sm rounded mt-2">
+            <table class="table table-sm table-striped table-bordered mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Référence</th>
+                  <th>Capacité Maximale (L)</th>
+                  <th>Statut</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let compartiment of compartiments">
+                  <td>{{ compartiment.reference }}</td>
+                  <td>{{ compartiment.capaciteMax }} L</td>
+                  <td>
+                    <span class="badge statut-badge" [ngClass]="{
+                      'bg-success': compartiment.statut === 'PLEIN',
+                      'bg-warning text-dark': compartiment.statut === 'EN_COURS',
+                      'bg-danger': compartiment.statut === 'VIDE'
+                    }">
+                      {{ compartiment.statut }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
         <div class="form-group">
           <label for="statut"><i class="fas fa-info-circle"></i> Statut</label>
           <div class="input-container">
@@ -146,7 +174,6 @@
             <i class="fas fa-check"></i> Ajouter la Livraison
           </button>
         </div>
-        
       </form>
     </div>
   </div>

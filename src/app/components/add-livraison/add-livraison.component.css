@@ -20,7 +20,36 @@
       margin: 0;
       padding: 0;
     }
-    
+    .table-responsive{
+      font-size: 0.875rem;
+
+    }
+
+    .compact-table {
+  font-size: 0.875rem;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.compact-table table th,
+.compact-table table td {
+  padding: 0.5rem 0.75rem;
+  vertical-align: middle;
+  border: 1px solid #F57C00;
+}
+
+.table-title {
+  font-weight: 600;
+  color: #444;
+  font-size: 1rem;
+}
+
+.statut-badge {
+  font-size: 0.75rem;
+  padding: 0.4em 0.7em;
+  border-radius: 0.75rem;
+}
+
     body {
       font-family: 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
       background-color: #F5F7FA;

@@ -38,15 +38,27 @@ export class CamionService {
       return this.http.get<any>(`${this.apiUrl}/${livraisonId}`);
 
 }
-getCiterneByImmatriculation(immatriculation: string) {
-  return this.http.get<{id: number, reference: string}[]>(`/api/citernes/${immatriculation}`);
+// Assurez-vous que cette méthode dans CamionService est correcte
+getCiterneByImmatriculation(immatriculation: string): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/citernes/${immatriculation}`);
 }
+
 
 
 // Méthode dans le CamionService pour récupérer les camions par marque
 // CamionService
 getCamionsByMarque(marque: string): Observable<any[]> {
   return this.http.get<any[]>(`${this.apiUrl}/marques/${marque}`);
+}
+// Exemple de méthode dans CamionService pour récupérer les compartiments
+getCompartimentsByCiterne(referenceCiterne: string): Observable<any[]> {
+  return this.http.get<any[]>(`/api/camions/citerne/${referenceCiterne}/compartiments`);
+}
+
+// CamionService
+
+getCiterneDetailsByReference(reference: string): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/citerne/details/${reference}`);
 }
 
 

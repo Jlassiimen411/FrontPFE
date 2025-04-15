@@ -1,10 +1,14 @@
 <h2>Détails de la Livraison</h2>
 
 <div>
-  <p><strong> Code Livraison :</strong> {{ data.codeLivraison }}</p>
+  <p><strong>Code Livraison :</strong> {{ data.codeLivraison }}</p>
+  <p><strong>Num de commande :</strong> {{ data.commande?.codeCommande }}</p>
+  <p><strong>Date de livraison :</strong> {{ data.dateLivraison }}</p>
   <p><strong>Marque :</strong> {{ data.marque }}</p>
   <p><strong>Immatriculation :</strong> {{ data.immatriculation }}</p>
-  <p><strong>Date de livraison :</strong> {{ data.dateLivraison }}</p>
+  <p><strong>Citerne :</strong> {{ data.citerne.reference }} ({{ data.citerne.capacite }} L)</p>
+ 
+ 
   <p><strong>Statut :</strong> {{ data.statut }}</p>
 </div>
 

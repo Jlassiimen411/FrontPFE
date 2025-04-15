@@ -19,18 +19,50 @@ export class DialogLivraisonDetailsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    console.log('Données reçues:', this.data); // Vérifier ici
-    if (!this.data) {
-      console.error('Aucune donnée reçue dans le dialogue!');
-      alert('Données manquantes pour afficher les détails de la livraison.');
-      this.dialogRef.close();
-      return;
-    }
-    this.data.codeLivraison = this.data.codeLivraison || 'Non définie';
-    this.data.marque = this.data.marque || 'Non définie';
-    this.data.immatriculation = this.data.immatriculation || 'Non définie';
-    this.data.statut = this.data.statut || 'Non défini';
+  const livraisonId = this.data?.livraisonId;
+
+  if (!livraisonId) {
+    console.error('ID de livraison manquant.');
+    this.dialogRef.close();
+    return;
   }
+
+  this.livraisonService.getLivraisonById(livraisonId).subscribe({
+    next: (res) => {
+      this.data = res;
+
+      const camion = this.data.camion || {};
+      const citerne = camion.citerne || {};
+
+      this.data.citerne = {
+        reference: citerne.reference || 'Non définie',
+        capacite: citerne.capacite || 'Non définie',
+        compartiment: citerne.compartiment || {
+          reference: 'Non définie',
+          capaciteMax: 'Non définie',
+          statut: 'Non défini'
+        }
+      };
+
+      this.data.marque = camion.marque || 'Non définie';
+      this.data.immatriculation = camion.immatriculation || 'Non définie';
+      this.data.codeCommande = this.data.commande?.codeCommande || 'Non définie';
+      this.data.codeLivraison = this.data.codeLivraison || 'Non définie';
+      this.data.statut = this.data.statut || 'Non défini';
+      this.data.dateLivraison = this.data.dateLivraison || 'Non définie';
+    },
+    error: (err) => {
+      console.error('Erreur lors du chargement des détails :', err);
+      this.dialogRef.close();
+    }
+  });
+}
+
+  
+  
+  
+  
+  
   
 
   closeDialog(): void {

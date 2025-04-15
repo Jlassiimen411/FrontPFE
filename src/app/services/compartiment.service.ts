@@ -7,13 +7,13 @@ import { Observable } from 'rxjs';
 })
 export class CompartimentService {
 
-  private apiUrl = 'http://localhost:8080/api/compartiments'; // Remplacez par l'URL de votre API
+  private apiUrl = 'http://localhost:8080/api/compartiments';
 
   constructor(private http: HttpClient) { }
 
   // Récupérer la liste des citernes
   getCiternes(): Observable<any[]> {
-    return this.http.get<any[]>(`http://localhost:8080/api/citernes`); // Remplacez par votre endpoint réel
+    return this.http.get<any[]>(`http://localhost:8080/api/citernes`);
   }
 
   // Récupérer la liste des compartiments
@@ -21,19 +21,29 @@ export class CompartimentService {
     return this.http.get<any[]>(`${this.apiUrl}`);
   }
 
-  addCompartimentToCiterne(citerneId: number, compartiment: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${citerneId}/compartiments`, compartiment);
-  }
-
-  
-  addCompartiment(compartiment: any) {
+  // Ajouter un compartiment indépendamment
+  addCompartiment(compartiment: any): Observable<any> {
     return this.http.post<any>(this.apiUrl, compartiment);
   }
 
-  
+  // Ajouter un compartiment à une citerne
+  addCompartimentToCiterne(citerneId: number, compartiment: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/citerne/${citerneId}/add`, compartiment);
+  }
+
   // Récupérer un compartiment par son ID
   getCompartiment(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
+  }
+
+  // Récupérer les compartiments par l'ID de la citerne
+  getCompartimentsByCiterneId(citerneId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/by-id/${citerneId}`);
+  }
+
+  // Récupérer les compartiments par la référence de la citerne
+  getCompartimentsByCiterneReference(reference: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/by-reference/${reference}`);
   }
 
   // Mettre à jour un compartiment
@@ -45,5 +55,4 @@ export class CompartimentService {
   deleteCompartiment(id: number): Observable<any> {
     return this.http.delete<any>(`${this.apiUrl}/${id}`);
   }
-
 }

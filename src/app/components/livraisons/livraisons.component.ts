@@ -58,22 +58,27 @@ export class LivraisonsComponent implements OnInit {
     this.lService.getAllLivraisons().subscribe({
       next: (data) => {
         this.allLivraisons = data;
-
+  
         this.calendarEvents = data.map((livraison: any) => ({
-          title: `Livraison ${livraison.id}`,
-          start: livraison.dateLivraison,
-          description: livraison.statut,
-          id: livraison.id,
-          codeLivraison: livraison.codeLivraison,
-          extendedProps: {
-            codeLivraison: livraison.codeLivraison,
-            commandeId: livraison.commandeId,
-            statut: livraison.statut,
-            marque: livraison.camion?.marque || 'Non définie',
-            immatriculation: livraison.camion?.immatriculation || 'Non définie'
-          }
-        }));
+  title: `Livraison ${livraison.id}`,
+  start: livraison.dateLivraison,
+  description: livraison.statut,
+  id: livraison.id,
+  codeLivraison: livraison.codeLivraison,
+  extendedProps: {
+    codeLivraison: livraison.codeLivraison,
+    statut: livraison.statut,
+    marque: livraison.camion?.marque || 'Non définie',
+    immatriculation: livraison.camion?.immatriculation || 'Non définie',
+    codeCommande: livraison.commande?.codeCommande || 'Non définie',
+    capaciteCompartiment: livraison.camion?.citerne?.compartiment?.capaciteMax || 'Non définie',
+    referenceCompartiment: livraison.camion?.citerne?.compartiment?.reference || 'Non définie',
+    referenceCiterne: livraison.camion?.citerne?.reference || 'Non définie',
+    capaciteCiterne: livraison.camion?.citerne?.capacite || 'Non définie'
+  }
+}));
 
+  
         this.updateCalendarEvents();
       },
       error: (err) => {
@@ -81,26 +86,36 @@ export class LivraisonsComponent implements OnInit {
       }
     });
   }
+  editLivraison(livraisonId: number): void {
+    const dialogRef = this.dialog.open(AddLivraisonComponent, {
+      width: '600px',
+      height: '800px',
+      disableClose: true,
+      data: { livraisonId } // ✅ Passe bien l'ID ici
+    });
+  
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadLivraisons();
+      }
+    });
+  }
+  
+  
+  
 
   updateCalendarEvents(): void {
     this.calendarOptions.events = [...this.calendarEvents];
   }
 
   handleEventClick(clickInfo: any): void {
-    const data = {
-      livraisonId: clickInfo.event.id,
-      codeLivraison: clickInfo.event.extendedProps.codeLivraison, // ✅ Ajouté ici
-      commandeId: clickInfo.event.extendedProps.commandeId,
-      dateLivraison: clickInfo.event.startStr,
-      statut: clickInfo.event.extendedProps.statut,
-      marque: clickInfo.event.extendedProps.marque,
-      immatriculation: clickInfo.event.extendedProps.immatriculation
-    };
-
+    const livraisonId = clickInfo.event.id;
+  
     this.dialog.open(DialogLivraisonDetailsComponent, {
       width: '600px',
-      height: '310px',
-      data
+      height: '400px',
+      data: { livraisonId }
     });
   }
+  
 }

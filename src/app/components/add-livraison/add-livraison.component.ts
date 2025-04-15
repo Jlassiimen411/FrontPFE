@@ -1,11 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AsyncValidatorFn, AbstractControl } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog'; // Pour gérer la fermeture du popup
+import { MatDialogRef } from '@angular/material/dialog';
 import { LivraisonService } from 'src/app/services/livraison.service';
 import { CommandeService } from 'src/app/services/commande.service';
 import { CamionService } from 'src/app/services/camion.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { debounceTime, switchMap, map, catchError, of, first } from 'rxjs';
+import { CompartimentService } from 'src/app/services/compartiment.service';
 
 @Component({
   selector: 'app-add-livraison',
@@ -13,24 +14,34 @@ import { debounceTime, switchMap, map, catchError, of, first } from 'rxjs';
   styleUrls: ['./add-livraison.component.css']
 })
 export class AddLivraisonComponent implements OnInit {
+  referenceCiterne: string = ''; // pour stocker la référence de citerne saisie
+  
   addLivraisonForm!: FormGroup;
   marquesCamion: string[] = [];
   immatriculations: string[] = [];
-  citernes: { id: number, reference: string }[] = []; // Déclaration correcte de citernes
   commandes: any[] = [];
   camions: any[] = [];
+  citernes: { id: number, reference: string, capacite: number }[] = [];
+  compartiments: { reference: string, capaciteMax: number, statut: string }[] = [];
 
   constructor(
     private fb: FormBuilder,
     private lService: LivraisonService,
     private cService: CommandeService,
+    private compartimentService: CompartimentService,
     private camionService: CamionService,
-    public dialogRef: MatDialogRef<AddLivraisonComponent>,  // Pour fermer le popup
+    public dialogRef: MatDialogRef<AddLivraisonComponent>,
     private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
-    // Initialisation du formulaire
+    this.initForm();
+    this.loadCommandes();
+    this.loadMarquesCamions();
+    
+  }
+
+  private initForm(): void {
     this.addLivraisonForm = this.fb.group({
       codeLivraison: ['', [
         Validators.required,
@@ -42,15 +53,18 @@ export class AddLivraisonComponent implements OnInit {
       statut: ['', Validators.required],
       marque: ['', Validators.required],
       immatriculation: ['', Validators.required],
-      citerne: ['', Validators.required] // Validation ajoutée ici
-    });
+      citerne: [{ value: '', disabled: true }, Validators.required]
 
-    // Chargement des commandes et des marques de camions
-    this.loadCommandes();
-    this.loadMarquesCamions();
+    });
   }
 
-  codeLivraisonAsyncValidator(): AsyncValidatorFn {
+  // Déplacer cette méthode ici
+  private getCamionIdByImmatriculation(immatriculation: string): number | null {
+    const camionTrouve = this.camions.find(c => c.immatriculation === immatriculation);
+    return camionTrouve ? camionTrouve.id : null;
+  }
+
+  private codeLivraisonAsyncValidator(): AsyncValidatorFn {
     return (control: AbstractControl) => {
       if (!control.value) {
         return of(null); // ne pas valider si le champ est vide
@@ -65,23 +79,86 @@ export class AddLivraisonComponent implements OnInit {
       );
     };
   }
+  onCiterneSelectionChange(event: any): void {
+    const citerneId = event.target.value;
+    const citerne = this.citernes.find(c => c.id == citerneId);
+    if (citerne) {
+      this.referenceCiterne = citerne.reference;
+      this.loadCompartimentsByCiterneReference();
+    } else {
+      this.compartiments = [];
+    }
+  }
+  loadCompartimentsByCiterneReference(): void {
+    if (!this.referenceCiterne) {
+      this.compartiments = [];
+      return;
+    }
+    
+    this.compartimentService.getCompartimentsByCiterneReference(this.referenceCiterne)
+      .subscribe({
+        next: (data) => {
+          this.compartiments = data;
+          console.log('Compartiments récupérés:', this.compartiments);
+        },
+        error: (err) => {
+          console.error('Erreur lors de la récupération des compartiments:', err);
+          this.compartiments = [];
+          this.snackBar.open("Erreur lors de la récupération des compartiments", 'Fermer', { duration: 3000 });
+        }
+      });
+  }
+  
+  
+  getCompartimentsByReference(): void {
+    if (!this.referenceCiterne) {
+      this.compartiments = [];
+      return;
+    }
+  
+    this.compartimentService.getCompartimentsByCiterneReference(this.referenceCiterne)
+      .pipe(first())
+      .subscribe({
+        next: data => this.compartiments = data,
+        error: () => {
+          this.compartiments = [];
+          this.snackBar.open("Erreur lors de la récupération des compartiments", 'Fermer', { duration: 3000 });
+        }
+      });
+  }
+  
 
   onImmatriculationSelectionChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     const immatriculation = target.value;
-  
-    this.camionService.getCiterneByImmatriculation(immatriculation).subscribe({
-      next: (data: any) => {
-        this.citernes = data.map((citerne: any) => ({
-          reference: citerne.reference,
-          id: citerne.id
-        }));
-      },
-      error: (err) => console.error('Erreur lors du chargement des citernes', err)
-    });
+    
+    console.log('Immatriculation sélectionnée:', immatriculation);
+    
+    this.camionService.getCiterneByImmatriculation(immatriculation)
+  .subscribe({
+    next: (data) => {
+      this.citernes = [{
+        id: data.id,
+        reference: data.reference,
+        capacite: data.capacite
+      }];
+
+      // Utiliser setTimeout pour éviter l'erreur ExpressionChangedAfterItHasBeenCheckedError
+      setTimeout(() => {
+        this.addLivraisonForm.get('citerne')?.enable();
+        this.addLivraisonForm.get('citerne')?.setValue(data.id);
+      });
+
+      this.referenceCiterne = data.reference;
+      this.loadCompartimentsByCiterneReference();
+    },
+    error: (err) => {
+      this.citernes = [];
+      this.snackBar.open('Erreur: Impossible de charger la citerne pour ce camion', 'Fermer', { duration: 3000 });
+    }
+  });
+
   }
-  
-  
 
   genererCodeLivraison(): void {
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -92,24 +169,17 @@ export class AddLivraisonComponent implements OnInit {
 
     this.addLivraisonForm.get('codeLivraison')?.setValue(codeLivraison);
     this.addLivraisonForm.get('codeLivraison')?.markAsTouched();
-    console.log("Code généré :", codeLivraison); // ➤ Devrait s'afficher en console
+    console.log("Code généré :", codeLivraison);
   }
 
-  // Fonction pour charger les commandes
-  loadCommandes(): void {
+  private loadCommandes(): void {
     this.cService.getAllCommandes().subscribe({
       next: (data) => this.commandes = data,
       error: (err) => console.error('Erreur lors du chargement des commandes', err)
     });
   }
 
-  getCamionIdByImmatriculation(immatriculation: string): number | null {
-    const camionTrouve = this.camions.find(c => c.immatriculation === immatriculation);
-    return camionTrouve ? camionTrouve.id : null;
-  }
-
-  // Fonction pour charger les marques de camions
-  loadMarquesCamions(): void {
+  private loadMarquesCamions(): void {
     this.camionService.getCamions().subscribe({
       next: (data: any) => {
         this.camions = data; // Stocker tous les camions
@@ -119,12 +189,10 @@ export class AddLivraisonComponent implements OnInit {
     });
   }
 
-  // Fonction appelée lorsqu'une marque de camion est sélectionnée
   onMarqueSelectionChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     const marque = target.value;
 
-    // Charger les immatriculations basées sur la marque sélectionnée
     this.camionService.getCamionsByMarque(marque).subscribe({
       next: (data: any[]) => {
         this.immatriculations = data.map((camion: any) => camion.immatriculation);
@@ -134,7 +202,6 @@ export class AddLivraisonComponent implements OnInit {
     });
   }
 
-  // Fonction pour ajouter une livraison
   addLivraison(): void {
     if (this.addLivraisonForm.invalid) {
       return;
@@ -147,20 +214,18 @@ export class AddLivraisonComponent implements OnInit {
     }
 
     const livraisonData = {
-      codeLivraison:  this.addLivraisonForm.get('codeLivraison')?.value,
+      codeLivraison: this.addLivraisonForm.get('codeLivraison')?.value,
       commandes: [{ id: this.addLivraisonForm.get('commandeId')?.value }],
       dateLivraison: this.addLivraisonForm.get('date')?.value,
-      camion: [{ id: camionId }], // Envoie uniquement l'ID du camion
+      camion: { id: camionId }, // ✅ Correction ici
       statut: this.addLivraisonForm.get('statut')?.value
     };
 
-    console.log('Données envoyées au backend :', livraisonData); // Debug
+    console.log('Données envoyées au backend :', livraisonData);
 
     fetch('http://localhost:8080/api/livraisons', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(livraisonData)
     })
       .then(response => {
@@ -179,8 +244,7 @@ export class AddLivraisonComponent implements OnInit {
       });
   }
 
-  // Fonction pour annuler l'ajout de la livraison
   onCancel(): void {
-    this.dialogRef.close();  // Fermer le pop-up sans soumettre
+    this.dialogRef.close();
   }
 }

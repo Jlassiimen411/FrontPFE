@@ -10,7 +10,7 @@ import Swal from 'sweetalert2';
 })
 export class DialogLivraisonDetailsComponent implements OnInit {
   livaisons: any[] = [];  // Initialisation de la propriété directement ici
-
+  livraisonDetail: any = {};
   constructor(
     public dialogRef: MatDialogRef<DialogLivraisonDetailsComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -19,45 +19,39 @@ export class DialogLivraisonDetailsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-  const livraisonId = this.data?.livraisonId;
+    const livraisonId = this.data?.livraisonId;
 
-  if (!livraisonId) {
-    console.error('ID de livraison manquant.');
-    this.dialogRef.close();
-    return;
-  }
-
-  this.livraisonService.getLivraisonById(livraisonId).subscribe({
-    next: (res) => {
-      this.data = res;
-
-      const camion = this.data.camion || {};
-      const citerne = camion.citerne || {};
-
-      this.data.citerne = {
-        reference: citerne.reference || 'Non définie',
-        capacite: citerne.capacite || 'Non définie',
-        compartiment: citerne.compartiment || {
-          reference: 'Non définie',
-          capaciteMax: 'Non définie',
-          statut: 'Non défini'
-        }
-      };
-
-      this.data.marque = camion.marque || 'Non définie';
-      this.data.immatriculation = camion.immatriculation || 'Non définie';
-      this.data.codeCommande = this.data.commande?.codeCommande || 'Non définie';
-      this.data.codeLivraison = this.data.codeLivraison || 'Non définie';
-      this.data.statut = this.data.statut || 'Non défini';
-      this.data.dateLivraison = this.data.dateLivraison || 'Non définie';
-    },
-    error: (err) => {
-      console.error('Erreur lors du chargement des détails :', err);
+    if (!livraisonId) {
+      console.error('ID de livraison manquant.');
       this.dialogRef.close();
+      return;
     }
-  });
-}
 
+    this.livraisonService.getLivraisonById(livraisonId).subscribe({
+      next: (res) => {
+        const camion = res.camion || {};
+        const citerne = camion.citerne || {};
+
+        this.livraisonDetail = {
+          id: res.id,
+          codeLivraison: res.codeLivraison || 'Non définie',
+          dateLivraison: res.dateLivraison || 'Non définie',
+          statut: res.statut || 'Non défini',
+          codeCommande: res.commande?.codeCommande || 'Non définie',
+          marque: camion.marque || 'Non définie',
+          immatriculation: camion.immatriculation || 'Non définie',
+          citerne: {
+            reference: citerne.reference || 'Non définie',
+            capacite: citerne.capacite || 'Non définie'
+          }
+        };
+      },
+      error: (err) => {
+        console.error('Erreur lors du chargement des détails :', err);
+        this.dialogRef.close();
+      }
+    });
+  }
   
   
   
@@ -115,8 +109,9 @@ export class DialogLivraisonDetailsComponent implements OnInit {
               icon: 'success',
               confirmButtonColor: '#28a745'
             });
+            // Fermer la boîte de dialogue
             this.dialogRef.close({ deleted: true, livraisonId: livraisonId });
-            this.removeLivraisonFromCalendar(livraisonId);
+            this.removeLivraisonFromCalendar(livraisonId); // Retirer de l'API calendrier
           },
           error: (err) => {
             console.error('Erreur lors de la suppression:', err);
@@ -132,6 +127,7 @@ export class DialogLivraisonDetailsComponent implements OnInit {
       }
     });
   }
+  
   
 
   removeLivraisonFromCalendar(livraisonId: number): void {
@@ -154,19 +150,20 @@ export class DialogLivraisonDetailsComponent implements OnInit {
 
   
 
-  editLivraison(): void {
-    const livraisonId = this.data?.livraisonId;
-    if (!livraisonId) {
-      alert("L'ID de livraison est manquant pour l'édition.");
-      return;
-    }
-
-    console.log("Modification de la livraison avec l'ID:", livraisonId);
-
-    // Fermer le dialogue avant la redirection
-    this.dialogRef.close();
-
-    // Rediriger vers la page de modification de la livraison
-    this.router.navigate(['/edit-livraison', livraisonId]);
+ editLivraison(id: number): void {
+  const livraisonId = id;
+  if (!livraisonId) {
+    alert("L'ID de livraison est manquant pour l'édition.");
+    return;
   }
+
+  console.log("Modification de la livraison avec l'ID:", livraisonId);
+
+  // Fermer le dialogue avant la redirection
+  this.dialogRef.close();
+
+  // Rediriger vers la page de modification de la livraison
+  this.router.navigate(['/edit-livraison', livraisonId]);
+}
+
 }

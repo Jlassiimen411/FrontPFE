@@ -11,6 +11,7 @@ export class CamionsComponent implements OnInit {
   camions: any[] = [];
   statuts: string[] = ['Disponible', 'En maintenance', 'En livraison', 'Hors service'];
   citernes: any[] = [];
+  citernesDisponibles: any[] = [];
 
   // Modifications ici : remplacer 'citerneId' par 'citerne' et ajouter un objet citerne avec un id
   nouveauCamion = {
@@ -48,12 +49,16 @@ export class CamionsComponent implements OnInit {
         
         // Ajout des informations complètes sur la citerne pour chaque camion
         this.camions = data.map(camion => {
-          const citerneAssociee = this.citernes.find(c => c.id === camion.citerne?.id); 
+          const citerneAssociee = this.citernes.find(c => c.id === camion.citerne?.id);
           return { 
             ...camion, 
-            citerne: citerneAssociee ? { reference: citerneAssociee.reference, capacite: citerneAssociee.capacite } : null 
+            citerne: citerneAssociee 
+              ? { id: citerneAssociee.id, reference: citerneAssociee.reference, capacite: citerneAssociee.capacite } 
+              : null 
           };
         });
+        
+        this.updateCiternesDisponibles();
       },
       (error) => {
         console.error('Erreur lors du chargement des camions:', error);
@@ -65,12 +70,23 @@ export class CamionsComponent implements OnInit {
     this.citerneService.getCiternes().subscribe(
       (data) => {
         this.citernes = data;
+        this.updateCiternesDisponibles();
       },
       (error) => {
         console.error('Erreur lors du chargement des citernes:', error);
       }
     );
   }
+  updateCiternesDisponibles(): void {
+    const idsCiternesUtilisées = this.camions
+      .filter(c => c.citerne && c.citerne.id != null)
+      .map(c => c.citerne.id);
+  
+    this.citernesDisponibles = this.citernes.filter(c =>
+      !idsCiternesUtilisées.includes(c.id)
+    );
+  }
+  
 
   isFormValid(): boolean {
     return !!(this.nouveauCamion.marque && this.nouveauCamion.modele && this.nouveauCamion.immatriculation &&
@@ -79,23 +95,34 @@ export class CamionsComponent implements OnInit {
 
   ajouterCamion() {
     if (this.isFormValid()) {
-      // Créer l'objet à envoyer, avec la structure requise dans Postman (citerne avec id)
       const camionData = {
         ...this.nouveauCamion,
         citerne: { id: this.nouveauCamion.citerne.id }
       };
-
+  
       this.camionService.addCamion(camionData).subscribe(
         (data) => {
           const citerneAssociee = this.citernes.find(c => c.id === data.citerne.id);
           const camionAvecCiterne = { 
             ...data, 
-            citerne: citerneAssociee ? { reference: citerneAssociee.reference, capacite: citerneAssociee.capacite } : null 
+            citerne: citerneAssociee ? { id: citerneAssociee.id, reference: citerneAssociee.reference, capacite: citerneAssociee.capacite } : null 
           };
+  
           this.camions.push(camionAvecCiterne);
-
+  
+          // 🔥 Mettre à jour la liste des citernes disponibles après ajout
+          this.updateCiternesDisponibles();
+  
           // Réinitialiser le formulaire
-          this.nouveauCamion = { id: 0, marque: '', modele: '', immatriculation: '', kilometrage: null, statut: 'Disponible', citerne: { id: null } };
+          this.nouveauCamion = {
+            id: 0,
+            marque: '',
+            modele: '',
+            immatriculation: '',
+            kilometrage: null,
+            statut: 'Disponible',
+            citerne: { id: null }
+          };
         },
         (error) => {
           console.error("Erreur lors de l'ajout du camion:", error);
@@ -103,6 +130,7 @@ export class CamionsComponent implements OnInit {
       );
     }
   }
+  
 
   supprimerCamion(id: number) {
     const camion = this.camions.find(c => c.id === id);
@@ -121,6 +149,7 @@ export class CamionsComponent implements OnInit {
           this.camionService.deleteCamion(id).subscribe(
             () => {
               this.camions = this.camions.filter(c => c.id !== id);
+              this.updateCiternesDisponibles();
               Swal.fire({
                 title: 'Supprimé !',
                 text: 'Le camion a été supprimé avec succès.',
@@ -148,7 +177,18 @@ export class CamionsComponent implements OnInit {
         confirmButtonColor: '#d33'
       });
     }
+  } 
+  getCiternesPourEdition(): any[] {
+    if (!this.camionEnCours || !this.camionEnCours.citerne) {
+      return this.citernesDisponibles;
+    }
+  
+    const citerneActuelle = this.citernes.find(c => c.id === this.camionEnCours.citerne.id);
+    return citerneActuelle
+      ? [citerneActuelle, ...this.citernesDisponibles.filter(c => c.id !== citerneActuelle.id)]
+      : this.citernesDisponibles;
   }
+  
 
   sauvegarderModification() {
     if (!this.camionEnCours.marque || !this.camionEnCours.modele || !this.camionEnCours.immatriculation || this.camionEnCours.kilometrage <= 0) {
@@ -159,6 +199,7 @@ export class CamionsComponent implements OnInit {
     // Vérifier si une citerne est bien sélectionnée
     const citerneId = this.camionEnCours.citerne ? this.camionEnCours.citerne.id : null;
   
+    // Assurez-vous que la citerne est correctement attachée à l'objet camion
     const camionModifie = {
       ...this.camionEnCours,
       citerne: citerneId ? { id: citerneId } : null
@@ -178,15 +219,18 @@ export class CamionsComponent implements OnInit {
   
 
   editCamion(id: number): void {
-    this.camionService.getCamion(id).subscribe(data => {
-      this.camionEnCours = data;
-      console.log('Fetched camion:', this.camionEnCours);
-      const modal = document.querySelector('.modal') as HTMLElement;
-      if (modal) {
-        modal.style.display = 'block'; // Display the modal after fetching the citerne
-      }
-    });
-  }
+  this.camionService.getCamion(id).subscribe(data => {
+    this.camionEnCours = data;
+    console.log('Fetched camion:', this.camionEnCours);
+    console.log('Citerne:', this.camionEnCours.citerne);  // Vérifier que la citerne est présente
+
+    const modal = document.querySelector('.modal') as HTMLElement;
+    if (modal) {
+      modal.style.display = 'block'; // Afficher la modal après récupération de la citerne
+    }
+  });
+}
+
 
   closeModal() {
     this.camionEnCours = null;

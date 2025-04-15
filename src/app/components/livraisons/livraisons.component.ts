@@ -60,25 +60,25 @@ export class LivraisonsComponent implements OnInit {
         this.allLivraisons = data;
   
         this.calendarEvents = data.map((livraison: any) => ({
-  title: `Livraison ${livraison.id}`,
-  start: livraison.dateLivraison,
-  description: livraison.statut,
-  id: livraison.id,
-  codeLivraison: livraison.codeLivraison,
-  extendedProps: {
-    codeLivraison: livraison.codeLivraison,
-    statut: livraison.statut,
-    marque: livraison.camion?.marque || 'Non définie',
-    immatriculation: livraison.camion?.immatriculation || 'Non définie',
-    codeCommande: livraison.commande?.codeCommande || 'Non définie',
-    capaciteCompartiment: livraison.camion?.citerne?.compartiment?.capaciteMax || 'Non définie',
-    referenceCompartiment: livraison.camion?.citerne?.compartiment?.reference || 'Non définie',
-    referenceCiterne: livraison.camion?.citerne?.reference || 'Non définie',
-    capaciteCiterne: livraison.camion?.citerne?.capacite || 'Non définie'
-  }
-}));
-
+          title: `Livraison ${livraison.id}`,
+          start: livraison.dateLivraison,
+          description: livraison.statut,
+          id: livraison.id,
+          codeLivraison: livraison.codeLivraison,
+          extendedProps: {
+            codeLivraison: livraison.codeLivraison,
+            statut: livraison.statut,
+            marque: livraison.camion?.marque || 'Non définie',
+            immatriculation: livraison.camion?.immatriculation || 'Non définie',
+            codeCommande: livraison.commande?.codeCommande || 'Non définie',
+            capaciteCompartiment: livraison.camion?.citerne?.compartiment?.capaciteMax || 'Non définie',
+            referenceCompartiment: livraison.camion?.citerne?.compartiment?.reference || 'Non définie',
+            referenceCiterne: livraison.camion?.citerne?.reference || 'Non définie',
+            capaciteCiterne: livraison.camion?.citerne?.capacite || 'Non définie'
+          }
+        }));
   
+        // Met à jour les événements du calendrier
         this.updateCalendarEvents();
       },
       error: (err) => {
@@ -86,6 +86,7 @@ export class LivraisonsComponent implements OnInit {
       }
     });
   }
+  
   editLivraison(livraisonId: number): void {
     const dialogRef = this.dialog.open(AddLivraisonComponent, {
       width: '600px',
@@ -111,11 +112,19 @@ export class LivraisonsComponent implements OnInit {
   handleEventClick(clickInfo: any): void {
     const livraisonId = clickInfo.event.id;
   
-    this.dialog.open(DialogLivraisonDetailsComponent, {
+    const dialogRef = this.dialog.open(DialogLivraisonDetailsComponent, {
       width: '600px',
       height: '400px',
       data: { livraisonId }
     });
+  
+    dialogRef.afterClosed().subscribe(result => {
+      if (result?.deleted) {
+        // Si la livraison a été supprimée, recharger les livraisons
+        this.loadLivraisons();
+      }
+    });
   }
+  
   
 }

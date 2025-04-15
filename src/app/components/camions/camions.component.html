@@ -19,8 +19,11 @@
 
     <!-- Liste déroulante pour sélectionner la citerne -->
     <select [(ngModel)]="nouveauCamion.citerne.id" required>
-      <option *ngFor="let citerne of citernes" [value]="citerne.id">{{ citerne.reference }} - {{ citerne.capacite }} L</option>
+      <option *ngFor="let citerne of citernesDisponibles" [value]="citerne.id">
+        {{ citerne.reference }} - {{ citerne.capacite }} L
+      </option>
     </select>
+    
 
     <!-- Ajouter le bouton uniquement si tous les champs sont remplis -->
     <button type="button" class="btn btn-warning" (click)="ajouterCamion()" [disabled]="!isFormValid()">
@@ -79,12 +82,14 @@
       <input type="text" [(ngModel)]="camionEnCours.immatriculation" placeholder="Immatriculation" />
       <input type="number" [(ngModel)]="camionEnCours.kilometrage" placeholder="Kilométrage" min="0">
   
-      <!-- Liste déroulante pour sélectionner la citerne -->
-      <select [(ngModel)]="camionEnCours.citerne" required>
-        <option *ngFor="let citerne of citernes" [ngValue]="citerne">
-          {{ citerne.reference }} - {{ citerne.capacite }} L
-        </option>
-      </select>
+     <!-- Liste déroulante pour sélectionner la citerne -->
+<select [(ngModel)]="camionEnCours.citerne" required>
+  <option *ngFor="let citerne of getCiternesPourEdition()" [ngValue]="citerne">
+    {{ citerne.reference }} - {{ citerne.capacite }} L
+  </option>
+</select>
+
+      
   
       <button type="button" class="btn btn-warning" (click)="sauvegarderModification()">
         <b>Enregistrer</b>

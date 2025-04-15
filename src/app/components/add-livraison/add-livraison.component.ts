@@ -48,15 +48,15 @@ export class AddLivraisonComponent implements OnInit {
         Validators.maxLength(50),
         Validators.pattern(/^[A-Za-z0-9\-_]+$/)
       ], [this.codeLivraisonAsyncValidator()]],
-      commandeId: ['', Validators.required],
+      commandeId: [[], Validators.required],  // Changez ceci pour un tableau vide
       date: ['', Validators.required],
       statut: ['', Validators.required],
       marque: ['', Validators.required],
       immatriculation: ['', Validators.required],
       citerne: [{ value: '', disabled: true }, Validators.required]
-
     });
   }
+  
 
   // Déplacer cette méthode ici
   private getCamionIdByImmatriculation(immatriculation: string): number | null {
@@ -206,7 +206,8 @@ export class AddLivraisonComponent implements OnInit {
     if (this.addLivraisonForm.invalid) {
       return;
     }
-
+    const commandesSelectionnees = this.addLivraisonForm.get('commandeId')?.value;
+  console.log('Commandes sélectionnées :', commandesSelectionnees);
     const camionId = this.getCamionIdByImmatriculation(this.addLivraisonForm.get('immatriculation')?.value);
     if (!camionId) {
       this.snackBar.open('Erreur : Camion non trouvé.', 'Fermer', { duration: 3000 });

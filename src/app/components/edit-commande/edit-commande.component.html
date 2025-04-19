@@ -25,14 +25,17 @@
   
           <!-- Produit -->
           <div class="mb-3">
-            <label for="produitSelect" class="form-label gradient-text">Produit :</label>
-            <select formControlName="produitId" id="produitSelect" class="form-select">
-              <option value="" disabled>Choisissez un produit</option>
-              <option *ngFor="let produit of produits" [value]="produit.id">
-                {{ produit.nomProduit }}
-              </option>
-            </select>
+            <label for="nomProduit" class="form-label gradient-text">Produit :</label>
+            <input
+              type="text"
+              id="nomProduit"
+              class="form-control"
+              [value]="getNomProduitParId(commandeForm.get('produitId')?.value)"
+              readonly
+            />
           </div>
+          
+          
   
           <!-- Quantité -->
           <div class="mb-3">
@@ -49,7 +52,7 @@
           <!-- Prix total -->
           <div class="mb-3">
             <label  class="form-label gradient-text">Prix total :</label>
-            <input formControlName="totalPrice" type="text" class="form-control" placeholder="Prix total" readonly>
+            <input formControlName="price" type="text" class="form-control" placeholder="Prix total" readonly>
           </div>
   
           <!-- Boutons -->

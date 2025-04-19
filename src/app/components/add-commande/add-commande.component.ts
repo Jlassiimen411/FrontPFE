@@ -1,10 +1,11 @@
-
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, AsyncValidatorFn, AbstractControl } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, AsyncValidatorFn, AbstractControl, FormArray } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { CommandeService } from 'src/app/services/commande.service';
 import { ProduitService } from 'src/app/services/produit.service';
+import { TypeProduitService } from 'src/app/services/type-produit.service';
 import { debounceTime, switchMap, map, catchError, of, first } from 'rxjs';
+
 @Component({
   selector: 'app-add-commande',
   templateUrl: './add-commande.component.html',
@@ -14,145 +15,208 @@ export class AddCommandeComponent implements OnInit {
   addCommandeForm!: FormGroup;
   isSuccessful: boolean = false;
   isFailed: boolean = false;
+  isLoading: boolean = false;
+  errorMessage: string = ''; 
+
   produits: any[] = [];
+  prixProduitsSelectionnes: { [index: number]: number } = {};
   totalPrice: number = 0;
+  typeProduitsAvecProduits: any[] = [];
 
   constructor(
     private fb: FormBuilder,
     private cService: CommandeService,
     private pService: ProduitService,
+    private typeProduitService: TypeProduitService,
     public _dialogRef: MatDialogRef<AddCommandeComponent>,
     private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    // Initialisation du formulaire avec la date système (readonly)
+    this.initForm();
+    this.loadProduits();
+  }
+
+  private initForm(): void {
     this.addCommandeForm = this.fb.group({
       codeCommande: ['', [
         Validators.required,
         Validators.maxLength(50),
         Validators.pattern(/^[A-Za-z0-9\-_]+$/)
-      ], [this.codeCommandeUniqueValidator()]],
-      produit: [null, Validators.required],
-      quantite: [null, [Validators.required, Validators.min(1)]],
-      dateCommande: [{ value: this.getTodayDate(), disabled: true }, Validators.required],
+      ]],
+      quantite: [0, Validators.required],
+      price: [0, Validators.required],
+      dateCommande: [this.getTodayDate(), Validators.required],
+      produits: this.fb.array([]),
       totalPrice: [0]
     });
+    
+    
+    
+    
+    
+  }
+  
 
-    // Charger les produits
-    this.loadProduits();
-
-    // Mise à jour automatique du prix total
-    this.addCommandeForm.get('produit')?.valueChanges.subscribe(() => {
-      this.calculateTotalPrice();
-    });
-
-    this.addCommandeForm.get('quantite')?.valueChanges.subscribe(() => {
-      this.calculateTotalPrice();
+  loadProduits(): void {
+    this.typeProduitService.getAllTypeProduits().subscribe(data => {
+      this.typeProduitsAvecProduits = data;
+      this.produits = data.flatMap(type => type.produits);
     });
   }
-   codeCommandeUniqueValidator(): AsyncValidatorFn {
-      return (control: AbstractControl) => {
-        if (!control.value) return of(null);
-        return control.valueChanges.pipe(
-          debounceTime(400),
-          switchMap(code => this.cService.checkCodeCommandeExists(code)),
-          map(exists => exists ? { codeProduitExists: true } : null),
-          catchError(() => of(null)),
-          first()
-        );
-      };
-    }
+
+  codeCommandeUniqueValidator(): AsyncValidatorFn {
+    return (control: AbstractControl) => {
+      if (!control.value) return of(null);
+      return of(control.value).pipe(
+        debounceTime(400),
+        switchMap(code => this.cService.checkCodeCommandeExists(code)),
+        map(exists => exists ? { codeCommandeExists: true } : null),
+        catchError(() => of(null)),
+        first()
+      );
+    };
+  }
+
+  get produitsFormArray(): FormArray {
+    return this.addCommandeForm.get('produits') as FormArray;
+  }
   
-    genererCodeCommande(): void {
-      const charset = '0123456789';
-      let code = 'COMM-';
-      for (let i = 0; i < 10; i++) {
-        code += charset.charAt(Math.floor(Math.random() * charset.length));
+
+  ajouterProduit(produit: any): void {
+    const group = this.fb.group({
+      produit: [produit.id, Validators.required],
+      quantite: [1, [Validators.required, Validators.min(1)]]
+    });
+
+    group.get('quantite')?.valueChanges.subscribe(() => this.calculateTotalPrice());
+    this.produitsFormArray.push(group);
+
+    this.calculateTotalPrice();
+  }
+
+  retirerProduit(index: number): void {
+    this.produitsFormArray.removeAt(index);
+    this.calculateTotalPrice();
+  }
+
+  calculateTotalPrice(): void {
+    let total = 0;
+    this.prixProduitsSelectionnes = {};
+  
+    this.produitsFormArray.controls.forEach((group, index) => {
+      const produitId = group.get('produit')?.value;
+      const quantite = group.get('quantite')?.value;
+      const produit = this.produits.find(p => p.id === Number(produitId));
+  
+      console.log('Produit sélectionné:', produit);
+      console.log('Quantité:', quantite);
+  
+      if (produit && quantite && quantite > 0) {
+        const prix = produit.prix;
+        const sousTotal = prix * quantite;
+        total += sousTotal;
+        this.prixProduitsSelectionnes[index] = prix;
       }
-    
-      this.addCommandeForm.get('codeCommande')?.setValue(code);
-      this.addCommandeForm.get('codeCommande')?.markAsTouched();
-      console.log("Code généré :", code); // ➤ Devrait s'afficher en console
-    }
-    
-    
-    
-  // Récupérer la date du jour (format YYYY-MM-DD)
+    });
+  
+    this.addCommandeForm.get('totalPrice')?.setValue(total);
+    console.log('Total calculé:', total);
+  }
+  
   getTodayDate(): string {
     const today = new Date();
     return today.toISOString().split('T')[0];
   }
 
-  // Calcul automatique du prix total
-  calculateTotalPrice() {
-    const produitId = this.addCommandeForm.get('produit')?.value;
-    const quantite = this.addCommandeForm.get('quantite')?.value;
+  genererCodeCommande(): void {
+    const code = 'CMD-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    this.addCommandeForm.get('codeCommande')?.setValue(code);
+  }
 
-    if (produitId && quantite) {
-      const produit = this.produits.find(p => p.id === Number(produitId));
-      if (produit) {
-        this.totalPrice = produit.prix * quantite;
-        this.addCommandeForm.get('totalPrice')?.setValue(this.totalPrice);
+  onProduitToggle(event: any, produit: any): void {
+    if (event.target.checked) {
+      this.ajouterProduit(produit);
+    } else {
+      const index = this.produitsFormArray.controls.findIndex(group => group.get('produit')?.value === produit.id);
+
+      if (index > -1) {
+        this.retirerProduit(index);
       }
     }
   }
 
-  // Charger les produits
-  loadProduits() {
-    this.pService.getAllProduits().subscribe(
-      (res: any[]) => {
-        this.produits = res;
-      },
-      (error) => {
-        console.error('Erreur lors du chargement des produits:', error);
-        this.isFailed = true;
-      }
-    );
+  getNomProduit(produitId: number): string {
+    const produit = this.produits.find(p => p.id === produitId);
+    return produit ? produit.nomProduit : 'Produit inconnu';
   }
 
-  // Soumission du formulaire
-  addCommande() {
+  addCommande(): void {
     if (this.addCommandeForm.invalid) {
-      this.isFailed = true;
-      console.error('Formulaire invalide:', this.addCommandeForm.value);
+      this.errorMessage = "Le formulaire contient des erreurs.";
       return;
     }
+  
+    this.isLoading = true;
+  
+    const formValue = this.addCommandeForm.value;
+  
+    const produitsTransformes = this.produitsFormArray.controls.map(group => {
+      return {
+        produitId: group.get('produit')?.value,
+        quantite: group.get('quantite')?.value
+      };
+    });
+  
+    let commandesAjoutees = 0;
+    const totalProduits = produitsTransformes.length;
+  
+    produitsTransformes.forEach((p, index) => {
+      const produit = this.produits.find(prod => prod.id === p.produitId);
+      if (!produit) return;
+  
+      const codeUnique = `${formValue.codeCommande}-${index + 1}`;
+  
+      const commandeIndividuelle = {
+        codeCommande: codeUnique,
+        quantite: p.quantite,
+        dateCommande: formValue.dateCommande,
+        price: produit.prix * p.quantite,
+        commandeProduits: [
+          {
+            produit: { id: p.produitId },
+            quantite: p.quantite
+          }
+        ]
+      };
+  
+      this.cService.addCommande(commandeIndividuelle).subscribe({
+        next: (response) => {
+          commandesAjoutees++;
+          if (commandesAjoutees === totalProduits) {
+            this.isSuccessful = true;
+            this.isFailed = false;
+            this.isLoading = false;
+            this.addCommandeForm.reset();
+            this.produitsFormArray.clear();
+            this.totalPrice = 0;
+            console.log("Toutes les commandes ont été ajoutées avec succès!");
+            this._dialogRef.close('success'); // ou un objet si tu veux plus de détails
 
-    const selectedProduit = this.produits.find(p => p.id == this.addCommandeForm.get('produit')?.value);
-    if (!selectedProduit) {
-      console.error('Produit non trouvé !');
-      this.isFailed = true;
-      return;
-    }
-
-    const rawFormData = this.addCommandeForm.getRawValue(); // inclut les champs désactivés
-
-    const commandeData = {
-      codeCommande: rawFormData.codeCommande,
-      quantite: rawFormData.quantite,
-      dateCommande: rawFormData.dateCommande,
-      totalPrice: rawFormData.totalPrice,
-      produits: [{ id: selectedProduit.id, nomProduit: selectedProduit.nomProduit }]
-    };
-
-    console.log('Commande envoyée:', commandeData);
-
-    this.cService.addCommande(commandeData).subscribe(
-      (response) => {
-        this.isSuccessful = true;
-        setTimeout(() => this.isSuccessful = false, 3000);
-        this._dialogRef.close(true);
-
-        this.addCommandeForm.get('totalPrice')?.setValue(response.totalPrice);
-
-        console.log('Commande ajoutée avec succès');
-      },
-      (error) => {
-        this.isFailed = true;
-        setTimeout(() => this.isFailed = false, 3000);
-        console.error('Erreur lors de l\'ajout de la commande:', error);
-      }
-    );
+          }
+        },
+        error: (err) => {
+          console.error('Erreur pour une commande :', err);
+          this.isFailed = true;
+          this.isSuccessful = false;
+          this.isLoading = false;
+          this.errorMessage = err?.error?.message || "Erreur lors de l'ajout de la commande.";
+        }
+      });
+    });
   }
+  
+  
+  
+  
 }

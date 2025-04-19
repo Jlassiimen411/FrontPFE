@@ -14,8 +14,8 @@ export class EditCommandeComponent implements OnInit {
   commandeForm: FormGroup;
   id!: number;
   produits: any[] = [];
-  totalPrice: number = 0;
-
+  nomProduitSelectionne: string = '';
+  price: number = 0;
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
@@ -28,10 +28,16 @@ export class EditCommandeComponent implements OnInit {
       produitId: ['', Validators.required],
       quantite: [1, [Validators.required, Validators.min(1)]],
       dateCommande: ['', Validators.required],
-      totalPrice: [{ value: '', disabled: true }]
+      price: [{ value: '', disabled: true }],
+      
     });
   }
-
+  getNomProduitParId(id: number): string {
+    const produit = this.produits.find(p => p.id === id);
+    return produit ? produit.nomProduit : '';
+  }
+ 
+  
   ngOnInit(): void {
     this.id = this.route.snapshot.params['id'];
     this.loadProduits();
@@ -44,14 +50,20 @@ export class EditCommandeComponent implements OnInit {
   loadCommande(): void {
     this.commandeService.getCommandeById(this.id).subscribe({
       next: (commande) => {
+        const produitCommande = commande.commandeProduits?.[0];
+  
         this.commandeForm.patchValue({
           codeCommande: commande.codeCommande,
-          produitId: commande.produits?.[0]?.id || '',
-          quantite: commande.quantite,
+          produitId: produitCommande?.produit?.id || '',
+          quantite: produitCommande?.quantite || 1,
           dateCommande: commande.dateCommande,
-          totalPrice: commande.totalPrice
+          price: commande.price
         });
-        this.totalPrice = commande.totalPrice;
+        
+        this.commandeForm.get('quantite')?.updateValueAndValidity();
+
+        this.nomProduitSelectionne = produitCommande?.produit?.nomProduit || '';
+        this.price = commande.price;
       },
       error: () => {
         Swal.fire({
@@ -63,6 +75,7 @@ export class EditCommandeComponent implements OnInit {
       }
     });
   }
+  
 
   loadProduits(): void {
     this.produitService.getAllProduits().subscribe({
@@ -84,8 +97,8 @@ export class EditCommandeComponent implements OnInit {
     const produit = this.produits.find(p => p.id == produitId);
 
     if (produit && quantite > 0) {
-      this.totalPrice = produit.prix * quantite;
-      this.commandeForm.get('totalPrice')?.setValue(this.totalPrice);
+      this.price = produit.prix * quantite;
+      this.commandeForm.get('price')?.setValue(this.price);
     }
   }
 
@@ -99,26 +112,42 @@ export class EditCommandeComponent implements OnInit {
       });
       return;
     }
-
+  
     const formValues = this.commandeForm.getRawValue();
-
+  
     const commandeToUpdate = {
       id: this.id,
       codeCommande: formValues.codeCommande,
       dateCommande: formValues.dateCommande,
       quantite: formValues.quantite,
-      totalPrice: this.totalPrice,
+      price: this.price,
       produits: [{ id: formValues.produitId }]
     };
-
+  
     this.commandeService.updateCommande(commandeToUpdate).subscribe({
       next: () => {
-        Swal.fire({
-          icon: 'success',
-          title: 'Succès',
-          text: 'Commande mise à jour avec succès !',
-          confirmButtonColor: '#198754'
-        }).then(() => this.router.navigate(['/commandes']));
+        // Recharger les données depuis le backend (au cas où d'autres champs sont modifiés automatiquement)
+        this.commandeService.getCommandeById(this.id).subscribe((updatedCommande) => {
+          this.commandeForm.patchValue({
+            quantite: updatedCommande.quantite,
+            dateCommande: updatedCommande.dateCommande,
+            price: updatedCommande.price,
+            produitId: Array.isArray(updatedCommande.produits) && updatedCommande.produits.length > 0 
+    ? updatedCommande.produits[0].id 
+    : null
+   
+
+          });
+  
+          Swal.fire({
+            icon: 'success',
+            title: 'Succès',
+            text: 'Commande mise à jour avec succès !',
+            confirmButtonColor: '#198754'
+          }).then(() => {
+            this.router.navigate(['/commandes']);
+          });
+        });
       },
       error: () => {
         Swal.fire({
@@ -130,4 +159,5 @@ export class EditCommandeComponent implements OnInit {
       }
     });
   }
+  
 }

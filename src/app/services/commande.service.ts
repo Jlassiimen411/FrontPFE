@@ -1,7 +1,7 @@
 // commande.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
@@ -17,15 +17,18 @@ export class CommandeService {
   }
   
 
-  addCommande(commandeObj: any): Observable<any> {
-    return this.httpClient.post<any>(this.commandeURL, commandeObj).pipe(
-      catchError(this.handleError<any>('addCommande'))
-    );
-  }
+ 
+addCommande(commande: any): Observable<any> {
+  return this.httpClient.post<any>(`${this.commandeURL}`, commande)
+ 
+}
 
   checkCodeCommandeExists(code: string) {
-    return this.httpClient.get<boolean>(`${this.commandeURL}/commandes/check-code?code=${code}`);
+    return this.httpClient.get<any>(`${this.commandeURL}/check-code`, {
+      params: { codeCommande: code }
+    });
   }
+  
   
   updateCommande(commandeObj: any): Observable<any> {
     return this.httpClient.put<any>(`${this.commandeURL}/${commandeObj.id}`, commandeObj).pipe(

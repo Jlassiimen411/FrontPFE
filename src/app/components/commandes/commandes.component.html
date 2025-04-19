@@ -21,93 +21,74 @@
 </div>
 </section>
 </main>
-<div class="container-fluid py-2">
-    <div class="row">
-      <div class="col-12">
-        <div class="card my-4">
-          <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
-            <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3">
-              <h6 class="text-white text-capitalize ps-3"> Tableau de commandes</h6>
-            </div>
+<div class="container-fluid py-2"> 
+  <div class="row">
+    <div class="col-12">
+      <div class="card my-4">
+        <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
+          <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3">
+            <h6 class="text-white text-capitalize ps-3"> Tableau de commandes</h6>
           </div>
-          <div class="card-body px-0 pb-2">
-            <div class="table-responsive p-0">
-              <table class="table align-items-center mb-0">
-                <thead>
-                  <tr>
-                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID Commande</th>
-                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">code de commade</th>
-                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ">Produits</th>
-                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Quantités</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date de commande</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Prix</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
-                    <th class="text-secondary opacity-7"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr *ngFor="let elt of allCommandes" >
-                    <td>
-                      <div class="d-flex px-2 py-1">
-                        <div>
-                         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                        </div>
-                        <div class="d-flex flex-column justify-content-center">
-                          <h6 class="mb-0 text-sm">{{elt.id}}</h6>
-                          <p class="text-xs text-secondary mb-0"></p>
-                        </div>
-                      </div>
-                    </td>
-                    <td>
-                      <p class="text-xs font-weight-bold mb-0">{{elt.codeCommande}}</p>
-                      <p class="text-xs text-secondary mb-0"></p>
-                    </td>
+        </div>
+        <div class="card-body px-0 pb-2">
+          <div class="table-responsive p-0">
+            <table class="table align-items-center mb-0">
+              <thead>
+                <tr>
+                  
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Code Commande</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Type produit</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Produit</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quantité</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date de Commande</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Prix</th>
+                  <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let produit of produits">
+                
+                  <td>
+                    <p class="text-xs font-weight-bold mb-0">{{ produit.codeCommande }}</p>
+                  </td>
+                  
+                  <td>
+                    <p class="text-xs font-weight-bold mb-0">{{ produit.typeProduit }}</p>
+                  </td>
 
                     
-                    <td>
-                      <p class="text-xs font-weight-bold mb-0">
-                        <span *ngIf="elt?.produits?.length > 0; else noProduit">
-                          <span *ngFor="let produit of elt.produits; let i = index">
-                            {{ produit.nomProduit || 'Nom introuvable' }} <!-- Vérifie bien que 'nomProduit' est là -->
-                            <span *ngIf="produit.typeProduit?.nom">({{ produit.typeProduit.nom }})</span>
-                            <span *ngIf="i < elt.produits.length - 1">, </span>
-                          </span>
-                        </span>
-                        <ng-template #noProduit> - Aucun produit trouvé - </ng-template>
-                      </p>
-                    </td>
+                  <td>
+                    <p class="text-xs font-weight-bold mb-0">
+                      
+                      <span>{{ produit.produitNom || 'Nom introuvable' }}</span>
+                    </p>
+                  </td>
+                  <td class="align-middle text-center text-sm">
+                    <span class="badge badge-sm">
+                      {{ produit.commandeQuantite }}
+                    </span>
                     
-                    
-                    
-                    <td class="align-middle text-center text-sm">
-                      <span class="badge badge-sm">{{ elt.quantite || 'Non définie' }}</span>
-                    </td>
-                    
-                    
-                    
-                    <td class="align-middle text-center">
-                      <span class="text-secondary text-xs font-weight-bold">{{elt.dateCommande}}</span>
-                    </td>
-
-                    <td class="align-middle">
-                      <span class="badge badge-sm bg-gradient-success">{{elt.totalPrice}} DT</span>
                   </td>
                   <td class="align-middle text-center">
-                                            
-                    <button type="button" class="btn btn-outline-dark" [routerLink]="['/editcommande',elt.id]">Edit</button>&nbsp;&nbsp;
-                    <button class="btn btn-outline-dark" (click)="deleteCommandeById(elt.id)">Delete</button>
-                </td>
-                  </tr>
-                 
-                </tbody>
-              </table>
-            </div>
+                    <span class="text-secondary text-xs font-weight-bold">{{ produit.dateCommande | date }}</span>
+                  </td>
+                  <td class="align-middle">
+                    <span class="badge badge-sm bg-gradient-success">{{ produit.prix }} DT</span>
+                  </td>
+                  <td class="align-middle text-center">
+                    <button type="button" class="btn btn-outline-dark" [routerLink]="['/editcommande', produit.idCommande]">Edit</button>
+                    <button class="btn btn-outline-dark" (click)="deleteCommandeById(produit.idCommande)">Delete</button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
     </div>
-    
-    
-  </div> 
+  </div>
+</div>
+
+
 
 

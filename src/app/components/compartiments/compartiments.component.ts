@@ -31,38 +31,39 @@ export class CompartimentsComponent implements OnInit {
    
 
     ngOnInit(): void {
-      this.getCompartiments();
+      this.route.paramMap.subscribe(params => {
+        const id = params.get('idCiterne');
+        console.log('DEBUG: idFromUrl =', id);
     
-      const idFromUrl = this.route.snapshot.paramMap.get('idCiterne');  // Utiliser 'idCiterne'
-      console.log('DEBUG: idFromUrl =', idFromUrl);  // Vérifie si l'ID est récupéré correctement
-    
-      if (idFromUrl) {
-        this.citerneIdFromUrl = +idFromUrl;
-        this.nouveauCompartiment.citerneId = this.citerneIdFromUrl;
-      } else {
-        console.log('DEBUG: ID non trouvé dans l\'URL');  // Si l'ID est null, un message apparaîtra
-      }
+        if (id) {
+          this.citerneIdFromUrl = +id;
+          this.nouveauCompartiment.citerneId = this.citerneIdFromUrl;
+          this.getCompartiments(); // ici, après que l'ID est défini
+        } else {
+          console.log('DEBUG: ID non trouvé dans l\'URL');
+        }
+      });
     }
+    
     
     
   
 
     getCompartiments(): void {
-      this.compartimentService.getCompartiments().subscribe({
-        next: data => {
-          console.log('Données récupérées:', data);  // Ajoutez cette ligne pour vérifier les données
-          if (this.citerneIdFromUrl) {
-            this.compartiments = data.filter((comp: any) => comp.citerne?.id === this.citerneIdFromUrl);
-          } else {
+      if (this.citerneIdFromUrl) {
+        this.compartimentService.getCompartimentsParCiterne(this.citerneIdFromUrl).subscribe({
+          next: data => {
+            console.log('Données récupérées:', data);
             this.compartiments = data;
+          },
+          error: err => {
+            console.error('Erreur récupération compartiments:', err);
           }
-        },
-        error: error => {
-          console.error('Erreur récupération compartiments:', error);
-          alert('Erreur lors de la récupération des compartiments.');
-        }
-      });
+        });
+        
+      }
     }
+    
     
     
     

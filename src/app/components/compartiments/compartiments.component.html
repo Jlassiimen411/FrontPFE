@@ -40,6 +40,7 @@
         <th>Capacité Max</th>
         <th>Type Produit</th>
         <th>Statut</th>
+        <th>Actions</th>
       </tr>
     </thead>
     <tbody>
@@ -48,11 +49,13 @@
         <td>{{ compartiment.capaciteMax }}</td>
         <td>{{ compartiment.typeProduit }}</td>
         <td>{{ compartiment.statut }}</td>
+        <td>
+          <button (click)="editCompartiment(compartiment.id)">Modifier</button>
+          <button (click)="supprimerCompartiment(compartiment.id)">Supprimer</button>
+        </td>
       </tr>
     </tbody>
   </table>
-  
-  
   
   
   

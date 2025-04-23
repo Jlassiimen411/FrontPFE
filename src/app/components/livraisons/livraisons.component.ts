@@ -40,20 +40,7 @@ export class LivraisonsComponent implements OnInit {
     this.loadLivraisons();
   }
 
-  openAddLivraisonDialog(): void {
-    const dialogRef = this.dialog.open(AddLivraisonComponent, {
-      width: '600px',
-      height: '800px',
-      disableClose: true
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadLivraisons();
-      }
-    });
-  }
-
+  
   loadLivraisons(): void {
     this.lService.getAllLivraisons().subscribe({
       next: (data) => {

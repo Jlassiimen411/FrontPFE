@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { CompartimentService } from 'src/app/services/compartiment.service';
-
+import { ChangeDetectorRef } from '@angular/core';
 @Component({
   selector: 'app-compartiments',
   templateUrl: './compartiments.component.html',
@@ -8,32 +9,63 @@ import { CompartimentService } from 'src/app/services/compartiment.service';
 })
 export class CompartimentsComponent implements OnInit {
 
+
+  citerneIdFromUrl: number | null = null;
+  
+  
   compartiments: any[] = [];
-  citernes: any[] = [];
+  citernes: any;
   nouveauCompartiment: any = {
     reference: '',
     capaciteMax: null,
     statut: 'VIDE',
-    // pas de champ "citerneId" ici
+    citerneId: null,
+    typeProduit: 'GAZ' // ou autre valeur par défaut
   };
+  
   compartimentEnCours: any = null;
 
-  constructor(private compartimentService: CompartimentService) {}
+  constructor(private compartimentService: CompartimentService, private cdr: ChangeDetectorRef,private route: ActivatedRoute,
+    private router: Router) {}
 
-  ngOnInit(): void {
-    this.getCompartiments();
-    this.getCiternes(); // Même si les citernes ne sont plus nécessaires ici, vous pouvez les récupérer si nécessaire pour d'autres usages.
-  }
+   
 
-  getCompartiments(): void {
-    this.compartimentService.getCompartiments().subscribe({
-      next: data => this.compartiments = data,
-      error: error => {
-        console.error('Erreur récupération compartiments:', error);
-        alert('Erreur lors de la récupération des compartiments.');
+    ngOnInit(): void {
+      this.getCompartiments();
+    
+      const idFromUrl = this.route.snapshot.paramMap.get('idCiterne');  // Utiliser 'idCiterne'
+      console.log('DEBUG: idFromUrl =', idFromUrl);  // Vérifie si l'ID est récupéré correctement
+    
+      if (idFromUrl) {
+        this.citerneIdFromUrl = +idFromUrl;
+        this.nouveauCompartiment.citerneId = this.citerneIdFromUrl;
+      } else {
+        console.log('DEBUG: ID non trouvé dans l\'URL');  // Si l'ID est null, un message apparaîtra
       }
-    });
-  }
+    }
+    
+    
+  
+
+    getCompartiments(): void {
+      this.compartimentService.getCompartiments().subscribe({
+        next: data => {
+          console.log('Données récupérées:', data);  // Ajoutez cette ligne pour vérifier les données
+          if (this.citerneIdFromUrl) {
+            this.compartiments = data.filter((comp: any) => comp.citerne?.id === this.citerneIdFromUrl);
+          } else {
+            this.compartiments = data;
+          }
+        },
+        error: error => {
+          console.error('Erreur récupération compartiments:', error);
+          alert('Erreur lors de la récupération des compartiments.');
+        }
+      });
+    }
+    
+    
+    
   genererCodeCompartiment(): void {
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let code = '';
@@ -54,15 +86,7 @@ export class CompartimentsComponent implements OnInit {
   }
   
   
-  getCiternes(): void {
-    this.compartimentService.getCiternes().subscribe({
-      next: data => this.citernes = data,
-      error: error => {
-        console.error('Erreur récupération citernes:', error);
-        alert('Erreur lors de la récupération des citernes.');
-      }
-    });
-  }
+ 
 
   ajouterCompartiment(): void {
     if (!this.nouveauCompartiment.reference || !this.nouveauCompartiment.capaciteMax) {
@@ -75,24 +99,46 @@ export class CompartimentsComponent implements OnInit {
       return;
     }
   
+    if (!this.nouveauCompartiment.citerneId) {
+      alert('Aucune citerne associée. ID manquant dans l\'URL.');
+      return;
+    }
+  
+    // Vérification du typeProduit
+    console.log('Valeur de typeProduit:', this.nouveauCompartiment.typeProduit);
+    const validTypes = ['GAZ', 'CARBURANT', 'LUBRIFIANT'];
+    if (!validTypes.includes(this.nouveauCompartiment.typeProduit)) {
+      alert('Type de produit invalide. Les valeurs autorisées sont GAZ, CARBURANT, LUBRIFIANT.');
+      return;
+    }
+  
     const payload = {
       reference: this.nouveauCompartiment.reference,
       capaciteMax: this.nouveauCompartiment.capaciteMax,
       statut: this.nouveauCompartiment.statut,
+      typeProduit: this.nouveauCompartiment.typeProduit,
+      citerne: {
+        id: this.nouveauCompartiment.citerneId
+      }
     };
   
     this.compartimentService.addCompartiment(payload).subscribe({
       next: () => {
         alert('Compartiment ajouté avec succès.');
-        this.getCompartiments();
+        this.getCompartiments();  // Rafraîchit les compartiments
         this.resetForm();
+        this.cdr.detectChanges();  // Force la détection des changements pour mettre à jour la vue
       },
       error: (error) => {
         console.error('Erreur ajout compartiment:', error);
         alert('Erreur lors de l\'ajout: ' + (error.error?.message || error.message));
       }
     });
+    
   }
+  
+  
+  
   
 
   editCompartiment(id: number): void {
@@ -153,8 +199,11 @@ export class CompartimentsComponent implements OnInit {
       reference: '',
       capaciteMax: null,
       statut: 'VIDE',
+      citerneId: this.citerneIdFromUrl,
+      typeProduit: 'GAZ'
     };
   }
+  
 
   closeModal(): void {
     this.compartimentEnCours = null;

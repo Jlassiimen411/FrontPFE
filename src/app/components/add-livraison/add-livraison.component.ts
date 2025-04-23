@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AsyncValidatorFn, AbstractControl } from '@angular/forms';
-import { MatDialogRef } from '@angular/material/dialog';
+
 import { LivraisonService } from 'src/app/services/livraison.service';
 import { CommandeService } from 'src/app/services/commande.service';
 import { CamionService } from 'src/app/services/camion.service';
@@ -30,7 +30,7 @@ export class AddLivraisonComponent implements OnInit {
     private cService: CommandeService,
     private compartimentService: CompartimentService,
     private camionService: CamionService,
-    public dialogRef: MatDialogRef<AddLivraisonComponent>,
+   
     private snackBar: MatSnackBar
   ) {}
 
@@ -237,7 +237,7 @@ export class AddLivraisonComponent implements OnInit {
       })
       .then(data => {
         console.log('Livraison ajoutée avec succès', data);
-        this.dialogRef.close(true);
+        
       })
       .catch(error => {
         console.error('Erreur lors de l\'ajout de la livraison', error);
@@ -245,7 +245,5 @@ export class AddLivraisonComponent implements OnInit {
       });
   }
 
-  onCancel(): void {
-    this.dialogRef.close();
-  }
+  
 }

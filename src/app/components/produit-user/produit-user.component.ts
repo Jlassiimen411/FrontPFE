@@ -2,6 +2,8 @@ import { Component } from '@angular/core';
 import { ProduitService } from 'src/app/services/produit.service';
 import { CartService } from 'src/app/services/cart.service';
 import { ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
+
 
 @Component({
   selector: 'app-produit-user',
@@ -13,7 +15,7 @@ export class ProduitUserComponent {
 allProduits: any[] = [];
 typeId!: number;
 
-  constructor(private produitService: ProduitService,private cartService: CartService,private route: ActivatedRoute) {}
+  constructor(private produitService: ProduitService,private cartService: CartService,private route: ActivatedRoute,private router: Router) {}
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
@@ -61,9 +63,9 @@ typeId!: number;
       console.log(`Produit avec l'ID ${productId} introuvable.`);
     }
   }
-  buyProduct(productId: number): void {
-    console.log(`Achat du produit ${productId}.`);
-    // Implémenter la logique d'achat ici
+  buyProduct(productId: number) {
+    this.router.navigate(['/buyProduct', productId, { isSingleProductCheckout: true }]);
   }
+  
 }
 

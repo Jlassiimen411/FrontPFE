@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { catchError, Observable, of, tap, throwError } from 'rxjs';
 import { Product } from 'src/app/model/product.model';
+import { OrderDetails } from '../model/order-details.model';
 
 @Injectable({
   providedIn: 'root'
@@ -78,7 +79,10 @@ export class ProduitService {
   public getProductDetails(isSingleProductCheckout: boolean, id: number): Observable<any[]> {
     return this.httpClient.get<any[]>(`http://localhost:8080/api/produits/v1/getProductDetails/${isSingleProductCheckout}/${id}`);
   }
-  
+  public placeOrder(orderDetails:OrderDetails){
+    return this.httpClient.post("http://localhost:8080/api/order/placeOrder",orderDetails);
+
+  }
   
   
 }

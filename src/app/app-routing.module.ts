@@ -30,6 +30,7 @@ import { SignupAdminComponent } from './components/signup-admin/signup-admin.com
 import { GestionDispatcheurComponent } from './components/gestion-dispatcheur/gestion-dispatcheur.component';
 import { GestionAdminComponent } from './components/gestion-admin/gestion-admin.component';
 import { CompartimentsComponent } from './components/compartiments/compartiments.component';
+import { OrderConfirmationComponent } from './components/order-confirmation/order-confirmation.component';
 
  
 const routes: Routes = [
@@ -49,7 +50,7 @@ const routes: Routes = [
   { path: 'edit_type_produit/:id', component: EditTypeProduitComponent },
   { path: 'addProduit/:typeId', component: AddProduitComponent },
   { path: 'citernes', component: CiternesComponent },
-  { path: 'compartiments', component: CompartimentsComponent },
+  { path: 'compartiments/:idCiterne', component: CompartimentsComponent },
   
   
   //////////////////admin////////////
@@ -65,11 +66,16 @@ const routes: Routes = [
   { path: 'categories', component: CategorieUserComponent },
   { path: 'produits_user/:typeId', component: ProduitUserComponent },
   { path: 'cart', component: CartComponent },
-  { path: 'buyProduct', component: BuyProductComponent ,
-  resolve:{
-    productDetails:BuyProductResolverService
-  }
-}
+  {
+    path: 'buyProduct/:id',
+    component: BuyProductComponent,
+    resolve: {
+      productDetails: BuyProductResolverService
+    }
+  },
+  { path: 'orderConfirm', component: OrderConfirmationComponent }
+  
+  
  
 
 

@@ -11,9 +11,17 @@
       <button type="button" class="btn btn-sm btn-outline-secondary position-absolute ss top-10 end-3 h-0" (click)="genererCodeCompartiment()">
         Générer
       </button>
-    </div>
+    </div> 
+    
+    
     
     <input type="number" placeholder="Capacité Max" [(ngModel)]="nouveauCompartiment.capaciteMax">
+    <select [(ngModel)]="nouveauCompartiment.typeProduit">
+      <option value="GAZ">Gaz</option>
+      <option value="CARBURANT">Carburant</option>
+      <option value="LUBRIFIANT">Lubrifiant</option>
+    </select>
+    
     <select [(ngModel)]="nouveauCompartiment.statut">
       <option value="VIDE">VIDE</option>
       <option value="PLEIN">PLEIN</option>
@@ -28,31 +36,27 @@
   <table>
     <thead>
       <tr>
-        <th>ID</th>
         <th>Référence</th>
         <th>Capacité Max</th>
+        <th>Type Produit</th>
         <th>Statut</th>
-        <th>Action</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let compartiment of compartiments">
-        <td>{{ compartiment.id }}</td>
         <td>{{ compartiment.reference }}</td>
         <td>{{ compartiment.capaciteMax }}</td>
+        <td>{{ compartiment.typeProduit }}</td>
         <td>{{ compartiment.statut }}</td>
-        <td>
-          <button type="button" class="btn btn-warning" (click)="editCompartiment(compartiment.id)">
-            <i class="fa-solid fa-pen"></i>
-          </button>
-          &nbsp;
-          <button type="button" class="btn btn-warning" (click)="supprimerCompartiment(compartiment.id)">
-            <i class="fa-solid fa-trash"></i>
-          </button>
-        </td>
       </tr>
     </tbody>
   </table>
+  
+  
+  
+  
+  
+  
 
   <!-- Modal pour modifier un compartiment -->
   <div *ngIf="compartimentEnCours" class="modal show">
@@ -62,6 +66,7 @@
 
       <input type="text" [(ngModel)]="compartimentEnCours.reference" placeholder="Référence" readonly/>
       <input type="number" [(ngModel)]="compartimentEnCours.capaciteMax" placeholder="Capacité Max" />
+      
       <select [(ngModel)]="compartimentEnCours.statut">
         <option value="VIDE">VIDE</option>
         <option value="EN_COURS">EN_COURS</option>

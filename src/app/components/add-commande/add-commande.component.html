@@ -42,7 +42,7 @@
                 <h3>{{ type.name }}</h3>
             <div *ngFor="let produit of type.produits">
                 <input type="checkbox" [value]="produit" (change)="onProduitToggle($event, produit)">
-                {{ produit.nomProduit }} ({{ type.name }})
+                {{ produit.nomProduit }} <!--({{ type.name }})-->
             </div>
 
               </div>
@@ -93,7 +93,7 @@
 
           <!-- Boutons -->
           <div class="mb-3 d-flex mt-4">
-            <button type="submit" class="btn btn-primary" [disabled]="addCommandeForm.invalid || isLoading">
+            <button type="submit" class="btn btn-warning ms-3" [disabled]="addCommandeForm.invalid || isLoading">
               <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
               <i class="fa fa-save me-2"></i>Ajouter
             </button>

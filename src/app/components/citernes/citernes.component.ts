@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CiterneService } from 'src/app/services/citerne.service';
 import { CamionService } from 'src/app/services/camion.service';
+import { ActivatedRoute } from '@angular/router';
 
 interface Compartiment {
   id: number;
@@ -29,16 +30,18 @@ export class CiternesComponent implements OnInit {
 
   constructor(
     private citerneService: CiterneService,
-    private camionService: CamionService
+    private camionService: CamionService,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
+    const idCiterne = this.route.snapshot.paramMap.get('idCiterne');
     this.getCiternes();
-    this.getCompartiments();
+    /*this.getCompartiments();*/
   }
 
   // Fetch compartiments from backend
-  getCompartiments(): void {
+/*  getCompartiments(): void {
     this.citerneService.getCompartiments().subscribe(
       (data) => {
         console.log('Compartiments disponibles:', data);
@@ -49,7 +52,7 @@ export class CiternesComponent implements OnInit {
         alert('Erreur lors de la récupération des compartiments.');
       }
     );
-  }
+  }*/
 
   // Fetch citernes from backend
   getCiternes(): void {
@@ -64,13 +67,13 @@ export class CiternesComponent implements OnInit {
       }
     );
   }
-
+/*
   // Vérifie si un compartiment est déjà utilisé dans une autre citerne
   compartimentEstDejaUtilise(compartimentId: number): boolean {
     return this.citernes.some(citerne =>
       citerne.compartiments.some((compartiment: Compartiment) => compartiment.id === compartimentId)
     );
-  }
+  }*/
 
   // Add a new citerne
   ajouterCiterne(): void {
@@ -78,37 +81,20 @@ export class CiternesComponent implements OnInit {
       alert('Veuillez remplir tous les champs.');
       return;
     }
-
-    // Vérification de la capacité totale des compartiments
-    const capaciteTotaleCompartiments = this.nouvelleCiterne.compartiments.reduce((total, compartiment) => {
-      return total + compartiment.capaciteMax;
-    }, 0);
-
-    if (capaciteTotaleCompartiments > this.nouvelleCiterne.capacite) {
-      alert('La capacité totale des compartiments dépasse la capacité de la citerne.');
-      return;
-    }
-
-    if (this.nouvelleCiterne.compartiments.length !== this.nouvelleCiterne.nombreCompartiments) {
-      alert(`Le nombre de compartiments doit être exactement ${this.nouvelleCiterne.nombreCompartiments}`);
-      return;
-    }
-
-    const compartimentsSelectionnes = this.nouvelleCiterne.compartiments.map((comp: Compartiment) => {
-      return { id: comp.id };
-    });
-
+  
     const citerneData = {
       reference: this.nouvelleCiterne.reference,
       capacite: this.nouvelleCiterne.capacite,
       nombreCompartiments: this.nouvelleCiterne.nombreCompartiments,
-      compartiments: compartimentsSelectionnes,
     };
-
+  
     this.citerneService.addCiterne(citerneData).subscribe(
       (data) => {
-        this.getCiternes(); 
-        alert('Citerne ajoutée avec succès.');
+        // Attendre un peu avant de récupérer les citernes, pour s'assurer que la nouvelle citerne est ajoutée
+        setTimeout(() => {
+          this.getCiternes(); // Rafraîchit la liste des citernes
+          alert('Citerne ajoutée avec succès.');
+        }, 1000); // Attendre 1 seconde (vous pouvez ajuster ce délai selon vos besoins)
         this.resetForm();
       },
       (error) => {
@@ -117,7 +103,7 @@ export class CiternesComponent implements OnInit {
       }
     );
   }
-
+  
   // Edit an existing citerne
   editCiterne(id: number): void {
     console.log('Editing citerne with ID:', id);

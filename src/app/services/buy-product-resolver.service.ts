@@ -11,12 +11,15 @@ export class BuyProductResolverService implements Resolve<Product[]> {
 
   constructor(private productService: ProduitService) { }
 
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Product[] | Observable<Product[]> | Promise<Product[]> {
-    //throw new Error('Method not implemented.');
+  resolve(
+    route: ActivatedRouteSnapshot, 
+    state: RouterStateSnapshot
+  ): Product[] | Observable<Product[]> | Promise<Product[]> {
     const id: number = Number(route.paramMap.get("id"));
     const isSingleProductCheckout: boolean = route.paramMap.get("isSingleProductCheckout") === "true";
-    return this.productService.getProductDetails(isSingleProductCheckout, id)
   
+    return this.productService.getProductDetails(isSingleProductCheckout, id)
   }
+  
 }
  

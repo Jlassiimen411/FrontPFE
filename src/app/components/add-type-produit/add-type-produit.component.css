@@ -3,6 +3,12 @@
   display: block;
   overflow: hidden;
 }
+.image-preview img {
+  max-width: 100%;
+  height: auto;
+  margin-top: 10px;
+  border-radius: 8px;
+}
 
 /* Conteneur principal avec effet de fond */
 .popup-wrapper {

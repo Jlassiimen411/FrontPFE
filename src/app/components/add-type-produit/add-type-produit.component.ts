@@ -4,6 +4,8 @@ import { TypeProduitService } from '../../services/type-produit.service';
 import { FormGroup, FormBuilder, Validators } from '@angular/forms';
 import { trigger, transition, style, animate } from '@angular/animations';
 
+import { DomSanitizer } from '@angular/platform-browser';
+
 @Component({
   selector: 'app-add-type-produit',
   templateUrl: './add-type-produit.component.html',
@@ -21,6 +23,8 @@ import { trigger, transition, style, animate } from '@angular/animations';
   ],
 })
 export class AddTypeProduitComponent implements OnInit, AfterViewInit {
+  selectedImageFile: File | null = null;
+imagePreview: any = null;
 
   addProduitForm!: FormGroup;
   isSuccessful: boolean = false;
@@ -31,7 +35,8 @@ export class AddTypeProduitComponent implements OnInit, AfterViewInit {
     public dialogRef: MatDialogRef<AddTypeProduitComponent>,
     private TproduitService: TypeProduitService,
     private fb: FormBuilder,
-    private elementRef: ElementRef
+    private elementRef: ElementRef,
+    private sanitizer:DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -149,4 +154,19 @@ export class AddTypeProduitComponent implements OnInit, AfterViewInit {
       }, 600);
     }
   }
+  /*onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedImageFile = input.files[0];
+  
+      // Pour afficher l'aperçu de l'image
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imagePreview = reader.result;
+      };
+      reader.readAsDataURL(this.selectedImageFile);
+    }
+  }*/
+  
+ 
 }

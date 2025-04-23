@@ -42,7 +42,60 @@
                 max-width: 100%;
             }
         }
-        
+        /* Titre des types de produits */
+.mb-4 h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #fccd4d;
+    border-left: 4px solid #f7b733;
+    padding-left: 12px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 8px 12px;
+  }
+  
+  /* Liste de produits */
+  .mb-4 div[ng-reflect-ng-for-of] > div {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 6px 0;
+    background-color: rgba(255, 255, 255, 0.03);
+    padding: 10px 15px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .mb-4 div[ng-reflect-ng-for-of] > div:hover {
+    background-color: rgba(247, 183, 51, 0.1);
+  }
+  
+  /* Style des checkboxes */
+  input[type="checkbox"] {
+    accent-color: #f7b733;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    transform: scale(1.1);
+  }
+  
+  /* Label du produit */
+  .mb-4 div[ng-reflect-ng-for-of] > div label,
+  .mb-4 div[ng-reflect-ng-for-of] > div span,
+  .mb-4 div[ng-reflect-ng-for-of] > div {
+    font-size: 15px;
+    color: #f8f9fa;
+  }
+  
+  /* Séparateur visuel entre groupes */
+  .mb-4:not(:last-child) {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+  }
+  
         .form-card {
             background-color: rgba(30, 30, 30, 0.8);
             border-radius: 20px;

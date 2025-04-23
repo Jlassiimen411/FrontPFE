@@ -49,6 +49,8 @@ import { SignupAdminComponent } from './components/signup-admin/signup-admin.com
 import { GestionAdminComponent } from './components/gestion-admin/gestion-admin.component';
 import { GestionDispatcheurComponent } from './components/gestion-dispatcheur/gestion-dispatcheur.component';
 import { CompartimentsComponent } from './components/compartiments/compartiments.component';
+import { OrderConfirmationComponent } from './components/order-confirmation/order-confirmation.component';
+import { ServiceHomeComponent } from './components/service-home/service-home.component';
 
 
 
@@ -89,6 +91,8 @@ import { CompartimentsComponent } from './components/compartiments/compartiments
     GestionAdminComponent,
     GestionDispatcheurComponent,
     CompartimentsComponent,
+    OrderConfirmationComponent,
+    ServiceHomeComponent,
  
   
   
@@ -103,7 +107,9 @@ import { CompartimentsComponent } from './components/compartiments/compartiments
     MatDialogModule,
     HttpClientModule,
     MatTableModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+   
+    
     
 
     

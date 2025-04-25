@@ -1,4 +1,4 @@
-<app-header2></app-header2>
+<!--<app-header2></app-header2>
   <title>Ajouter une Livraison</title>
   
 <body>
@@ -9,7 +9,7 @@
     </div>
     
     <div class="livraison-form">
-      <form [formGroup]="addLivraisonForm" (ngSubmit)="addLivraison()">
+      <form [formGroup]="addLivraisonForm" >
   
         <div class="form-group position-relative">
           <label for="codeLivraison"><i class="fas fa-hashtag"></i> Code Livraison</label>
@@ -29,101 +29,35 @@
             </div>
           </div>
         </div>
+       
+     
+       
+      
         <!-- Champ pour sélectionner la citerne -->
+       <!--
         <div class="form-group">
-          <label for="citerne"><i class="fas fa-gas-pump"></i> Citerne</label>
+          <label for="citerne-id"><i class="fas fa-gas-pump"></i> Citerne</label>
           <div class="input-container">
-            <!-- Modifiez le sélecteur de citerne pour ajouter (change) -->
-<select id="citerne" class="form-control"
-[disabled]="citernes.length === 0"
-formControlName="citerne" 
-(change)="onCiterneSelectionChange($event)" required>
-<option value="" disabled selected>Sélectionnez une citerne</option>
-<option *ngFor="let citerne of citernes" [value]="citerne.id">
-{{ citerne.reference }} ({{ citerne.capacite }} L)
-</option>
-</select>
-            <i class="fas fa-oil-can input-icon"></i>
-          </div>
-          <div *ngIf="addLivraisonForm.get('citerne')?.invalid && addLivraisonForm.get('citerne')?.touched" class="error-message">
-            <i class="fas fa-exclamation-circle"></i> La citerne est requise.
-          </div>
-        </div>
-    
-        
-        <div class="form-group">
-          <label for="commande-num"><i class="fas fa-shopping-cart"></i> Numéro Commande</label>
-          <div class="input-container">
-            <select id="commande-num" class="form-control" formControlName="commandeId" required>
-              <option value="" disabled selected>Sélectionnez une commande</option>
-              <option *ngFor="let commande of commandes" [value]="commande.id">
-                {{ commande.codeCommande }}
+            <select id="citerne-id"
+                    class="form-control"
+                    formControlName="citerneId"
+                    required
+                    [disabled]="citernes.length === 0"
+                    (change)="onCiterneSelectionChange($event)">
+              <option value="" disabled selected>Sélectionnez une citerne</option>
+              <option *ngFor="let citerne of citernes" [value]="citerne.id">
+                {{ citerne.reference }} ({{ citerne.capacite }} L)
               </option>
-            </select>
-            <i class="fas fa-clipboard-list input-icon"></i>
-          </div>
-          <div *ngIf="addLivraisonForm.get('commandeId')?.invalid && addLivraisonForm.get('commandeId')?.touched" class="error-message">
-            <i class="fas fa-exclamation-circle"></i> Le numéro de commande est requis.
-          </div>
-        </div>
-        
-        
-        <div class="form-group">
-          <label for="marque-camion"><i class="fas fa-truck-moving"></i> Marque du Camion</label>
-          <div class="input-container">
-            <select id="marque-camion" class="form-control" formControlName="marque" (change)="onMarqueSelectionChange($event)" required>
-              <option value="" disabled selected>Sélectionnez une marque</option>
-              <option *ngFor="let marque of marquesCamion" [value]="marque">
-                {{ marque }}
-              </option>
-            </select>
-            <i class="fas fa-building input-icon"></i>
-          </div>
-          <div *ngIf="addLivraisonForm.get('marque')?.invalid && addLivraisonForm.get('marque')?.touched" class="error-message">
-            <i class="fas fa-exclamation-circle"></i> La marque du camion est requise.
-          </div>
-        </div>
-        
-        <div class="form-group">
-          <label for="immatriculation"><i class="fas fa-id-card"></i> Immatriculation</label>
-          <div class="input-container">
-            <select id="immatriculation" class="form-control" formControlName="immatriculation" 
-            (change)="onImmatriculationSelectionChange($event)" required>
-      <option value="" disabled selected>Sélectionnez une immatriculation</option>
-      <option *ngFor="let immatriculation of immatriculations" [value]="immatriculation">
-        {{ immatriculation }}
-      </option>
-    </select>
-            <i class="fas fa-barcode input-icon"></i>
-          </div>
-          <div *ngIf="addLivraisonForm.get('immatriculation')?.invalid && addLivraisonForm.get('immatriculation')?.touched" class="error-message">
-            <i class="fas fa-exclamation-circle"></i> L'immatriculation est requise.
-          </div>
-        </div>
-        <!-- Champ pour sélectionner la citerne -->
-       <!-- 
-        <div class="form-group">
-          <label for="citerne"><i class="fas fa-gas-pump"></i> Citerne</label>
-          <div class="input-container">-->
-            <!-- Modifiez le sélecteur de citerne pour ajouter (change) -->
-<!--
-            <select id="citerne" class="form-control"
-            [disabled]="citernes.length === 0"
-            formControlName="citerne" 
-            (change)="onCiterneSelectionChange($event)" required>
-            <option value="" disabled selected>Sélectionnez une citerne</option>
-            <option *ngFor="let citerne of citernes" [value]="citerne.id">
-            {{ citerne.reference }} ({{ citerne.capacite }} L)
-            </option>
             </select>
             <i class="fas fa-oil-can input-icon"></i>
           </div>
-          <div *ngIf="addLivraisonForm.get('citerne')?.invalid && addLivraisonForm.get('citerne')?.touched" class="error-message">
+          <div *ngIf="addLivraisonForm.get('citerneId')?.invalid && addLivraisonForm.get('citerneId')?.touched" class="error-message">
             <i class="fas fa-exclamation-circle"></i> La citerne est requise.
           </div>
-        </div>-->
-        <!-- Tableau des compartiments de la citerne sélectionnée -->
-        <!--<div class="form-group" *ngIf="compartiments.length > 0">
+        </div>
+        
+        <!-- Table des compartiments -->
+       <!-- <div class="form-group" *ngIf="compartiments.length > 0">
           <label class="table-title">
             <i class="fas fa-database me-1"></i> Compartiments de la citerne
           </label>
@@ -153,8 +87,14 @@ formControlName="citerne"
               </tbody>
             </table>
           </div>
-        </div>-->
+
+      <br>
         
+        
+        
+       
+        </div>
+
         <div class="form-group">
           <label for="date"><i class="fas fa-calendar-alt"></i> Date Livraison</label>
           <div class="input-container">
@@ -180,7 +120,6 @@ formControlName="citerne"
             <i class="fas fa-exclamation-circle"></i> Le statut est requis.
           </div>
         </div>
-        
         <div class="btn-group">
           <button type="button" class="btn btn-secondary" [routerLink]="['/livraisons']">
             <i class="fas fa-times"></i> Annuler
@@ -190,8 +129,10 @@ formControlName="citerne"
             <i class="fas fa-check"></i> Ajouter la Livraison
           </button>
         </div>
+
       </form>
+      
     </div>
   </div>
-</body>
+</body>-->
 

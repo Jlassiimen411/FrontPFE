@@ -1,7 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { CiterneService } from 'src/app/services/citerne.service';
 import { CamionService } from 'src/app/services/camion.service';
-import { ActivatedRoute } from '@angular/router';
 
 interface Compartiment {
   id: number;
@@ -30,29 +29,15 @@ export class CiternesComponent implements OnInit {
 
   constructor(
     private citerneService: CiterneService,
-    private camionService: CamionService,
-    private route: ActivatedRoute
+    private camionService: CamionService
   ) {}
 
   ngOnInit(): void {
-    const idCiterne = this.route.snapshot.paramMap.get('idCiterne');
     this.getCiternes();
-    /*this.getCompartiments();*/
+    
   }
 
-  // Fetch compartiments from backend
-/*  getCompartiments(): void {
-    this.citerneService.getCompartiments().subscribe(
-      (data) => {
-        console.log('Compartiments disponibles:', data);
-        this.compartiments = data;
-      },
-      (error) => {
-        console.error('Erreur lors de la récupération des compartiments:', error);
-        alert('Erreur lors de la récupération des compartiments.');
-      }
-    );
-  }*/
+  
 
   // Fetch citernes from backend
   getCiternes(): void {
@@ -87,7 +72,9 @@ export class CiternesComponent implements OnInit {
       capacite: this.nouvelleCiterne.capacite,
       nombreCompartiments: this.nouvelleCiterne.nombreCompartiments,
     };
-  
+    console.log('Valeur de nombreCompartiments :', this.nouvelleCiterne.nombreCompartiments);
+console.log('Données envoyées au backend :', citerneData);
+
     this.citerneService.addCiterne(citerneData).subscribe(
       (data) => {
         // Attendre un peu avant de récupérer les citernes, pour s'assurer que la nouvelle citerne est ajoutée
@@ -104,6 +91,7 @@ export class CiternesComponent implements OnInit {
     );
   }
   
+
   // Edit an existing citerne
   editCiterne(id: number): void {
     console.log('Editing citerne with ID:', id);
@@ -222,6 +210,7 @@ genererCodeCiterne(): void {
       compartiments: []
     };
   }
+  
 
   // Close the modal
   closeModal(): void {

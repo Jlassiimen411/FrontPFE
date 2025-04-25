@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CompartimentService } from 'src/app/services/compartiment.service';
 import { ChangeDetectorRef } from '@angular/core';
+
 @Component({
   selector: 'app-compartiments',
   templateUrl: './compartiments.component.html',
@@ -9,10 +10,7 @@ import { ChangeDetectorRef } from '@angular/core';
 })
 export class CompartimentsComponent implements OnInit {
 
-
   citerneIdFromUrl: number | null = null;
-  
-  
   compartiments: any[] = [];
   citernes: any;
   nouveauCompartiment: any = {
@@ -20,53 +18,58 @@ export class CompartimentsComponent implements OnInit {
     capaciteMax: null,
     statut: 'VIDE',
     citerneId: null,
-    typeProduit: 'GAZ' // ou autre valeur par défaut
+    typeProduit: 'GAZ'
   };
   
   compartimentEnCours: any = null;
 
-  constructor(private compartimentService: CompartimentService, private cdr: ChangeDetectorRef,private route: ActivatedRoute,
-    private router: Router) {}
+  constructor(
+    private compartimentService: CompartimentService,
+    private cdr: ChangeDetectorRef,
+    private route: ActivatedRoute,
+    private router: Router
+  ) {}
 
-   
-
-    ngOnInit(): void {
-      this.route.paramMap.subscribe(params => {
-        const id = params.get('idCiterne');
-        console.log('DEBUG: idFromUrl =', id);
+  ngOnInit(): void {
+    this.getCompartiments();
     
-        if (id) {
-          this.citerneIdFromUrl = +id;
-          this.nouveauCompartiment.citerneId = this.citerneIdFromUrl;
-          this.getCompartiments(); // ici, après que l'ID est défini
-        } else {
-          console.log('DEBUG: ID non trouvé dans l\'URL');
+    const idFromUrl = this.route.snapshot.paramMap.get('idCiterne');
+    console.log('DEBUG: idFromUrl =', idFromUrl);
+    
+    if (idFromUrl) {
+      this.citerneIdFromUrl = +idFromUrl;
+      this.nouveauCompartiment.citerneId = this.citerneIdFromUrl;
+    } else {
+      console.log('DEBUG: ID non trouvé dans l\'URL');
+    }
+  }
+
+  getCompartiments(): void {
+    if (this.citerneIdFromUrl) {
+      console.log('DEBUG: appel API avec citerneId:', this.citerneIdFromUrl);
+      this.compartimentService.getCompartimentsByCiterneId(this.citerneIdFromUrl).subscribe({
+        next: data => {
+          console.log('Données récupérées:', data);
+          // Vérifie si les données sont un tableau directement
+          if (Array.isArray(data)) {
+            this.compartiments = data;
+          } else {
+            console.error("Données inattendues:", data);
+            this.compartiments = [];
+          }
+        },
+        error: err => {
+          console.error('Erreur récupération compartiments:', err);
+          this.compartiments = [];
         }
       });
+    } else {
+      console.error('Aucun ID de citerne trouvé.');
     }
-    
-    
-    
+  }
+  
   
 
-    getCompartiments(): void {
-      if (this.citerneIdFromUrl) {
-        this.compartimentService.getCompartimentsParCiterne(this.citerneIdFromUrl).subscribe({
-          next: data => {
-            console.log('Données récupérées:', data);
-            this.compartiments = data;
-          },
-          error: err => {
-            console.error('Erreur récupération compartiments:', err);
-          }
-        });
-        
-      }
-    }
-    
-    
-    
-    
   genererCodeCompartiment(): void {
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let code = '';
@@ -78,16 +81,10 @@ export class CompartimentsComponent implements OnInit {
       for (let i = 0; i < 10; i++) {
         code += charset.charAt(Math.floor(Math.random() * charset.length));
       }
-  
-      // Vérifie l'unicité par rapport aux références existantes
       isUnique = !this.compartiments.some(c => c.reference === code);
     }
-  
     this.nouveauCompartiment.reference = code;
   }
-  
-  
- 
 
   ajouterCompartiment(): void {
     if (!this.nouveauCompartiment.reference || !this.nouveauCompartiment.capaciteMax) {
@@ -105,8 +102,6 @@ export class CompartimentsComponent implements OnInit {
       return;
     }
   
-    // Vérification du typeProduit
-    console.log('Valeur de typeProduit:', this.nouveauCompartiment.typeProduit);
     const validTypes = ['GAZ', 'CARBURANT', 'LUBRIFIANT'];
     if (!validTypes.includes(this.nouveauCompartiment.typeProduit)) {
       alert('Type de produit invalide. Les valeurs autorisées sont GAZ, CARBURANT, LUBRIFIANT.');
@@ -126,26 +121,20 @@ export class CompartimentsComponent implements OnInit {
     this.compartimentService.addCompartiment(payload).subscribe({
       next: () => {
         alert('Compartiment ajouté avec succès.');
-        this.getCompartiments();  // Rafraîchit les compartiments
+        this.getCompartiments();
         this.resetForm();
-        this.cdr.detectChanges();  // Force la détection des changements pour mettre à jour la vue
+        this.cdr.detectChanges();
       },
       error: (error) => {
         console.error('Erreur ajout compartiment:', error);
         alert('Erreur lors de l\'ajout: ' + (error.error?.message || error.message));
       }
     });
-    
   }
-  
-  
-  
-  
 
   editCompartiment(id: number): void {
     this.compartimentService.getCompartiment(id).subscribe({
       next: data => {
-        // Suppression de la gestion de "citerne" ici
         this.compartimentEnCours = data;
       },
       error: error => {
@@ -166,7 +155,6 @@ export class CompartimentsComponent implements OnInit {
       reference: this.compartimentEnCours.reference,
       capaciteMax: this.compartimentEnCours.capaciteMax,
       statut: this.compartimentEnCours.statut,
-      // Ne pas inclure citerne ici
     };
   
     this.compartimentService.updateCompartiment(payload).subscribe({
@@ -181,7 +169,6 @@ export class CompartimentsComponent implements OnInit {
       }
     });
   }
-  
 
   supprimerCompartiment(id: number): void {
     if (!confirm('Supprimer ce compartiment ?')) return;
@@ -204,7 +191,6 @@ export class CompartimentsComponent implements OnInit {
       typeProduit: 'GAZ'
     };
   }
-  
 
   closeModal(): void {
     this.compartimentEnCours = null;

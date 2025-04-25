@@ -7,7 +7,7 @@
   <!-- Formulaire pour ajouter un nouveau compartiment -->
   <div class="form">
     <div class="position-relative">
-      <input type="text" class="form-control pe-5" placeholder="Référence" [(ngModel)]="nouveauCompartiment.reference"readonly>
+      <input type="text" class="form-control pe-5" placeholder="Référence" [(ngModel)]="nouveauCompartiment.reference" readonly>
       <button type="button" class="btn btn-sm btn-outline-secondary position-absolute ss top-10 end-3 h-0" (click)="genererCodeCompartiment()">
         Générer
       </button>
@@ -17,12 +17,15 @@
     
     <input type="number" placeholder="Capacité Max" [(ngModel)]="nouveauCompartiment.capaciteMax">
     <select [(ngModel)]="nouveauCompartiment.typeProduit">
+      <option value="" disabled selected hidden>Sélectionner le type de produit</option>
       <option value="GAZ">Gaz</option>
       <option value="CARBURANT">Carburant</option>
       <option value="LUBRIFIANT">Lubrifiant</option>
     </select>
     
+    
     <select [(ngModel)]="nouveauCompartiment.statut">
+      <option value="" disabled selected hidden>Sélectionner le status</option>
       <option value="VIDE">VIDE</option>
       <option value="PLEIN">PLEIN</option>
     </select>
@@ -50,8 +53,8 @@
         <td>{{ compartiment.typeProduit }}</td>
         <td>{{ compartiment.statut }}</td>
         <td>
-          <button (click)="editCompartiment(compartiment.id)">Modifier</button>
-          <button (click)="supprimerCompartiment(compartiment.id)">Supprimer</button>
+          <button type="button" class="btn btn-outline-warning" (click)="editCompartiment(compartiment.id)">Modifier</button>&nbsp;
+          <button type="button" class="btn btn-outline-warning" (click)="supprimerCompartiment(compartiment.id)">Supprimer</button>
         </td>
       </tr>
     </tbody>
@@ -69,10 +72,16 @@
 
       <input type="text" [(ngModel)]="compartimentEnCours.reference" placeholder="Référence" readonly/>
       <input type="number" [(ngModel)]="compartimentEnCours.capaciteMax" placeholder="Capacité Max" />
-      
       <select [(ngModel)]="compartimentEnCours.statut">
         <option value="VIDE">VIDE</option>
         <option value="EN_COURS">EN_COURS</option>
+       
+      </select>
+      
+      <select [(ngModel)]="compartimentEnCours.typeProduit">
+        <option value="GAZ">Gaz</option>
+      <option value="CARBURANT">Carburant</option>
+      <option value="LUBRIFIANT">Lubrifiant</option>
        
       </select>
 

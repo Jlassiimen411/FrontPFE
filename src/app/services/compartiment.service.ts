@@ -20,10 +20,12 @@ export class CompartimentService {
   getCompartiments(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}`);
   }
-  getCompartimentsParCiterne(idCiterne: number): Observable<any[]> {
-    return this.http.get<any[]>(`http://localhost:8080/api/citernes/${idCiterne}/compartiments`);
+  // compartiment.service.ts
+  getCompartimentsByCiterneId(citerneId: number): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/citerne/${citerneId}/compartiments`);
   }
   
+
   // Ajouter un compartiment indépendamment
   addCompartiment(compartiment: any): Observable<any> {
     return this.http.post<any>(this.apiUrl, compartiment);
@@ -40,9 +42,9 @@ export class CompartimentService {
   }
 
   // Récupérer les compartiments par l'ID de la citerne
-  getCompartimentsByCiterneId(citerneId: number): Observable<any[]> {
+ /* getCompartimentsByCiterneId(citerneId: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/by-id/${citerneId}`);
-  }
+  }*/
 
   // Récupérer les compartiments par la référence de la citerne
   getCompartimentsByCiterneReference(reference: string): Observable<any[]> {

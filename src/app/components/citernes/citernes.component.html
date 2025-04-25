@@ -19,7 +19,8 @@
     </div>
     
     <input type="number" placeholder="Capacité" [(ngModel)]="nouvelleCiterne.capacite">
-    <input type="number" placeholder="Nombre de Compartiments" [(ngModel)]="nouvelleCiterne.nombreCompartiments" min="1">
+    <input type="number" [(ngModel)]="nouvelleCiterne.nombreCompartiments" name="nombreCompartiments" required />
+
 
 
   
@@ -33,24 +34,17 @@
   <table>
     <thead>
       <tr>
-        <th>ID</th>
+        <!--<th>ID</th>-->
         <th>Référence</th>
         <th>Capacité</th>
         <th>Nbre de compartiment</th>
-        <th>
-            <a class="th-link" [routerLink]="['/compartiments']" title="Voir tous les compartiments">
-              <i class="fa-solid fa-up-right-from-square"></i>
-              Compartiments
-            </a>
-          </th>
-          
-          
+        <th>Compartiments </th>    
         <th>Action</th>
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let citerne of citernes">
-        <td>{{ citerne.id }}</td>
+       <!-- <td>{{ citerne.id }}</td>-->
         <td>{{ citerne.reference }}</td>
         <td>{{ citerne.capacite }}</td>
         <td>{{ citerne.nombreCompartiments }}</td>
@@ -62,17 +56,17 @@
           </ul>
         </td>
         <td>
-          <button type="button" class="btn btn-warning" [routerLink]="['/compartiments', citerne.id]">
+          <button type="button" class="btn btn-outline-warning"  [routerLink]="['/compartiments', citerne.id]">
             <i class="fa fa-plus-circle"></i> Ajouter compartiment
           </button>
           
           &nbsp;
-          <button type="button" class="btn btn-warning" (click)="editCiterne(citerne.id)">
-            <i class="fa-solid fa-pen"></i> Modifier
+          <button type="button" class="btn btn-outline-warning"  (click)="editCiterne(citerne.id)">
+            <i class="fa-solid fa-pen"></i> 
           </button>
           &nbsp;
-          <button type="button" class="btn btn-danger" (click)="supprimerCiterne(citerne.id)">
-            <i class="fa-solid fa-trash"></i> Supprimer
+          <button type="button" class="btn btn-outline-danger" (click)="supprimerCiterne(citerne.id)">
+            <i class="fa-solid fa-trash"></i> 
           </button>
         </td>
       </tr>

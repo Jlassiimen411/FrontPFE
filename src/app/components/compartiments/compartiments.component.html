@@ -16,7 +16,7 @@
     
     
     <input type="number" placeholder="Capacité Max" [(ngModel)]="nouveauCompartiment.capaciteMax">
-    <select [(ngModel)]="nouveauCompartiment.typeProduit">
+    <select [(ngModel)]="nouveauCompartiment.typeProduit" name="typeProduit" required>
       <option value="" disabled selected hidden>Sélectionner le type de produit</option>
       <option value="GAZ">Gaz</option>
       <option value="CARBURANT">Carburant</option>

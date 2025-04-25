@@ -16,9 +16,9 @@ export class CompartimentsComponent implements OnInit {
   nouveauCompartiment: any = {
     reference: '',
     capaciteMax: null,
-    statut: 'VIDE',
+    statut: '',
     citerneId: null,
-    typeProduit: 'GAZ'
+    typeProduit: ''
   };
   
   compartimentEnCours: any = null;
@@ -31,14 +31,13 @@ export class CompartimentsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.getCompartiments();
-    
     const idFromUrl = this.route.snapshot.paramMap.get('idCiterne');
     console.log('DEBUG: idFromUrl =', idFromUrl);
     
     if (idFromUrl) {
       this.citerneIdFromUrl = +idFromUrl;
       this.nouveauCompartiment.citerneId = this.citerneIdFromUrl;
+      this.getCompartiments(); // Appel de getCompartiments après avoir défini l'ID
     } else {
       console.log('DEBUG: ID non trouvé dans l\'URL');
     }
@@ -186,9 +185,9 @@ export class CompartimentsComponent implements OnInit {
     this.nouveauCompartiment = {
       reference: '',
       capaciteMax: null,
-      statut: 'VIDE',
+      statut: '',
       citerneId: this.citerneIdFromUrl,
-      typeProduit: 'GAZ'
+      typeProduit: ''
     };
   }
 

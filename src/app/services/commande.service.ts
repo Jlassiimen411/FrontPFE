@@ -23,6 +23,12 @@ addCommande(commande: any): Observable<any> {
  
 }
 
+// Dans ton service, exemple : commande.service.ts
+getTypeProduitsParCommande(idCommande: number): Observable<any[]> {
+  return this.httpClient.get<any[]>(`http://localhost:8080/commandes/${idCommande}/type-produits`);
+}
+
+
   checkCodeCommandeExists(code: string) {
     return this.httpClient.get<any>(`${this.commandeURL}/check-code`, {
       params: { codeCommande: code }

@@ -5,9 +5,10 @@ import { LivraisonService } from 'src/app/services/livraison.service';
 import { CommandeService } from 'src/app/services/commande.service';
 import { CamionService } from 'src/app/services/camion.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { debounceTime, switchMap, map, catchError, of, first } from 'rxjs';
+import { debounceTime, switchMap, map, catchError,forkJoin, of, first,Observable } from 'rxjs';
 import { CompartimentService } from 'src/app/services/compartiment.service';
 import { CiterneService } from 'src/app/services/citerne.service';
+import { TypeProduitService } from 'src/app/services/type-produit.service';
 interface Commande {
   idCommande: number;
   codeCommande: string;
@@ -16,14 +17,15 @@ interface Commande {
   commandeQuantite: number;
   dateCommande: Date;
   prix: number;
+  typeProduitApi?: string;  
 }
+
 
 interface Compartiment {
   reference: string;
   capaciteMax: number;
   statut: string;
   typeProduit: string;
-
   commandesAffectees?: Commande[];      // ← ajout
   capaciteRestante?: number;            // ← ajout
 }
@@ -45,6 +47,7 @@ export class AddLivraisonComponent implements OnInit {
   camions: any[] = [];
   citernes: { id: number, reference: string, capacite: number }[] = [];
   compartiments: Compartiment[] = [];
+  typeproduits: any[] = [];
 
 
   compartimentCommandesMap: { [reference: string]: Commande[] } = {};
@@ -57,22 +60,55 @@ export class AddLivraisonComponent implements OnInit {
     private compartimentService: CompartimentService,
     private citerneService: CiterneService,
     private camionService: CamionService,
+    private typeProduitService:TypeProduitService,
    
     private snackBar: MatSnackBar
   ) {}
-
- 
   ngOnInit(): void {
     this.initForm();
     this.chargerCiternes();
     this.loadMarquesCamions();
-    this.cService.getAllCommandes().subscribe(data => {
-      this.filteredCommandes = data;
-      this.listeCommandes = data;
-     
+  
+    // 1. Charger d'abord les typeproduits
+    this.typeProduitService.getAllTypeProduits().pipe(
+      first()
+    ).subscribe((typeProduitsData: any[]) => {
+      this.typeproduits = typeProduitsData; // Stocke les types de produits
+  
+      // 2. Puis charger les commandes
+      this.cService.getAllCommandes().subscribe(data => {
+        console.log('Commandes reçues :', data);
+  
+        // Ajouter ici ton code de mapping
+        data.forEach(commande => {
+          commande.commandeProduits.forEach((cp: any) => {
+            const produit = cp.produit;
+            const typeProduit = this.typeproduits.find(tp =>
+              tp.produits.some((p: any) => p.id === produit.id)
+            );
+            if (typeProduit) {
+              produit.typeProduit = typeProduit; // On injecte le typeProduit
+            }
+          });
+        });
+  
+        // Ensuite transformer tes commandes comme tu le fais déjà
+        this.listeCommandes = data.map(cmd => {
+          const produit = cmd.commandeProduits[0]?.produit;
+          return {
+            idCommande: cmd.id,
+            codeCommande: cmd.codeCommande,
+            produitNom: produit ? produit.nomProduit : 'Nom inconnu',
+            typeProduit: produit ? (produit.typeProduit?.name || produit.typeProduit || 'Type inconnu') : 'Type inconnu',
+            commandeQuantite: cmd.quantite,
+            dateCommande: new Date(cmd.dateCommande),
+            prix: cmd.price
+          };
+        });
+      });
     });
-    
   }
+  
   private loadMarquesCamions(): void {
     this.camionService.getCamions().subscribe({
       next: (data: any) => {
@@ -82,8 +118,6 @@ export class AddLivraisonComponent implements OnInit {
       error: (err) => console.error('Erreur lors du chargement des camions', err)
     });
   }
-
-
 onMarqueSelectionChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     const marque = target.value;
@@ -103,36 +137,16 @@ onImmatriculationSelectionChange(event: Event): void {
     console.log('Immatriculation sélectionnée:', immatriculation);
     
     this.camionService.getCiterneByImmatriculation(immatriculation)
-  .subscribe({
-    next: (data) => {
-      this.citernes = [{
-        id: data.id,
-        reference: data.reference,
-        capacite: data.capacite
-      }];
-
-      // Utiliser setTimeout pour éviter l'erreur ExpressionChangedAfterItHasBeenCheckedError
-      setTimeout(() => {
-        this.addLivraisonForm.get('citerne')?.enable();
-        this.addLivraisonForm.get('citerne')?.setValue(data.id);
-      });
-
-    },
-    error: (err) => {
-      this.snackBar.open('Erreur: Impossible de charger la citerne pour ce camion', 'Fermer', { duration: 3000 });
-    }
-  });
+  
 
   }
 
-
-
-
-
   initialiserCompartimentCommandesMap() {
+    console.log('Initialisation des compartiments et des commandes...');
     this.compartimentCommandesMap = {};
   
     this.compartiments.forEach(compartiment => {
+      console.log('Traitement du compartiment:', compartiment.reference);
       this.compartimentCommandesMap[compartiment.reference] = this.listeCommandes
         .filter(cmd =>
           cmd.typeProduit === compartiment.typeProduit &&
@@ -143,39 +157,24 @@ onImmatriculationSelectionChange(event: Event): void {
           const dateB = new Date(b.dateCommande).getTime();
           return dateA === dateB ? a.commandeQuantite - b.commandeQuantite : dateA - dateB;
         });
+  
+      console.log('Commandes affectées au compartiment:', this.compartimentCommandesMap[compartiment.reference]);
     });
   }
-  
   selectCommande(compartiment: any, commande: any) {
     if (!compartiment.commandesAffectees) {
       compartiment.commandesAffectees = [];
     }
   
-    // Vérifie si la commande est déjà affectée
-    const dejaAffectee = compartiment.commandesAffectees.some((c: Commande) => c.idCommande === commande.idCommande)
-    ;
+    const dejaAffectee = compartiment.commandesAffectees.some((c: Commande) => c.idCommande === commande.idCommande);
+  
     if (!dejaAffectee) {
       compartiment.commandesAffectees.push(commande);
-      
-      // Optionnel : mise à jour de la capacité restante
-      compartiment.capaciteRestante = (compartiment.capaciteRestante || compartiment.capaciteMax) - commande.commandeQuantite;
+      compartiment.capaciteRestante -= commande.commandeQuantite;
   
-      // Ré-appliquer le filtre
-      this.compartimentCommandesMap[compartiment.reference] = this.commandes
-        .filter(cmd =>
-          cmd.typeProduit === compartiment.typeProduit &&
-          cmd.commandeQuantite <= compartiment.capaciteRestante &&
-          !compartiment.commandesAffectees.find((c: Commande) => c.idCommande === cmd.idCommande)
-
-        )
-        .sort((a, b) => {
-          const dateA = new Date(a.dateCommande).getTime();
-          const dateB = new Date(b.dateCommande).getTime();
-          return dateA === dateB ? a.commandeQuantite - b.commandeQuantite : dateA - dateB;
-        });
+      console.log('Commandes affectées après sélection:', compartiment.commandesAffectees); // Ajout du log pour vérifier
     }
   }
-  
   remplirCompartimentsAuto(): void {
     // On fait une copie des commandes disponibles
     const commandesDispo = [...this.listeCommandes];
@@ -198,58 +197,63 @@ onImmatriculationSelectionChange(event: Event): void {
       // On ajoute les commandes une à une jusqu’à remplir au mieux le compartiment
       for (const commande of commandesCompatibles) {
         if (commande.commandeQuantite <= capaciteRestante) {
+          if (!compartiment.commandesAffectees) {
+            compartiment.commandesAffectees = [];
+          }
           compartiment.commandesAffectees.push(commande);
           capaciteRestante -= commande.commandeQuantite;
   
-          // On retire cette commande de la liste globale pour éviter qu’elle soit réutilisée ailleurs
-          const index = commandesDispo.findIndex(c => c.idCommande === commande.idCommande);
-          if (index !== -1) commandesDispo.splice(index, 1);
+          // Retirer la commande des commandes disponibles
+          const index = commandesDispo.findIndex(cmd => cmd.idCommande === commande.idCommande);
+          if (index !== -1) {
+            commandesDispo.splice(index, 1);
+          }
         }
       }
-  
-      // Mise à jour de la capacité restante dans le compartiment
       compartiment.capaciteRestante = capaciteRestante;
-  
-      // Mise à jour de la map pour affichage
-      this.compartimentCommandesMap[compartiment.reference] = compartiment.commandesAffectees;
     });
   }
+  filtrerEtTrierCommandes(commandes: Commande[], compartiment: Compartiment): Observable<Commande[]> {
+    console.log("⚡ Comparaison pour compartiment:", compartiment.reference);
+    console.log("TypeProduit Compartiment:", compartiment.typeProduit, "| Capacité max:", compartiment.capaciteMax);
   
-  filtrerEtTrierCommandes(commandes: Commande[], compartiment: Compartiment): Commande[] {
-    // Étape 1: filtrer les commandes qui ont le même type de produit que le compartiment
-    let commandesFiltrees = commandes.filter(cmd =>
-      cmd.typeProduit === compartiment.typeProduit &&
-      cmd.commandeQuantite <= compartiment.capaciteMax
+    // Créer un tableau de Promesses pour récupérer les types de produits pour chaque commande
+    const promesses = commandes.map(cmd => 
+      this.cService.getTypeProduitsParCommande(cmd.idCommande).pipe(
+        map((typeProduits: any[]) => {
+          // Ajouter le type produit récupéré à la commande
+          cmd.typeProduitApi = typeProduits[0]?.typeProduit;  // Je suppose que tu veux juste le premier type produit
+          return cmd;
+        })
+      )
     );
   
-    // Étape 2: trier les commandes par date croissante
-    commandesFiltrees.sort((a, b) => {
-      const dateA = new Date(a.dateCommande).getTime();
-      const dateB = new Date(b.dateCommande).getTime();
-      return dateA - dateB;
-    });
+    // Attendre que toutes les promesses soient résolues
+    return forkJoin(promesses).pipe(
+      map(() => {
+        // Filtrer les commandes en fonction du type de produit et de la quantité
+        let commandesFiltrees = commandes.filter(cmd =>
+          cmd.typeProduitApi?.toLowerCase() === compartiment.typeProduit?.toLowerCase() &&
+          cmd.commandeQuantite <= compartiment.capaciteMax
+        );
   
-    // Étape 3: trier les commandes par capacité restante (ordre croissant de la capacité restante dans le compartiment)
-    commandesFiltrees.sort((a, b) => {
-      const resteA = compartiment.capaciteMax - a.commandeQuantite;
-      const resteB = compartiment.capaciteMax - b.commandeQuantite;
-      return resteA - resteB;
-    });
-  
-    return commandesFiltrees;
+        console.log("✅ Commandes filtrées pour", compartiment.reference, ":", commandesFiltrees);
+        return commandesFiltrees;
+      })
+    );
   }
-  
   
   
   onCompartimentSelected(compartiment: Compartiment): void {
     // Filtrer et trier les commandes en fonction du compartiment sélectionné
-    this.filteredCommandes = this.filtrerEtTrierCommandes(this.listeCommandes, compartiment);
+    this.filtrerEtTrierCommandes(this.listeCommandes, compartiment).subscribe((commandesFiltrees) => {
+      this.filteredCommandes = commandesFiltrees;
+    });
+    
   
     // Vous pouvez également mettre à jour le formulaire avec le compartiment sélectionné si nécessaire
     console.log("Commandes filtrées et triées par capacité restante :", this.filteredCommandes);
   }
-  
-  
   onCiterneSelectionChange(event: any): void {
     const citerneId = event.target.value;
     if (citerneId) {
@@ -257,10 +261,14 @@ onImmatriculationSelectionChange(event: Event): void {
         next: (data) => {
           this.compartiments = data;
           this.initialiserCompartimentCommandesMap(); // ← ajouter ici
-  
+    
+          // Pour chaque compartiment, charger les commandes compatibles avec l'API
           this.compartiments.forEach(compartiment => {
-            this.compartimentCommandesMap[compartiment.reference] =
-              this.filtrerEtTrierCommandes(this.listeCommandes, compartiment);
+            this.filtrerEtTrierCommandes(this.listeCommandes, compartiment).subscribe(commandesCompatibles => {
+              console.log(`Commandes compatibles pour ${compartiment.reference}:`, commandesCompatibles);
+              // Maintenant on assigne le tableau de commandes compatibles dans compartimentCommandesMap
+              this.compartimentCommandesMap[compartiment.reference] = commandesCompatibles;
+            });
           });
         },
         error: (err) => {
@@ -290,7 +298,6 @@ onImmatriculationSelectionChange(event: Event): void {
       }
     });
   }
-  
   private initForm(): void {
     this.addLivraisonForm = this.fb.group({
       codeLivraison: ['', [
@@ -309,8 +316,6 @@ onImmatriculationSelectionChange(event: Event): void {
       // Ajoute ici les autres champs si besoin
     });
   }
-  
-  
   private codeLivraisonAsyncValidator(): AsyncValidatorFn {
     return (control: AbstractControl) => {
       if (!control.value) {
@@ -326,7 +331,6 @@ onImmatriculationSelectionChange(event: Event): void {
       );
     };
   }
-
   genererCodeLivraison(): void {
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let codeLivraison = 'LIV-';
@@ -338,13 +342,6 @@ onImmatriculationSelectionChange(event: Event): void {
     this.addLivraisonForm.get('codeLivraison')?.markAsTouched();
     console.log("Code généré :", codeLivraison);
   }
-  
 
-  
-
-
- 
-
-  
 }
 

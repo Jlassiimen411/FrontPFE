@@ -156,6 +156,11 @@
                         </tr>
                       </thead>
                       <tbody>
+                        <tr *ngIf="!compartimentCommandesMap[compartiment.reference] || compartimentCommandesMap[compartiment.reference].length === 0">
+                          <td colspan="7" class="text-center text-muted">
+                            Aucune commande compatible disponible pour ce compartiment.
+                          </td>
+                        </tr>
                         <tr *ngFor="let cmd of compartimentCommandesMap[compartiment.reference]">
                           <td>{{ cmd.codeCommande }}</td>
                           <td>{{ cmd.typeProduit }}</td>

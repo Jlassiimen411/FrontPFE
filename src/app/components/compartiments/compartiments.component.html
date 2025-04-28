@@ -4,6 +4,18 @@
 <div class="container">
   <h2>Gestion des Compartiments</h2>
 
+
+  <p>la capacité de la citerne:
+    <strong>{{ citerneDetails?.capacite }} L</strong>
+  </p>
+<p>Nombre de compartiments de la citerne : 
+  <strong>{{ citerneDetails?.nombreCompartiments }}</strong>
+</p>
+
+  
+  
+  
+  
   <!-- Formulaire pour ajouter un nouveau compartiment -->
   <div class="form">
     <div class="position-relative">
@@ -12,9 +24,7 @@
         Générer
       </button>
     </div> 
-    
-    
-    
+    <!-- Formulaire de saisie -->
     <input type="number" placeholder="Capacité Max" [(ngModel)]="nouveauCompartiment.capaciteMax">
     <select [(ngModel)]="nouveauCompartiment.typeProduit" name="typeProduit" required>
       <option value="" disabled selected hidden>Sélectionner le type de produit</option>
@@ -22,7 +32,6 @@
       <option value="CARBURANT">Carburant</option>
       <option value="LUBRIFIANT">Lubrifiant</option>
     </select>
-    
     
     <select [(ngModel)]="nouveauCompartiment.statut">
       <option value="" disabled selected hidden>Sélectionner le status</option>
@@ -34,7 +43,7 @@
       <i class="fa fa-plus-circle">&nbsp;&nbsp;</i><b>Ajouter</b>
     </button>
   </div>
-
+ 
   <!-- Table pour afficher les compartiments -->
   <table>
     <thead>
@@ -59,9 +68,8 @@
       </tr>
     </tbody>
   </table>
-  
-  
-  
+
+
   
 
   <!-- Modal pour modifier un compartiment -->

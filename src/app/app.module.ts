@@ -13,7 +13,6 @@ import { LivraisonsComponent } from './components/livraisons/livraisons.componen
 import { ReceptionnairePageComponent } from './components/receptionnaire-page/receptionnaire-page.component';
 import { AddCommandeComponent } from './components/add-commande/add-commande.component';
 import { ReactiveFormsModule } from '@angular/forms';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialogModule } from '@angular/material/dialog';
 import { HttpClientModule } from '@angular/common/http';
 import { FullCalendarModule } from '@fullcalendar/angular';
@@ -36,7 +35,8 @@ import { CartComponent } from './components/cart/cart.component';
 import { BuyProductComponent } from './components/buy-product/buy-product.component';
 import { ProduitUserComponent } from './components/produit-user/produit-user.component';
 import { CamionsComponent } from './components/camions/camions.component';
-
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';  // Ajoute cette ligne
+import { ToastrModule } from 'ngx-toastr'
 import { MatTableModule } from '@angular/material/table';
 import { CiternesComponent } from './components/citernes/citernes.component';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -45,7 +45,6 @@ import { AdminPageComponent } from './components/admin-page/admin-page.component
 import { CreerDispatcheurComponent } from './components/creer-dispatcheur/creer-dispatcheur.component';
 import { CollapsibleInscrireComponent } from './components/collapsible-inscrire/collapsible-inscrire.component';
 import { SignupAdminComponent } from './components/signup-admin/signup-admin.component';
-
 import { GestionAdminComponent } from './components/gestion-admin/gestion-admin.component';
 import { GestionDispatcheurComponent } from './components/gestion-dispatcheur/gestion-dispatcheur.component';
 import { CompartimentsComponent } from './components/compartiments/compartiments.component';
@@ -108,6 +107,7 @@ import { ServiceHomeComponent } from './components/service-home/service-home.com
     HttpClientModule,
     MatTableModule,
     MatSnackBarModule,
+  ToastrModule.forRoot()
    
     
     

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CompartimentService } from 'src/app/services/compartiment.service';
 import { ChangeDetectorRef } from '@angular/core';
+import { CiterneService } from 'src/app/services/citerne.service';
 
 @Component({
   selector: 'app-compartiments',
@@ -9,9 +10,11 @@ import { ChangeDetectorRef } from '@angular/core';
   styleUrls: ['./compartiments.component.css']
 })
 export class CompartimentsComponent implements OnInit {
+  citerneDetails: any = null; // ici on va stocker toutes les infos de la citerne récupérée
 
   citerneIdFromUrl: number | null = null;
   compartiments: any[] = [];
+  nbCompartiments: number = 0;
   citernes: any;
   nouveauCompartiment: any = {
     reference: '',
@@ -25,6 +28,7 @@ export class CompartimentsComponent implements OnInit {
 
   constructor(
     private compartimentService: CompartimentService,
+    private citerrneService: CiterneService,
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
     private router: Router
@@ -37,11 +41,27 @@ export class CompartimentsComponent implements OnInit {
     if (idFromUrl) {
       this.citerneIdFromUrl = +idFromUrl;
       this.nouveauCompartiment.citerneId = this.citerneIdFromUrl;
-      this.getCompartiments(); // Appel de getCompartiments après avoir défini l'ID
+      this.getCompartiments();
+     this.getCiterne(); // <<< === ajoute cet appel*/
     } else {
       console.log('DEBUG: ID non trouvé dans l\'URL');
     }
   }
+  getCiterne(): void {
+    if (this.citerneIdFromUrl) {
+      this.citerrneService.getCiterne(this.citerneIdFromUrl).subscribe({
+        next: (citerne) => {
+          console.log('Détails de la citerne récupérés:', citerne);
+          this.citerneDetails = citerne;
+        },
+        error: (err) => {
+          console.error('Erreur récupération citerne:', err);
+          alert('Erreur lors de la récupération des détails de la citerne.');
+        }
+      });
+    }
+  }
+  
 
   getCompartiments(): void {
     if (this.citerneIdFromUrl) {
@@ -49,7 +69,6 @@ export class CompartimentsComponent implements OnInit {
       this.compartimentService.getCompartimentsByCiterneId(this.citerneIdFromUrl).subscribe({
         next: data => {
           console.log('Données récupérées:', data);
-          // Vérifie si les données sont un tableau directement
           if (Array.isArray(data)) {
             this.compartiments = data;
           } else {
@@ -59,13 +78,14 @@ export class CompartimentsComponent implements OnInit {
         },
         error: err => {
           console.error('Erreur récupération compartiments:', err);
-          this.compartiments = [];
+          alert('Erreur lors de la récupération des compartiments. Veuillez vérifier le serveur.');
         }
       });
     } else {
       console.error('Aucun ID de citerne trouvé.');
     }
   }
+  
   
   
 
@@ -107,29 +127,62 @@ export class CompartimentsComponent implements OnInit {
       return;
     }
   
-    const payload = {
-      reference: this.nouveauCompartiment.reference,
-      capaciteMax: this.nouveauCompartiment.capaciteMax,
-      statut: this.nouveauCompartiment.statut,
-      typeProduit: this.nouveauCompartiment.typeProduit,
-      citerne: {
-        id: this.nouveauCompartiment.citerneId
-      }
-    };
+    // Vérification de la capacité du compartiment par rapport à la capacité de la citerne
+    this.citerrneService.getCiterne(this.nouveauCompartiment.citerneId).subscribe({
+      next: (citerne) => {
+        if (this.nouveauCompartiment.capaciteMax > citerne.capaciteMax) {
+          this.citerneDetails = citerne;
+          alert('La capacité du compartiment ne doit pas dépasser la capacité de la citerne.');
+          return;
+        }
   
-    this.compartimentService.addCompartiment(payload).subscribe({
-      next: () => {
-        alert('Compartiment ajouté avec succès.');
-        this.getCompartiments();
-        this.resetForm();
-        this.cdr.detectChanges();
+        // Vérification du nombre de compartiments déjà ajoutés
+        this.compartimentService.getCompartimentsByCiterneId(this.nouveauCompartiment.citerneId).subscribe({
+          next: (compartiments) => {
+            if (compartiments.length >= citerne.nombreCompartimentsMax) {
+              alert('Le nombre maximal de compartiments pour cette citerne a déjà été atteint.');
+              return;
+            }
+  
+            // Tout est OK, on peut ajouter
+            const payload = {
+              reference: this.nouveauCompartiment.reference,
+              capaciteMax: this.nouveauCompartiment.capaciteMax,
+              statut: this.nouveauCompartiment.statut,
+              typeProduit: this.nouveauCompartiment.typeProduit,
+              citerne: {
+                id: this.nouveauCompartiment.citerneId
+              }
+            };
+  
+            this.compartimentService.addCompartiment(payload).subscribe({
+              next: () => {
+                alert('Compartiment ajouté avec succès.');
+                this.getCompartiments();
+                this.resetForm();
+                this.cdr.detectChanges();
+              },
+              error: (error) => {
+                console.error('Erreur ajout compartiment:', error);
+                alert('Erreur: la capacité des compartiments dépasse la capacité maximale de la citerne.');
+              }
+            });
+          },
+          error: (err) => {
+            console.error('Erreur récupération compartiments:', err);
+            alert('Erreur lors de la vérification des compartiments existants.');
+          }
+        });
+  
       },
-      error: (error) => {
-        console.error('Erreur ajout compartiment:', error);
-        alert('Erreur lors de l\'ajout: ' + (error.error?.message || error.message));
+      error: (err) => {
+        console.error('Erreur récupération citerne:', err);
+        alert('Erreur lors de la récupération de la citerne.');
       }
     });
   }
+  
+  
 
   editCompartiment(id: number): void {
     this.compartimentService.getCompartiment(id).subscribe({
@@ -156,15 +209,16 @@ export class CompartimentsComponent implements OnInit {
       statut: this.compartimentEnCours.statut,
     };
   
-    this.compartimentService.updateCompartiment(payload).subscribe({
+    this.compartimentService.addCompartiment(payload).subscribe({
       next: () => {
-        alert('Modification enregistrée.');
-        this.getCompartiments();
-        this.closeModal();
+        alert('Compartiment ajouté avec succès.');
+        this.getCompartiments(); // Mise à jour du nombre de compartiments
+        this.resetForm();
+        this.cdr.detectChanges();
       },
-      error: error => {
-        console.error('Erreur modification compartiment:', error);
-        alert('Erreur lors de la modification.');
+      error: (error) => {
+        console.error('Erreur ajout compartiment:', error);
+        alert('Erreur lors de l\'ajout: ' + (error.error?.message || error.message));
       }
     });
   }

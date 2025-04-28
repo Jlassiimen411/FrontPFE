@@ -24,17 +24,8 @@ export class LivraisonService  {
   
   
   
-  addLivraison(livraison: any) {
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json'
-    });
-  
-    this.httpClient.post('http://localhost:8080/api/livraisons', livraison, { headers })
-      .subscribe(response => {
-        console.log('Livraison ajoutée', response);
-      }, error => {
-        console.error('Erreur lors de l\'ajout de la livraison', error);
-      });
+  addLivraison(livraisonData: any): Observable<any> {
+    return this.httpClient.post(this.livraisonURL, livraisonData);
   }
   
   

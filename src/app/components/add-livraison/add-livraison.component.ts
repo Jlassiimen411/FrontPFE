@@ -1,14 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AsyncValidatorFn, AbstractControl } from '@angular/forms';
-
 import { LivraisonService } from 'src/app/services/livraison.service';
 import { CommandeService } from 'src/app/services/commande.service';
 import { CamionService } from 'src/app/services/camion.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { debounceTime, switchMap, map, catchError,forkJoin, of, first,Observable } from 'rxjs';
+import { debounceTime, map, catchError, of, first, Observable } from 'rxjs';
 import { CompartimentService } from 'src/app/services/compartiment.service';
 import { CiterneService } from 'src/app/services/citerne.service';
 import { TypeProduitService } from 'src/app/services/type-produit.service';
+import { Router } from '@angular/router';
+
 interface Commande {
   idCommande: number;
   codeCommande: string;
@@ -17,17 +18,15 @@ interface Commande {
   commandeQuantite: number;
   dateCommande: Date;
   prix: number;
-  typeProduitApi?: string;  
 }
-
 
 interface Compartiment {
   reference: string;
   capaciteMax: number;
   statut: string;
   typeProduit: string;
-  commandesAffectees?: Commande[];      // ← ajout
-  capaciteRestante?: number;            // ← ajout
+  commandesAffectees?: Commande[];
+  capaciteRestante?: number;
 }
 
 @Component({
@@ -37,7 +36,7 @@ interface Compartiment {
 })
 export class AddLivraisonComponent implements OnInit {
   selectedCommande!: Commande;
-  referenceCiterne: string = ''; // pour stocker la référence de citerne saisie
+  referenceCiterne: string = '';
   filteredCommandes: Commande[] = [];
   listeCommandes: Commande[] = [];
   addLivraisonForm!: FormGroup;
@@ -48,11 +47,8 @@ export class AddLivraisonComponent implements OnInit {
   citernes: { id: number, reference: string, capacite: number }[] = [];
   compartiments: Compartiment[] = [];
   typeproduits: any[] = [];
-
-
   compartimentCommandesMap: { [reference: string]: Commande[] } = {};
-
- /* compartiments: any[] = [];*/
+  isSubmitting: boolean = false;
   constructor(
     private fb: FormBuilder,
     private lService: LivraisonService,
@@ -60,26 +56,36 @@ export class AddLivraisonComponent implements OnInit {
     private compartimentService: CompartimentService,
     private citerneService: CiterneService,
     private camionService: CamionService,
-    private typeProduitService:TypeProduitService,
-   
+    private router: Router,
+    private typeProduitService: TypeProduitService,
     private snackBar: MatSnackBar
   ) {}
+
   ngOnInit(): void {
     this.initForm();
     this.chargerCiternes();
     this.loadMarquesCamions();
-  
-    // 1. Charger d'abord les typeproduits
+
     this.typeProduitService.getAllTypeProduits().pipe(
-      first()
+      first(),
+      catchError((err) => {
+        console.error('Erreur lors du chargement des typeproduits:', err);
+        this.snackBar.open('Erreur lors du chargement des types de produits', 'Fermer', { duration: 3000 });
+        return of([]);
+      })
     ).subscribe((typeProduitsData: any[]) => {
-      this.typeproduits = typeProduitsData; // Stocke les types de produits
-  
-      // 2. Puis charger les commandes
-      this.cService.getAllCommandes().subscribe(data => {
-        console.log('Commandes reçues :', data);
-  
-        // Ajouter ici ton code de mapping
+      this.typeproduits = typeProduitsData;
+      console.log('TypeProduits chargés:', this.typeproduits);
+
+      this.cService.getAllCommandes().pipe(
+        catchError((err) => {
+          console.error('Erreur lors du chargement des commandes:', err);
+          this.snackBar.open('Erreur lors du chargement des commandes', 'Fermer', { duration: 3000 });
+          return of([]);
+        })
+      ).subscribe((data: any[]) => {
+        console.log('Commandes reçues:', data);
+
         data.forEach(commande => {
           commande.commandeProduits.forEach((cp: any) => {
             const produit = cp.produit;
@@ -87,12 +93,11 @@ export class AddLivraisonComponent implements OnInit {
               tp.produits.some((p: any) => p.id === produit.id)
             );
             if (typeProduit) {
-              produit.typeProduit = typeProduit; // On injecte le typeProduit
+              produit.typeProduit = typeProduit;
             }
           });
         });
-  
-        // Ensuite transformer tes commandes comme tu le fais déjà
+
         this.listeCommandes = data.map(cmd => {
           const produit = cmd.commandeProduits[0]?.produit;
           return {
@@ -105,243 +110,270 @@ export class AddLivraisonComponent implements OnInit {
             prix: cmd.price
           };
         });
+        console.log('ListeCommandes après transformation:', this.listeCommandes);
       });
     });
   }
-  
+
+  private initForm(): void {
+    this.addLivraisonForm = this.fb.group({
+      codeLivraison: ['', [Validators.required, /* éventuellement un validateur pour vérifier l'unicité */]],
+      date: ['', Validators.required],
+      camionMarque: ['', Validators.required],
+      camionId: ['', Validators.required],
+      citerneId: ['', Validators.required],
+      statut: ['', Validators.required]
+    });
+    
+  }
+
+  private codeLivraisonAsyncValidator(): AsyncValidatorFn {
+    return (control: AbstractControl) => {
+      if (!control.value) {
+        return of(null);
+      }
+      return this.lService.checkCodeLivraisonExists(control.value).pipe(
+        debounceTime(300),
+        map(response => (response.exists ? { codeLivraisonExists: true } : null)),
+        catchError(() => of(null)),
+        first()
+      );
+    };
+  }
+
   private loadMarquesCamions(): void {
-    this.camionService.getCamions().subscribe({
-      next: (data: any) => {
-        this.camions = data; // Stocker tous les camions
-        this.marquesCamion = Array.from(new Set(data.map((camion: any) => camion.marque)));
-      },
-      error: (err) => console.error('Erreur lors du chargement des camions', err)
+    this.camionService.getCamions().pipe(
+      catchError((err) => {
+        console.error('Erreur lors du chargement des camions:', err);
+        this.snackBar.open('Erreur lors du chargement des camions', 'Fermer', { duration: 3000 });
+        return of([]);
+      })
+    ).subscribe((data: any) => {
+      this.camions = data;
+      this.marquesCamion = Array.from(new Set(data.map((camion: any) => camion.marque)));
+      console.log('MarquesCamion chargées:', this.marquesCamion);
     });
   }
-onMarqueSelectionChange(event: Event): void {
+
+  onMarqueSelectionChange(event: Event): void { 
     const target = event.target as HTMLSelectElement;
     const marque = target.value;
-
-    this.camionService.getCamionsByMarque(marque).subscribe({
-      next: (data: any[]) => {
+  
+    this.camionService.getCamionsByMarque(marque).pipe(
+      catchError((err) => {
+        console.error('Erreur lors du chargement des camions pour cette marque:', err);
+        this.snackBar.open('Erreur lors du chargement des immatriculations', 'Fermer', { duration: 3000 });
+        this.immatriculations = [];  // Assure que la liste est vide en cas d'erreur
+        return of([]);
+      })
+    ).subscribe((data: any[]) => {
+      if (data.length > 0) {
         this.immatriculations = data.map((camion: any) => camion.immatriculation);
-        this.addLivraisonForm.get('immatriculation')?.setValue('');  // Réinitialiser l'immatriculation
-      },
-      error: (err) => console.error('Erreur lors du chargement des camions pour cette marque', err)
+        this.addLivraisonForm.get('camionImmatriculation')?.setValue('');
+      } else {
+        this.immatriculations = [];
+        this.snackBar.open('Aucune immatriculation disponible pour cette marque', 'Fermer', { duration: 3000 });
+      }
+      console.log('Immatriculations chargées:', this.immatriculations);
     });
   }
-onImmatriculationSelectionChange(event: Event): void {
+  
+
+  onImmatriculationSelectionChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     const immatriculation = target.value;
-    
     console.log('Immatriculation sélectionnée:', immatriculation);
-    
-    this.camionService.getCiterneByImmatriculation(immatriculation)
-  
 
-  }
-
-  initialiserCompartimentCommandesMap() {
-    console.log('Initialisation des compartiments et des commandes...');
-    this.compartimentCommandesMap = {};
-  
-    this.compartiments.forEach(compartiment => {
-      console.log('Traitement du compartiment:', compartiment.reference);
-      this.compartimentCommandesMap[compartiment.reference] = this.listeCommandes
-        .filter(cmd =>
-          cmd.typeProduit === compartiment.typeProduit &&
-          cmd.commandeQuantite <= compartiment.capaciteMax
-        )
-        .sort((a, b) => {
-          const dateA = new Date(a.dateCommande).getTime();
-          const dateB = new Date(b.dateCommande).getTime();
-          return dateA === dateB ? a.commandeQuantite - b.commandeQuantite : dateA - dateB;
-        });
-  
-      console.log('Commandes affectées au compartiment:', this.compartimentCommandesMap[compartiment.reference]);
-    });
-  }
-  selectCommande(compartiment: any, commande: any) {
-    if (!compartiment.commandesAffectees) {
-      compartiment.commandesAffectees = [];
-    }
-  
-    const dejaAffectee = compartiment.commandesAffectees.some((c: Commande) => c.idCommande === commande.idCommande);
-  
-    if (!dejaAffectee) {
-      compartiment.commandesAffectees.push(commande);
-      compartiment.capaciteRestante -= commande.commandeQuantite;
-  
-      console.log('Commandes affectées après sélection:', compartiment.commandesAffectees); // Ajout du log pour vérifier
-    }
-  }
-  remplirCompartimentsAuto(): void {
-    // On fait une copie des commandes disponibles
-    const commandesDispo = [...this.listeCommandes];
-  
-    this.compartiments.forEach(compartiment => {
-      compartiment.commandesAffectees = [];
-      let capaciteRestante = compartiment.capaciteMax;
-  
-      // On filtre les commandes par type produit et quantité <= capacité restante
-      const commandesCompatibles = commandesDispo
-        .filter(cmd => cmd.typeProduit === compartiment.typeProduit && cmd.commandeQuantite <= capaciteRestante)
-        .sort((a, b) => {
-          const dateA = new Date(a.dateCommande).getTime();
-          const dateB = new Date(b.dateCommande).getTime();
-  
-          // Priorité à la date, puis à la quantité
-          return dateA === dateB ? a.commandeQuantite - b.commandeQuantite : dateA - dateB;
-        });
-  
-      // On ajoute les commandes une à une jusqu’à remplir au mieux le compartiment
-      for (const commande of commandesCompatibles) {
-        if (commande.commandeQuantite <= capaciteRestante) {
-          if (!compartiment.commandesAffectees) {
-            compartiment.commandesAffectees = [];
-          }
-          compartiment.commandesAffectees.push(commande);
-          capaciteRestante -= commande.commandeQuantite;
-  
-          // Retirer la commande des commandes disponibles
-          const index = commandesDispo.findIndex(cmd => cmd.idCommande === commande.idCommande);
-          if (index !== -1) {
-            commandesDispo.splice(index, 1);
-          }
-        }
-      }
-      compartiment.capaciteRestante = capaciteRestante;
-    });
-  }
-  filtrerEtTrierCommandes(commandes: Commande[], compartiment: Compartiment): Observable<Commande[]> {
-    console.log("⚡ Comparaison pour compartiment:", compartiment.reference);
-    console.log("TypeProduit Compartiment:", compartiment.typeProduit, "| Capacité max:", compartiment.capaciteMax);
-  
-    // Créer un tableau de Promesses pour récupérer les types de produits pour chaque commande
-    const promesses = commandes.map(cmd => 
-      this.cService.getTypeProduitsParCommande(cmd.idCommande).pipe(
-        map((typeProduits: any[]) => {
-          // Ajouter le type produit récupéré à la commande
-          cmd.typeProduitApi = typeProduits[0]?.typeProduit;  // Je suppose que tu veux juste le premier type produit
-          return cmd;
-        })
-      )
-    );
-  
-    // Attendre que toutes les promesses soient résolues
-    return forkJoin(promesses).pipe(
-      map(() => {
-        // Filtrer les commandes en fonction du type de produit et de la quantité
-        let commandesFiltrees = commandes.filter(cmd =>
-          cmd.typeProduitApi?.toLowerCase() === compartiment.typeProduit?.toLowerCase() &&
-          cmd.commandeQuantite <= compartiment.capaciteMax
-        );
-  
-        console.log("✅ Commandes filtrées pour", compartiment.reference, ":", commandesFiltrees);
-        return commandesFiltrees;
+    this.camionService.getCiterneByImmatriculation(immatriculation).pipe(
+      catchError((err) => {
+        console.error('Erreur lors du chargement des citernes pour cette immatriculation:', err);
+      
+        return of(null);
       })
-    );
-  }
-  
-  
-  onCompartimentSelected(compartiment: Compartiment): void {
-    // Filtrer et trier les commandes en fonction du compartiment sélectionné
-    this.filtrerEtTrierCommandes(this.listeCommandes, compartiment).subscribe((commandesFiltrees) => {
-      this.filteredCommandes = commandesFiltrees;
+    ).subscribe((data) => {
+      console.log('Citernes pour immatriculation:', data);
+      if (data) {
+        this.citernes = data;
+      }
     });
-    
-  
-    // Vous pouvez également mettre à jour le formulaire avec le compartiment sélectionné si nécessaire
-    console.log("Commandes filtrées et triées par capacité restante :", this.filteredCommandes);
   }
+
+  private chargerCiternes(): void {
+    this.citerneService.getCiternes().pipe(
+      catchError((err) => {
+        console.error('Erreur lors du chargement des citernes:', err);
+        this.snackBar.open('Erreur lors du chargement des citernes', 'Fermer', { duration: 3000 });
+        return of([]);
+      })
+    ).subscribe((data) => {
+      this.citernes = data;
+      console.log('Citernes chargées:', this.citernes);
+    });
+  }
+
   onCiterneSelectionChange(event: any): void {
     const citerneId = event.target.value;
     if (citerneId) {
-      this.compartimentService.getCompartimentsByCiterneId(citerneId).subscribe({
-        next: (data) => {
-          this.compartiments = data;
-          this.initialiserCompartimentCommandesMap(); // ← ajouter ici
-    
-          // Pour chaque compartiment, charger les commandes compatibles avec l'API
-          this.compartiments.forEach(compartiment => {
-            this.filtrerEtTrierCommandes(this.listeCommandes, compartiment).subscribe(commandesCompatibles => {
-              console.log(`Commandes compatibles pour ${compartiment.reference}:`, commandesCompatibles);
-              // Maintenant on assigne le tableau de commandes compatibles dans compartimentCommandesMap
-              this.compartimentCommandesMap[compartiment.reference] = commandesCompatibles;
-            });
-          });
-        },
-        error: (err) => {
-          console.error("Erreur lors du chargement des compartiments :", err);
-          this.compartiments = [];
-          this.remplirCompartimentsAuto();
-        }
+      this.compartimentService.getCompartimentsByCiterneId(citerneId).pipe(
+        catchError((err) => {
+          console.error('Erreur lors du chargement des compartiments:', err);
+          this.snackBar.open('Erreur lors du chargement des compartiments', 'Fermer', { duration: 3000 });
+          return of([]);
+        })
+      ).subscribe((data) => {
+        this.compartiments = data;
+        this.initialiserCompartimentCommandesMap();
+
+        this.compartiments.forEach(compartiment => {
+          const commandesCompatibles = this.filtrerEtTrierCommandes(this.listeCommandes, compartiment);
+          this.compartimentCommandesMap[compartiment.reference] = commandesCompatibles;
+          console.log(`Commandes compatibles pour ${compartiment.reference}:`, commandesCompatibles);
+
+        });
       });
     } else {
       this.compartiments = [];
       this.compartimentCommandesMap = {};
     }
   }
-  
-  
-  private chargerCiternes(): void {
-    this.citerneService.getCiternes().subscribe({
-      next: (data) => {
-        this.citernes = data;
-        console.log('Citernes chargées :', this.citernes);
-      },
-      error: (err) => {
-        console.error('Erreur lors du chargement des citernes :', err);
-        this.snackBar.open("Erreur de chargement des citernes", "Fermer", {
-          duration: 3000
-        });
-      }
-    });
-  }
-  private initForm(): void {
-    this.addLivraisonForm = this.fb.group({
-      codeLivraison: ['', [
-        Validators.required,
-        Validators.maxLength(50),
-        Validators.pattern(/^[A-Za-z0-9\-_]+$/)
-      ], [this.codeLivraisonAsyncValidator()]],
-      commandeId: [null, Validators.required],
 
-      date: ['', Validators.required],
-      statut: ['', Validators.required],
-      typeProduit: ['', Validators.required],
-      camionMarque: ['', Validators.required],
-      camionImmatriculation: ['', Validators.required],
-      citerneId: ['', Validators.required], // 👈 AJOUT ICI
-      // Ajoute ici les autres champs si besoin
+  initialiserCompartimentCommandesMap(): void {
+    console.log('Initialisation des compartiments et des commandes...');
+    this.compartimentCommandesMap = {};
+
+    this.compartiments.forEach(compartiment => {
+      console.log('Traitement du compartiment:', compartiment.reference);
+      this.compartimentCommandesMap[compartiment.reference] = this.filtrerEtTrierCommandes(this.listeCommandes, compartiment);
+      console.log('Commandes affectées au compartiment:', this.compartimentCommandesMap[compartiment.reference]);
     });
   }
-  private codeLivraisonAsyncValidator(): AsyncValidatorFn {
-    return (control: AbstractControl) => {
-      if (!control.value) {
-        return of(null); // ne pas valider si le champ est vide
-      }
-      return this.lService.checkCodeLivraisonExists(control.value).pipe(
-        debounceTime(300),
-        map(response => {
-          return response.exists ? { codeLivraisonExists: true } : null;
-        }),
-        catchError(() => of(null)),
-        first()
-      );
-    };
+
+  filtrerEtTrierCommandes(commandes: Commande[], compartiment: Compartiment): Commande[] {
+    console.log('⚡ Comparaison pour compartiment:', compartiment.reference);
+    console.log('TypeProduit Compartiment:', compartiment.typeProduit, '| Capacité max:', compartiment.capaciteMax);
+
+    const commandesFiltrees = commandes.filter(cmd =>
+      cmd.typeProduit?.toLowerCase() === compartiment.typeProduit?.toLowerCase() &&
+      cmd.commandeQuantite <= compartiment.capaciteMax
+    ).sort((a, b) => {
+      const dateA = new Date(a.dateCommande).getTime();
+      const dateB = new Date(b.dateCommande).getTime();
+      return dateA === dateB ? a.commandeQuantite - b.commandeQuantite : dateA - dateB;
+    });
+
+    console.log('✅ Commandes filtrées pour', compartiment.reference, ':', commandesFiltrees);
+    return commandesFiltrees;
   }
+
+  onCompartimentSelected(compartiment: Compartiment): void {
+    const commandesFiltrees = this.filtrerEtTrierCommandes(this.listeCommandes, compartiment);
+    this.filteredCommandes = commandesFiltrees;
+    console.log('Commandes filtrées et triées par capacité restante:', this.filteredCommandes);
+  }
+
+
+  selectCommande(compartiment: Compartiment, commande: Commande): void {
+    if (!compartiment.commandesAffectees) {
+      compartiment.commandesAffectees = [];
+    }
+  
+    // Vérifier si la commande rentre dans la capacité restante
+    const capaciteRestante = compartiment.capaciteRestante ?? compartiment.capaciteMax;
+  
+    if (commande.commandeQuantite <= capaciteRestante) {
+      compartiment.commandesAffectees.push(commande);
+      compartiment.capaciteRestante = capaciteRestante - commande.commandeQuantite;
+  
+      console.log(`Commande ${commande.codeCommande} affectée à ${compartiment.reference}`);
+console.log(`Capacité restante dans ${compartiment.reference}: ${compartiment.capaciteRestante}`);
+
+    } else {
+      this.snackBar.open('Capacité insuffisante pour ajouter cette commande au compartiment.', 'Fermer', {
+        duration: 3000
+      });
+    }
+  }
+  
+
+
+  onSubmit(): void {
+    if (this.addLivraisonForm.invalid) {
+      this.snackBar.open('Veuillez remplir tous les champs obligatoires.', 'Fermer', { duration: 3000 });
+      return;
+    }
+  
+    const formValue = this.addLivraisonForm.value;
+  
+    if (!formValue.camionId || !formValue.citerneId) {
+      this.snackBar.open('Veuillez sélectionner un camion et une citerne.', 'Fermer', { duration: 3000 });
+      return;
+    }
+  
+    if (this.isSubmitting) return;
+  
+    this.isSubmitting = true;
+    this.addLivraisonForm.disable();
+  
+    const livraisonPayload = {
+      codeLivraison: formValue.codeLivraison,
+      camion: { id: Number(formValue.camionId) },
+      citerne: { id: Number(formValue.citerneId) },
+      commandes: formValue.commandes?.map((cmd: number) => ({ id: cmd })) || [],
+      dateLivraison: formValue.date,
+      statut: formValue.statut
+    };
+  
+    this.lService.addLivraison(livraisonPayload).subscribe({
+      next: (response) => {
+        console.log('Livraison ajoutée avec succès:', response);
+        this.snackBar.open('Livraison ajoutée avec succès.', 'Fermer', { duration: 3000 });
+        this.addLivraisonForm.reset();
+        this.isSubmitting = false;
+        this.addLivraisonForm.enable();
+        this.router.navigate(['/livraisons']); // Redirection ici
+      },
+      error: (error) => {
+        console.error('Erreur lors de l\'ajout de la livraison:', error);
+        this.snackBar.open('Erreur lors de l\'ajout de la livraison.', 'Fermer', { duration: 3000 });
+        this.isSubmitting = false;
+        this.addLivraisonForm.enable();
+      }
+    });
+  }
+  
+  
+  
+  
+  
+  
+
+  debugForm(): void {
+    console.log('Formulaire valide:', this.addLivraisonForm.valid);
+    console.log('Valeurs du formulaire:', this.addLivraisonForm.value);
+    console.log('Erreurs du formulaire:', this.addLivraisonForm.errors);
+    Object.keys(this.addLivraisonForm.controls).forEach(key => {
+      const control = this.addLivraisonForm.get(key);
+      console.log(`Champ ${key}:`, {
+        value: control?.value,
+        valid: control?.valid,
+        errors: control?.errors,
+        touched: control?.touched,
+      });
+      
+    });
+  }
+
   genererCodeLivraison(): void {
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let codeLivraison = 'LIV-';
     for (let i = 0; i < 10; i++) {
-      codeLivraison += charset.charAt(Math.floor(Math.random() * charset.length));
+      const randomIndex = Math.floor(Math.random() * charset.length);
+      codeLivraison += charset[randomIndex];
     }
-
     this.addLivraisonForm.get('codeLivraison')?.setValue(codeLivraison);
-    this.addLivraisonForm.get('codeLivraison')?.markAsTouched();
-    console.log("Code généré :", codeLivraison);
+    console.log('Code livraison généré:', codeLivraison);
   }
+  
+  
 
 }
-

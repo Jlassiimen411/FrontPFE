@@ -52,21 +52,12 @@ export class CiternesComponent implements OnInit {
       }
     );
   }
-/*
-  // Vérifie si un compartiment est déjà utilisé dans une autre citerne
-  compartimentEstDejaUtilise(compartimentId: number): boolean {
-    return this.citernes.some(citerne =>
-      citerne.compartiments.some((compartiment: Compartiment) => compartiment.id === compartimentId)
-    );
-  }*/
-
   // Add a new citerne
   ajouterCiterne(): void {
     if (!this.nouvelleCiterne.reference || !this.nouvelleCiterne.capacite || !this.nouvelleCiterne.nombreCompartiments) {
       alert('Veuillez remplir tous les champs.');
       return;
     }
-  
     const citerneData = {
       reference: this.nouvelleCiterne.reference,
       capacite: this.nouvelleCiterne.capacite,
@@ -90,7 +81,6 @@ console.log('Données envoyées au backend :', citerneData);
       }
     );
   }
-  
 
   // Edit an existing citerne
   editCiterne(id: number): void {

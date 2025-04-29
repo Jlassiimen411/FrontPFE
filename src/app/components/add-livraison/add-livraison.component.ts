@@ -63,10 +63,11 @@ export class AddLivraisonComponent implements OnInit {
 
   ngOnInit(): void {
     this.initForm();
+    
     this.chargerCiternes();
     this.loadMarquesCamions();
 
-    this.typeProduitService.getAllTypeProduits().pipe(
+      this.typeProduitService.getAllTypeProduits().pipe(
       first(),
       catchError((err) => {
         console.error('Erreur lors du chargement des typeproduits:', err);
@@ -97,7 +98,7 @@ export class AddLivraisonComponent implements OnInit {
             }
           });
         });
-
+     
         this.listeCommandes = data.map(cmd => {
           const produit = cmd.commandeProduits[0]?.produit;
           return {
@@ -119,7 +120,7 @@ export class AddLivraisonComponent implements OnInit {
     this.addLivraisonForm = this.fb.group({
       codeLivraison: ['', [Validators.required, /* éventuellement un validateur pour vérifier l'unicité */]],
       date: ['', Validators.required],
-      camionMarque: ['', Validators.required],
+      
       camionId: ['', Validators.required],
       citerneId: ['', Validators.required],
       statut: ['', Validators.required]
@@ -223,12 +224,15 @@ export class AddLivraisonComponent implements OnInit {
       ).subscribe((data) => {
         this.compartiments = data;
         this.initialiserCompartimentCommandesMap();
-
+  
+        if (this.compartiments.length === 0) {
+          this.snackBar.open('Aucun compartiment disponible pour cette citerne', 'Fermer', { duration: 3000 });
+        }
+  
         this.compartiments.forEach(compartiment => {
           const commandesCompatibles = this.filtrerEtTrierCommandes(this.listeCommandes, compartiment);
           this.compartimentCommandesMap[compartiment.reference] = commandesCompatibles;
           console.log(`Commandes compatibles pour ${compartiment.reference}:`, commandesCompatibles);
-
         });
       });
     } else {
@@ -236,6 +240,19 @@ export class AddLivraisonComponent implements OnInit {
       this.compartimentCommandesMap = {};
     }
   }
+  onDateChangeciterne(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const selectedDate = input.value;
+
+    if (selectedDate) {
+      // Récupérer les citernes disponibles pour la date
+      this.lService.getCiterneDisponiblesPourDate(selectedDate)
+        .subscribe((data) => {
+          this.citernes = data;
+        });
+    }
+  }
+
 
   initialiserCompartimentCommandesMap(): void {
     console.log('Initialisation des compartiments et des commandes...');
@@ -277,22 +294,24 @@ export class AddLivraisonComponent implements OnInit {
       compartiment.commandesAffectees = [];
     }
   
-    // Vérifier si la commande rentre dans la capacité restante
     const capaciteRestante = compartiment.capaciteRestante ?? compartiment.capaciteMax;
   
     if (commande.commandeQuantite <= capaciteRestante) {
       compartiment.commandesAffectees.push(commande);
+  
+      // Mise à jour de la capacité restante
       compartiment.capaciteRestante = capaciteRestante - commande.commandeQuantite;
   
-      console.log(`Commande ${commande.codeCommande} affectée à ${compartiment.reference}`);
-console.log(`Capacité restante dans ${compartiment.reference}: ${compartiment.capaciteRestante}`);
-
+      // Retirer la commande de la liste globale pour éviter une réutilisation ailleurs si nécessaire
+      this.listeCommandes = this.listeCommandes.filter(c => c.idCommande !== commande.idCommande);
+  
+      console.log(`✅ Commande ${commande.codeCommande} affectée au compartiment ${compartiment.reference}`);
+      console.log('Nouvelle capacité restante:', compartiment.capaciteRestante);
     } else {
-      this.snackBar.open('Capacité insuffisante pour ajouter cette commande au compartiment.', 'Fermer', {
-        duration: 3000
-      });
+      this.snackBar.open('La commande dépasse la capacité disponible du compartiment.', 'Fermer', { duration: 3000 });
     }
   }
+  
   
 
 
@@ -302,48 +321,60 @@ console.log(`Capacité restante dans ${compartiment.reference}: ${compartiment.c
       return;
     }
   
-    const formValue = this.addLivraisonForm.value;
+    // Récupérer la date depuis le formulaire avant de soumettre
+    const dateLivraison = this.addLivraisonForm.value.date;
   
-    if (!formValue.camionId || !formValue.citerneId) {
-      this.snackBar.open('Veuillez sélectionner un camion et une citerne.', 'Fermer', { duration: 3000 });
-      return;
-    }
+    // Charger les camions disponibles à la date choisie
+    this.lService.getCamionsDisponibles(dateLivraison).subscribe(
+      (data) => {
+        this.camions = data; // Mettre à jour la liste des camions avec les résultats
+        console.log('Camions disponibles:', data);
   
-    if (this.isSubmitting) return;
+        // Vérifier que l'utilisateur a sélectionné un camion
+        const formValue = this.addLivraisonForm.value;
+        if (!formValue.camionId || !formValue.citerneId) {
+          this.snackBar.open('Veuillez sélectionner un camion et une citerne.', 'Fermer', { duration: 3000 });
+          return;
+        }
   
-    this.isSubmitting = true;
-    this.addLivraisonForm.disable();
+        // Si tout est valide, procéder à l'ajout de la livraison
+        if (this.isSubmitting) return;
   
-    const livraisonPayload = {
-      codeLivraison: formValue.codeLivraison,
-      camion: { id: Number(formValue.camionId) },
-      citerne: { id: Number(formValue.citerneId) },
-      commandes: formValue.commandes?.map((cmd: number) => ({ id: cmd })) || [],
-      dateLivraison: formValue.date,
-      statut: formValue.statut
-    };
+        this.isSubmitting = true;
+        this.addLivraisonForm.disable();
   
-    this.lService.addLivraison(livraisonPayload).subscribe({
-      next: (response) => {
-        console.log('Livraison ajoutée avec succès:', response);
-        this.snackBar.open('Livraison ajoutée avec succès.', 'Fermer', { duration: 3000 });
-        this.addLivraisonForm.reset();
-        this.isSubmitting = false;
-        this.addLivraisonForm.enable();
-        this.router.navigate(['/livraisons']); // Redirection ici
+        const livraisonPayload = {
+          codeLivraison: formValue.codeLivraison,
+          camion: { id: Number(formValue.camionId) },
+          citerne: { id: Number(formValue.citerneId) },
+          commandes: formValue.commandes?.map((cmd: number) => ({ id: cmd })) || [],
+          dateLivraison: formValue.date,
+          statut: formValue.statut
+        };
+  
+        this.lService.addLivraison(livraisonPayload).subscribe({
+          next: (response) => {
+            console.log('Livraison ajoutée avec succès:', response);
+            this.snackBar.open('Livraison ajoutée avec succès.', 'Fermer', { duration: 3000 });
+            this.addLivraisonForm.reset();
+            this.isSubmitting = false;
+            this.addLivraisonForm.enable();
+            this.router.navigate(['/livraisons']); // Redirection ici
+          },
+          error: (error) => {
+            console.error('Erreur lors de l\'ajout de la livraison:', error);
+            this.snackBar.open('Erreur lors de l\'ajout de la livraison.', 'Fermer', { duration: 3000 });
+            this.isSubmitting = false;
+            this.addLivraisonForm.enable();
+          }
+        });
       },
-      error: (error) => {
-        console.error('Erreur lors de l\'ajout de la livraison:', error);
-        this.snackBar.open('Erreur lors de l\'ajout de la livraison.', 'Fermer', { duration: 3000 });
-        this.isSubmitting = false;
-        this.addLivraisonForm.enable();
+      (error) => {
+        console.error('Erreur lors de la récupération des camions disponibles:', error);
+        this.snackBar.open('Erreur lors du chargement des camions disponibles', 'Fermer', { duration: 3000 });
       }
-    });
+    );
   }
-  
-  
-  
-  
   
   
 
@@ -362,6 +393,20 @@ console.log(`Capacité restante dans ${compartiment.reference}: ${compartiment.c
       
     });
   }
+  
+
+onDateChange(event: Event): void {
+  const input = event.target as HTMLInputElement;
+  const selectedDate = input.value;
+
+  if (selectedDate) {
+    this.lService.getCamionsDisponibles(selectedDate)
+      .subscribe((data) => {
+        this.camions = data;
+      });
+  }
+}
+
 
   genererCodeLivraison(): void {
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

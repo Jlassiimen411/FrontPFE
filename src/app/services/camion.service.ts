@@ -18,11 +18,20 @@ export class CamionService {
   getCamion(id: number): Observable<any> {
     return this.http.get<any>(`${this.apiUrl}/${id}`);
   }
+  isCamionReservedForDate(camionId: number, date: string): Observable<boolean> {
+    return this.http.get<boolean>(`/${camionId}?date=${date}`);
+  }
 
   // Ajouter un nouveau camion
   addCamion(camion: any): Observable<any> {
     return this.http.post<any>(this.apiUrl, camion);
   }
+
+  // livraison.service.ts
+getCiterneDisponiblesPourDate(date: string): Observable<any[]> {
+  return this.http.get<any[]>(`http://localhost:8080/api/livraisons/citerne/disponibles?date=${date}`);
+}
+
 
   // Mettre à jour un camion existant
   updateCamion(camion: any): Observable<any> {

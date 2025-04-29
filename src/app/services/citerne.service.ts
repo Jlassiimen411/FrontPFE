@@ -19,7 +19,13 @@ export class CiterneService {
   getCompartiments(): Observable<any[]> {
     return this.http.get<any[]>(this.compartimentsUrl);  // Ensure this URL is correct
   }
-
+  getCiterneByImmatriculationEtDate(immatriculation: string, date: string) {
+    return this.http.get(`${this.baseUrl}/citernes/immatriculation/${immatriculation}?date=${date}`);
+  }
+  
+  getCiternesDisponibles(date: string) {
+    return this.http.get(`${this.baseUrl}/citernes/disponibles?date=${date}`);
+  }
   // Add citerne
   addCiterne(citerne: any): Observable<any> {
     return this.http.post(this.baseUrl, citerne);

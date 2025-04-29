@@ -21,7 +21,19 @@ export class LivraisonService  {
   checkCodeLivraisonExists(code: string) {
     return this.httpClient.get<{ exists: boolean }>(`${this.livraisonURL}/check-code?codeLivraison=${code}`);
   }
+  getCamionsDisponibles(date: string): Observable<any> {
+    return this.httpClient.get<any[]>(`http://localhost:8080/api/livraisons/camions/disponibles?date=${date}`);
+  }
   
+  // livraison.service.ts
+getCiterneDisponiblesPourDate(date: string): Observable<any[]> {
+  return this.httpClient.get<any[]>(`http://localhost:8080/api/livraisons/citerne/disponibles?date=${date}`);
+}
+
+  
+  /*getCiternesDisponibles(date: string): Observable<Citerne[]> {
+    return this.http.get<any[]>(`/api/citernes/disponibles?date=${date}`);
+  }*/
   
   
   addLivraison(livraisonData: any): Observable<any> {

@@ -33,33 +33,24 @@
         <div class="form-group">
           <label for="date"><i class="fas fa-calendar-alt"></i> Date Livraison</label>
           <div class="input-container">
-            <input type="date" id="date" class="form-control" formControlName="date" required>
+            <input type="date"
+                   id="date"
+                   class="form-control"
+                   formControlName="date"
+                   required
+                   (change)="onDateChange($event); onDateChangeciterne($event)">
             <i class="fas fa-calendar-check input-icon"></i>
           </div>
           <div *ngIf="addLivraisonForm.get('date')?.invalid && addLivraisonForm.get('date')?.touched" class="error-message">
             <i class="fas fa-exclamation-circle"></i> La date de livraison est requise.
           </div>
         </div>
-        <div class="form-group">
-          <label for="marque-camion"><i class="fas fa-truck-moving"></i> Marque du Camion</label>
-          <div class="input-container">
-            <select id="marque-camion" class="form-control" formControlName="camionMarque" (change)="onMarqueSelectionChange($event)" required>
-              <option value="" disabled selected>Sélectionnez une marque</option>
-              <option *ngFor="let marque of marquesCamion" [value]="marque">
-                {{ marque }}
-              </option>
-            </select>
-            <i class="fas fa-building input-icon"></i>
-          </div>
-          <div *ngIf="addLivraisonForm.get('camionMarque')?.invalid && addLivraisonForm.get('camionMarque')?.touched" class="error-message">
-            <i class="fas fa-exclamation-circle"></i> La marque du camion est requise.
-          </div>
-        </div>
         
+
         <div class="form-group">
           <label for="immatriculation"><i class="fas fa-id-card"></i> Immatriculation</label>
           <div class="input-container">
-            <select formControlName="camionId">
+            <select formControlName="camionId" class="form-control">
               <option *ngFor="let camion of camions" [value]="camion.id">
                 {{ camion.immatriculation }}
               </option>

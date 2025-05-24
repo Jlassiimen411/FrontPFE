@@ -1,49 +1,44 @@
 <app-header2></app-header2>
 <app-dash-receptionnaire></app-dash-receptionnaire>
 
-<div class="container">
-  <h2>Gestion des Compartiments</h2>
+<div class="heading_container heading_center container">
+  <h2 class="lo">L'ajout des Compartiments</h2>
 
 
   <p>la capacité de la citerne:
     <strong>{{ citerneDetails?.capacite }} L</strong>
   </p>
-<p>Nombre de compartiments de la citerne : 
-  <strong>{{ citerneDetails?.nombreCompartiments }}</strong>
-</p>
+  <p>Nombre de compartiments de la citerne :
+    <strong>{{ citerneDetails?.nombreCompartiments }}</strong>
+  </p>
 
-  
-  
-  
-  
+
   <!-- Formulaire pour ajouter un nouveau compartiment -->
-  <div class="form">
+  <div class="form" *ngIf="peutAjouterCompartiment()">
     <div class="position-relative">
-      <input type="text" class="form-control pe-5" placeholder="Référence" [(ngModel)]="nouveauCompartiment.reference" readonly>
-      <button type="button" class="btn btn-sm btn-outline-secondary position-absolute ss top-10 end-3 h-0" (click)="genererCodeCompartiment()">
+      <input type="text" class="form-control pe-5" placeholder="Référence" [(ngModel)]="nouveauCompartiment.reference"
+        readonly>
+      <button type="button" class="btn btn-sm btn-outline-secondary position-absolute ss top-10 end-3 h-0"
+        (click)="genererCodeCompartiment()">
         Générer
       </button>
-    </div> 
-    <!-- Formulaire de saisie -->
+    </div>
     <input type="number" placeholder="Capacité Max" [(ngModel)]="nouveauCompartiment.capaciteMax">
-    <select [(ngModel)]="nouveauCompartiment.typeProduit" name="typeProduit" required>
-      <option value="" disabled selected hidden>Sélectionner le type de produit</option>
-      <option value="GAZ">Gaz</option>
-      <option value="CARBURANT">Carburant</option>
-      <option value="LUBRIFIANT">Lubrifiant</option>
-    </select>
-    
-    <select [(ngModel)]="nouveauCompartiment.statut">
-      <option value="" disabled selected hidden>Sélectionner le status</option>
-      <option value="VIDE">VIDE</option>
-      <option value="PLEIN">PLEIN</option>
+    <select class="form-control mb-2" [(ngModel)]="nouveauCompartiment.typeProduits" multiple required>
+      <option value="" disabled>Sélectionner un type de produit</option>
+      <option *ngFor="let type of typesProduits" [ngValue]="type">{{ type.name }}</option>
     </select>
 
-    <button type="button" class="btn btn-warning" (click)="ajouterCompartiment()">
+    <button type="button" class="btn btn-outline-warning" (click)="ajouterCompartiment()">
       <i class="fa fa-plus-circle">&nbsp;&nbsp;</i><b>Ajouter</b>
     </button>
   </div>
- 
+  <div *ngIf="!peutAjouterCompartiment()" class="alert alert-warning mt-3">
+    <b>La capacité maximale de la citerne a été atteinte. Impossible d’ajouter un autre compartiment.</b>
+  </div>
+
+
+
   <!-- Table pour afficher les compartiments -->
   <table>
     <thead>
@@ -51,50 +46,23 @@
         <th>Référence</th>
         <th>Capacité Max</th>
         <th>Type Produit</th>
-        <th>Statut</th>
-        <th>Actions</th>
+
       </tr>
     </thead>
     <tbody>
       <tr *ngFor="let compartiment of compartiments">
         <td>{{ compartiment.reference }}</td>
         <td>{{ compartiment.capaciteMax }}</td>
-        <td>{{ compartiment.typeProduit }}</td>
-        <td>{{ compartiment.statut }}</td>
         <td>
-          <button type="button" class="btn btn-outline-warning" (click)="editCompartiment(compartiment.id)">Modifier</button>&nbsp;
-          <button type="button" class="btn btn-outline-warning" (click)="supprimerCompartiment(compartiment.id)">Supprimer</button>
+          <span *ngFor="let type of compartiment.typeProduits; let last = last">
+            {{ type.name }}<span *ngIf="!last">, </span>
+          </span>
         </td>
+
+
       </tr>
     </tbody>
   </table>
+ 
 
-
-  
-
-  <!-- Modal pour modifier un compartiment -->
-  <div *ngIf="compartimentEnCours" class="modal show">
-    <div class="modal-content">
-      <span class="close" (click)="closeModal()">&times;</span>
-      <h2>Modifier le Compartiment</h2>
-
-      <input type="text" [(ngModel)]="compartimentEnCours.reference" placeholder="Référence" readonly/>
-      <input type="number" [(ngModel)]="compartimentEnCours.capaciteMax" placeholder="Capacité Max" />
-      <select [(ngModel)]="compartimentEnCours.statut">
-        <option value="VIDE">VIDE</option>
-        <option value="EN_COURS">EN_COURS</option>
-       
-      </select>
-      
-      <select [(ngModel)]="compartimentEnCours.typeProduit">
-        <option value="GAZ">Gaz</option>
-      <option value="CARBURANT">Carburant</option>
-      <option value="LUBRIFIANT">Lubrifiant</option>
-       
-      </select>
-
-      <!-- Le champ pour la citerne est supprimé -->
-      <button (click)="sauvegarderModification()">Enregistrer</button>
-    </div>
-  </div>
 </div>

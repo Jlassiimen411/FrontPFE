@@ -1,7 +1,10 @@
 <app-header2></app-header2>
 <app-dash-admin></app-dash-admin>
 <body class="lolo outer ">
-<div class="container-fluid py-4">
+<div class="container-fluid py-1">
+  <h2 class="text-white text-capitalize ps-4 copperplate-title text-center fs-4" style="margin-top: 3em;">
+    <b>la liste des dispatcheurs</b>
+  </h2>
     <div class="row table-small" >
       <div class="col-12 panell" style="margin-left: 18em;">
         <div class="card my-4">
@@ -15,45 +18,34 @@
               <table class="table align-items-center mb-0">
                 <thead>
                   <tr class="table-header">
-                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">ID</th>
-                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Email</th>
-                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">First Name</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Last Name</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Password</th>
-                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Username</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2r">Prénom</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nom de famille</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nom d'utilisateur</th>
+                    <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Adresse email</th>
+                    <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Mot de passe</th>
                     <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                    <tr *ngFor="let elt of alladmins">
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">{{ elt.id }}</h6>
-                          </div>
-                        </div>
+                    <tr *ngFor="let elt of alldispatcheurs">
+                      <td class="text-center">
+                        <h6 class="mb-0 text-sm">{{ elt.userFirstName }}</h6>
                       </td>
-                      <td>
-                        <div class="d-flex px-2 py-1">
-                          <div class="d-flex flex-column justify-content-center">
-                            <h6 class="mb-0 text-sm">{{ elt.email }}</h6>
-                          </div>
-                        </div>
+                      <td class="text-center">
+                        <h6 class="mb-0 text-sm">{{ elt.userLastName }}</h6>
                       </td>
-                      <td>
-                        <h6 class="mb-0 text-sm">{{ elt.firstname }}</h6>
+                      <td class="text-center">
+                        <h6 class="mb-0 text-sm">{{ elt.userName }}</h6>
                       </td>
-                      <td>
-                        <h6 class="mb-0 text-sm">{{ elt.lastname }}</h6>
+                      <td class="text-center">
+                            <h6 class="mb-0 text-sm">{{ elt.email }}</h6> 
                       </td>
-                      <td class="align-middle text-center text-sm">
-                        <h6 class="mb-0 text-sm">{{ elt.password }}</h6>
+                      <td class="text-center">
+                        <h6 class="mb-0 text-sm">{{ elt.userPassword}}</h6>
                       </td>
-                      <td class="align-middle text-center text-sm">
-                        <h6 class="mb-0 text-sm">{{ elt.username }}</h6>
-                      </td>
-                      <td class="align-middle">
-                        <button class="background" >Delete</button>
+                      
+                      <td class="text-center">
+                        <button type="button" class="btn btn-outline-dark" (click)="deleteDispatcheur(elt.userName)"><i class="fa-solid fa-trash"></i></button>
                       </td>
                     </tr>
                   </tbody>

@@ -3,255 +3,163 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CompartimentService } from 'src/app/services/compartiment.service';
 import { ChangeDetectorRef } from '@angular/core';
 import { CiterneService } from 'src/app/services/citerne.service';
-
+import { TypeProduitService } from 'src/app/services/type-produit.service';
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-compartiments',
   templateUrl: './compartiments.component.html',
   styleUrls: ['./compartiments.component.css']
 })
 export class CompartimentsComponent implements OnInit {
-  citerneDetails: any = null; // ici on va stocker toutes les infos de la citerne récupérée
-
   citerneIdFromUrl: number | null = null;
+  citerneDetails: any = null;
   compartiments: any[] = [];
-  nbCompartiments: number = 0;
-  citernes: any;
+  typesProduits: { id: number, name: string }[] = [];
+
+
   nouveauCompartiment: any = {
     reference: '',
     capaciteMax: null,
-    statut: '',
-    citerneId: null,
-    typeProduit: ''
+    typeProduits: [],  // tableau au lieu d'un seul produit
+    citerneId: null
   };
-  
+
   compartimentEnCours: any = null;
 
   constructor(
     private compartimentService: CompartimentService,
-    private citerrneService: CiterneService,
+    private citerneService: CiterneService,
+    private typeProduitService: TypeProduitService,
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
-    const idFromUrl = this.route.snapshot.paramMap.get('idCiterne');
-    console.log('DEBUG: idFromUrl =', idFromUrl);
-    
-    if (idFromUrl) {
-      this.citerneIdFromUrl = +idFromUrl;
+    const id = this.route.snapshot.paramMap.get('idCiterne');
+    if (id) {
+      this.citerneIdFromUrl = +id;
       this.nouveauCompartiment.citerneId = this.citerneIdFromUrl;
-      this.getCompartiments();
-     this.getCiterne(); // <<< === ajoute cet appel*/
+      this.loadInitialData();
     } else {
-      console.log('DEBUG: ID non trouvé dans l\'URL');
+      alert('ID de la citerne manquant dans l’URL.');
+      this.router.navigate(['/']);
     }
   }
+
+  loadInitialData(): void {
+    this.getCiterne();
+    this.getCompartiments();
+    this.getTypesProduits();
+  }
+
   getCiterne(): void {
     if (this.citerneIdFromUrl) {
-      this.citerrneService.getCiterne(this.citerneIdFromUrl).subscribe({
-        next: (citerne) => {
-          console.log('Détails de la citerne récupérés:', citerne);
-          this.citerneDetails = citerne;
-        },
-        error: (err) => {
-          console.error('Erreur récupération citerne:', err);
-          alert('Erreur lors de la récupération des détails de la citerne.');
-        }
+      this.citerneService.getCiterne(this.citerneIdFromUrl).subscribe({
+        next: (data) => this.citerneDetails = data,
+        error: () => alert('Erreur lors de la récupération de la citerne.')
       });
     }
   }
-  
 
   getCompartiments(): void {
     if (this.citerneIdFromUrl) {
-      console.log('DEBUG: appel API avec citerneId:', this.citerneIdFromUrl);
       this.compartimentService.getCompartimentsByCiterneId(this.citerneIdFromUrl).subscribe({
-        next: data => {
-          console.log('Données récupérées:', data);
-          if (Array.isArray(data)) {
-            this.compartiments = data;
-          } else {
-            console.error("Données inattendues:", data);
-            this.compartiments = [];
-          }
-        },
-        error: err => {
-          console.error('Erreur récupération compartiments:', err);
-          alert('Erreur lors de la récupération des compartiments. Veuillez vérifier le serveur.');
-        }
+        next: (data) => this.compartiments = Array.isArray(data) ? data : [],
+        error: () => alert('Erreur lors de la récupération des compartiments.')
       });
-    } else {
-      console.error('Aucun ID de citerne trouvé.');
     }
   }
-  
-  
-  
+
+  getTypesProduits(): void {
+    this.typeProduitService.getAllTypeProduits().subscribe({
+      next: (types) => {
+        this.typesProduits = types.map((type: any) => ({ id: type.id, name: type.name }));
+        this.cdr.detectChanges();
+      },
+      error: () => alert('Erreur lors de la récupération des types de produits.')
+    });
+  }
+
 
   genererCodeCompartiment(): void {
+    if (this.compartiments.length >= this.citerneDetails?.nombreCompartiments) {
+      alert('Nombre maximal de compartiments atteint. Vous ne pouvez pas en ajouter d\'autres.');
+      return;
+    }
+
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const prefix = 'COMP-';
     let code = '';
     let isUnique = false;
-    const prefix = 'COMP-';
-  
+
     while (!isUnique) {
-      code = prefix;
-      for (let i = 0; i < 10; i++) {
-        code += charset.charAt(Math.floor(Math.random() * charset.length));
-      }
+      code = prefix + Array.from({ length: 10 }, () => charset.charAt(Math.floor(Math.random() * charset.length))).join('');
       isUnique = !this.compartiments.some(c => c.reference === code);
     }
+
     this.nouveauCompartiment.reference = code;
   }
 
-  ajouterCompartiment(): void {
-    if (!this.nouveauCompartiment.reference || !this.nouveauCompartiment.capaciteMax) {
-      alert('Veuillez remplir tous les champs.');
-      return;
-    }
-  
-    if (this.nouveauCompartiment.capaciteMax <= 0) {
-      alert('La capacité doit être positive.');
-      return;
-    }
-  
-    if (!this.nouveauCompartiment.citerneId) {
-      alert('Aucune citerne associée. ID manquant dans l\'URL.');
-      return;
-    }
-  
-    const validTypes = ['GAZ', 'CARBURANT', 'LUBRIFIANT'];
-    if (!validTypes.includes(this.nouveauCompartiment.typeProduit)) {
-      alert('Type de produit invalide. Les valeurs autorisées sont GAZ, CARBURANT, LUBRIFIANT.');
-      return;
-    }
-  
-    // Vérification de la capacité du compartiment par rapport à la capacité de la citerne
-    this.citerrneService.getCiterne(this.nouveauCompartiment.citerneId).subscribe({
-      next: (citerne) => {
-        if (this.nouveauCompartiment.capaciteMax > citerne.capaciteMax) {
-          this.citerneDetails = citerne;
-          alert('La capacité du compartiment ne doit pas dépasser la capacité de la citerne.');
-          return;
-        }
-  
-        // Vérification du nombre de compartiments déjà ajoutés
-        this.compartimentService.getCompartimentsByCiterneId(this.nouveauCompartiment.citerneId).subscribe({
-          next: (compartiments) => {
-            if (compartiments.length >= citerne.nombreCompartimentsMax) {
-              alert('Le nombre maximal de compartiments pour cette citerne a déjà été atteint.');
-              return;
-            }
-  
-            // Tout est OK, on peut ajouter
-            const payload = {
-              reference: this.nouveauCompartiment.reference,
-              capaciteMax: this.nouveauCompartiment.capaciteMax,
-              statut: this.nouveauCompartiment.statut,
-              typeProduit: this.nouveauCompartiment.typeProduit,
-              citerne: {
-                id: this.nouveauCompartiment.citerneId
-              }
-            };
-  
-            this.compartimentService.addCompartiment(payload).subscribe({
-              next: () => {
-                alert('Compartiment ajouté avec succès.');
-                this.getCompartiments();
-                this.resetForm();
-                this.cdr.detectChanges();
-              },
-              error: (error) => {
-                console.error('Erreur ajout compartiment:', error);
-                alert('Erreur: la capacité des compartiments dépasse la capacité maximale de la citerne.');
-              }
-            });
-          },
-          error: (err) => {
-            console.error('Erreur récupération compartiments:', err);
-            alert('Erreur lors de la vérification des compartiments existants.');
-          }
-        });
-  
-      },
-      error: (err) => {
-        console.error('Erreur récupération citerne:', err);
-        alert('Erreur lors de la récupération de la citerne.');
-      }
-    });
-  }
-  
-  
 
-  editCompartiment(id: number): void {
-    this.compartimentService.getCompartiment(id).subscribe({
-      next: data => {
-        this.compartimentEnCours = data;
-      },
-      error: error => {
-        console.error('Erreur chargement compartiment:', error);
-        alert('Erreur lors du chargement.');
-      }
-    });
-  }
-
-  sauvegarderModification(): void {
-    if (!this.isFormValidEdit()) {
-      alert('Veuillez remplir les champs valides.');
-      return;
-    }
-  
-    const payload = {
-      id: this.compartimentEnCours.id,
-      reference: this.compartimentEnCours.reference,
-      capaciteMax: this.compartimentEnCours.capaciteMax,
-      statut: this.compartimentEnCours.statut,
+  ajouterCompartiment() {
+    const compartimentData = {
+      reference: this.nouveauCompartiment.reference,
+      capaciteMax: this.nouveauCompartiment.capaciteMax,
+      citerne: { id: this.citerneIdFromUrl },
+      typeProduits: this.nouveauCompartiment.typeProduits
     };
-  
-    this.compartimentService.addCompartiment(payload).subscribe({
-      next: () => {
-        alert('Compartiment ajouté avec succès.');
-        this.getCompartiments(); // Mise à jour du nombre de compartiments
+
+    this.compartimentService.addCompartiment(compartimentData).subscribe(
+      () => {
+        this.getCompartiments();
         this.resetForm();
-        this.cdr.detectChanges();
+        Swal.fire({
+          icon: 'success',
+          title: 'Ajout réussi',
+          text: 'Le compartiment a été ajouté avec succès !',
+          confirmButtonColor: '#28a745'
+        });
       },
-      error: (error) => {
-        console.error('Erreur ajout compartiment:', error);
-        alert('Erreur lors de l\'ajout: ' + (error.error?.message || error.message));
+      err => {
+        Swal.fire({
+          icon: 'error',
+          title: 'Échec de l\'ajout',
+          text: err.error.message || 'Erreur lors de l\'ajout du compartiment.',
+          confirmButtonColor: '#dc3545'
+        });
       }
-    });
+    );
   }
 
-  supprimerCompartiment(id: number): void {
-    if (!confirm('Supprimer ce compartiment ?')) return;
 
-    this.compartimentService.deleteCompartiment(id).subscribe({
-      next: () => this.getCompartiments(),
-      error: error => {
-        console.error('Erreur suppression:', error);
-        alert('Erreur lors de la suppression.');
-      }
-    });
-  }
 
   resetForm(): void {
     this.nouveauCompartiment = {
       reference: '',
       capaciteMax: null,
-      statut: '',
-      citerneId: this.citerneIdFromUrl,
-      typeProduit: ''
+      typeProduits: [], // au lieu de typeProduit: null
+      citerneId: this.citerneIdFromUrl
     };
   }
+
+  getCapaciteTotaleCompartiments(): number {
+    return this.compartiments.reduce((total, compartiment) => total + (compartiment.capaciteMax || 0), 0);
+  }
+  peutAjouterCompartiment(): boolean {
+    return this.getCapaciteTotaleCompartiments() < (this.citerneDetails?.capacite || 0);
+  }
+
 
   closeModal(): void {
     this.compartimentEnCours = null;
   }
 
   isFormValidEdit(): boolean {
-    return this.compartimentEnCours &&
-      this.compartimentEnCours.reference &&
-      this.compartimentEnCours.capaciteMax > 0;
+    const c = this.compartimentEnCours;
+    return c && c.reference && c.capaciteMax > 0 && Array.isArray(c.typeProduits) && c.typeProduits.length > 0;
   }
+
+
+
 }

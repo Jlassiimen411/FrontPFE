@@ -1,5 +1,5 @@
 body{
-    margin-top: -39em;
+    margin-top: -39.3em;
     background: rgba(0, 0, 0, 0.4); 
     height: 100vh;
     
@@ -50,11 +50,12 @@ body{
         transform: translateY(-2px);
     }
     .produit-img{
-        margin-top: -5em;
-        height: 30em;
+        margin-top: -3em;
+        height: 26em;
         width: 40em;
         border-radius: 30px;
-        opacity: 90%;
+        opacity: 80%;
+        margin-left: 13em;
         
     
     }

@@ -7,13 +7,13 @@ import { Observable } from 'rxjs';
 })
 export class CompartimentService {
 
-  private apiUrl = 'http://localhost:8080/api/compartiments';
+  private apiUrl = 'http://localhost:8090/api/compartiments';
 
   constructor(private http: HttpClient) { }
 
   // Récupérer la liste des citernes
   getCiternes(): Observable<any[]> {
-    return this.http.get<any[]>(`http://localhost:8080/api/citernes`);
+    return this.http.get<any[]>(`http://localhost:8090/api/citernes`);
   }
 
   // Récupérer la liste des compartiments

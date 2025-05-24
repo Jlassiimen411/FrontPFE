@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <body>
   <div class="container page-container outer">
     <div class="row">
@@ -35,53 +34,55 @@
             </div>
           </div>
 
+          <!-- Client selection -->
+          <div class="mb-3 form-group">
+            <label for="client" class="form-label">Client</label>
+            <div class="input-group">
+            <select id="client" formControlName="client" class="form-control select-large">
+              <option [ngValue]="null" disabled>Sélectionnez un client</option>
+              <option *ngFor="let client of clients" [ngValue]="client.clientId">{{ client.fullName }}</option>
+            </select>
+              <button type="button" class="btn btn-outline-primary btnn" (click)="openAddClientDialog()" style="background-color: rgb(247, 183, 51); border-color: rgb(247, 183, 51); color: black;">
+          <i class="fa fa-plus me-2"></i>Nouveau Client
+        </button>
+            </div>
+            <div *ngIf="addCommandeForm.get('client')?.touched && addCommandeForm.get('client')?.hasError('required')" class="invalid-feedback">
+              La sélection d'un client est requise.
+            </div>
+          </div>
+
           <!-- Choix multi-produits -->
           <div class="mb-4">
             <label class="form-label">Produits</label>
             <div *ngFor="let type of typeProduitsAvecProduits">
-                <h3>{{ type.name }}</h3>
-            <div *ngFor="let produit of type.produits">
+              <h3>{{ type.name }}</h3>
+              <div *ngFor="let produit of type.produits">
                 <input type="checkbox" [value]="produit" (change)="onProduitToggle($event, produit)">
-                {{ produit.nomProduit }} <!--({{ type.name }})-->
-            </div>
-
+                {{ produit.nomProduit }}
               </div>
-              
+            </div>
           </div>
 
           <!-- Liste des produits sélectionnés avec quantité -->
           <div formArrayName="produits">
             <div *ngFor="let groupe of produitsFormArray.controls; let i = index" [formGroupName]="i" class="mb-3">
-                <div class="d-flex align-items-center justify-content-between">
-                    <label class="form-label">{{ getNomProduit(groupe.get('produit')?.value) }}</label>
-                    <span class="badge bg-warning" style="color: black;">Prix : {{ prixProduitsSelectionnes[i] || 0 }} TND</span>
-                  </div>
-                  <input type="number" formControlName="quantite" class="form-control mt-1" min="1" />
-                  <div *ngIf="groupe.get('quantite')?.invalid && groupe.get('quantite')?.touched" class="text-danger">
-                    Quantité invalide (minimum 1)
-                  </div>
-                  
+              <div class="d-flex align-items-center justify-content-between">
+                <label class="form-label">{{ getNomProduit(groupe.get('produit')?.value) }}</label>
+                <span class="badge bg-warning" style="color: black;">Prix : {{ prixProduitsSelectionnes[i] || 0 }} TND</span>
+              </div>
+              <input type="number" formControlName="quantite" class="form-control mt-1" min="1" />
+              <div *ngIf="groupe.get('quantite')?.invalid && groupe.get('quantite')?.touched" class="text-danger">
+                Quantité invalide (minimum 1)
+              </div>
               <div>
                 <span class="text-muted">Code de commande : {{ addCommandeForm.get('codeCommande')?.value }}</span>
                 <span class="text-muted">Date : {{ addCommandeForm.get('dateCommande')?.value }}</span>
               </div>
-
               <button type="button" class="btn btn-sm btn-danger mt-2" (click)="retirerProduit(i)">Retirer</button>
             </div>
           </div>
 
-          <!-- Champ Date -->
-          <div class="mb-4">
-            <label for="dateCommande" class="form-label">
-              <i class="fa fa-calendar-alt me-2"></i>Date de commande
-            </label>
-            <input formControlName="dateCommande" type="date" class="form-control" [readonly]="true" >
 
-
-            <div *ngIf="addCommandeForm.get('dateCommande')?.invalid && addCommandeForm.get('dateCommande')?.touched" class="text-danger">
-              <i class="fa fa-exclamation-circle me-1"></i>La date est obligatoire.
-            </div>
-          </div>
 
           <!-- Champ Prix total -->
           <div class="mb-4">
@@ -97,7 +98,6 @@
               <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
               <i class="fa fa-save me-2"></i>Ajouter
             </button>
-            
             <button type="button" class="custom-btn-outline ms-3" (click)="_dialogRef.close()">
               <i class="fa fa-times me-2"></i>Annuler
             </button>
@@ -108,7 +108,7 @@
             <i class="fa fa-check-circle me-2"></i>Commande ajoutée avec succès !
           </div>
           <div *ngIf="isFailed" class="alert alert-danger">
-            <i class="fa fa-exclamation-triangle me-2"></i>Erreur lors de l'ajout de la commande.
+            <i class="fa fa-exclamation-triangle me-2"></i>{{ errorMessage || 'Erreur lors de l\'ajout de la commande.' }}
           </div>
         </form>
       </div>

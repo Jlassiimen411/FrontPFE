@@ -8,14 +8,14 @@ import { OrderDetails } from '../model/order-details.model';
   providedIn: 'root'
 })
 export class ProduitService {
-  private produitURL: string = 'http://localhost:8080/api/produits/v1';
+  private produitURL: string = 'http://localhost:8090/api/produits/v1';
 
 
   constructor(private httpClient: HttpClient) {}
 
   //Méthode pour récupérer toutes les commandes
   getAllProduits(): Observable<any[]> {
-    return this.httpClient.get<any[]>('http://localhost:8080/api/produits/v1')
+    return this.httpClient.get<any[]>('http://localhost:8090/api/produits/v1')
       .pipe(
         catchError(this.handleError<any[]>('getAllProduits', []))
       );
@@ -73,14 +73,14 @@ export class ProduitService {
     };
   }
   public addToCart(id: number){
-    return this.httpClient.get("http://localhost:8080/api/cart/addToCart/"+id);
+    return this.httpClient.get("http://localhost:8090/api/cart/addToCart/"+id);
   }
 
   public getProductDetails(isSingleProductCheckout: boolean, id: number): Observable<any[]> {
-    return this.httpClient.get<any[]>(`http://localhost:8080/api/produits/v1/getProductDetails/${isSingleProductCheckout}/${id}`);
+    return this.httpClient.get<any[]>(`http://localhost:8090/api/produits/v1/getProductDetails/${isSingleProductCheckout}/${id}`);
   }
   public placeOrder(orderDetails:OrderDetails){
-    return this.httpClient.post("http://localhost:8080/api/order/placeOrder",orderDetails);
+    return this.httpClient.post("http://localhost:8090/api/order/placeOrder",orderDetails);
 
   }
   

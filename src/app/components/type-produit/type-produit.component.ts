@@ -12,7 +12,8 @@ import Swal from 'sweetalert2';
 })
 export class TypeProduitComponent {
   allTypeProduits: any[] = [];
-
+  searchTerm: string = ''; // ce que l'utilisateur tape
+  filteredTypeProduits: any[] = [];
   constructor(
     private pService: TypeProduitService,
     private router: Router,
@@ -27,13 +28,21 @@ export class TypeProduitComponent {
     this.pService.getAllTypeProduits().subscribe({
       next: (data) => {
         this.allTypeProduits = data;
+        this.filteredTypeProduits = data; // initialiser la liste filtrée
       },
       error: (err) => {
         console.error('Erreur lors du chargement des produits', err);
       }
     });
   }
-
+  
+  filterProduits(): void {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredTypeProduits = this.allTypeProduits.filter(p =>
+      p.name.toLowerCase().includes(term) ||
+      (p.description && p.description.toLowerCase().includes(term))
+    );
+  }
   deleteProduitById(id: number): void {
     Swal.fire({
       title: 'Êtes-vous sûr de vouloir supprimer ce produit ?',
@@ -79,8 +88,9 @@ export class TypeProduitComponent {
   openAddProduitDialog(): void {
     const dialogRef = this.dialog.open(AddTypeProduitComponent, {
       width: '900px',
-      height: '500px',
-      disableClose: true
+      height: '410px',
+      disableClose: false
+     
     });
 
     dialogRef.afterClosed().subscribe((result) => {

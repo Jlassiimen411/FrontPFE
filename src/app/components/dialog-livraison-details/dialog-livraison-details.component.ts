@@ -3,61 +3,130 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { LivraisonService } from 'src/app/services/livraison.service';
 import Swal from 'sweetalert2';
+
+// Définition des interfaces
+interface Produit {
+  id?: number;
+  nomProduit?: string;
+}
+
+interface CommandeProduit {
+  produit?: Produit;
+}
+
+interface Commande {
+  id?: number;
+  codeCommande: string;
+  quantite?: number;
+  commandeProduits?: CommandeProduit[];
+}
+
+interface Citerne {
+  reference?: string;
+  capacite?: number;
+}
+
+interface Camion {
+  marque?: string;
+  immatriculation?: string;
+}
+
+interface LivraisonResponse {
+  id: number;
+  codeLivraison: string;
+  dateLivraison: Date;
+  statut: string;
+  camion?: Camion;
+  citerne?: Citerne;
+  commandes?: Commande[];
+}
+
+interface LivraisonDetail {
+  id: number;
+  codeLivraison: string;
+  dateLivraison: Date | string;
+  statut: string;
+  marque: string;
+  immatriculation: string;
+  citerne: {
+    reference: string;
+    capacite: number | string;
+  };
+  commandes: Array<{
+    codeCommande: string;
+    produitNom: string;
+    commandeQuantite: number | string;
+  }>;
+}
+
 @Component({
   selector: 'app-dialog-livraison-details',
   templateUrl: './dialog-livraison-details.component.html',
   styleUrls: ['./dialog-livraison-details.component.css']
 })
 export class DialogLivraisonDetailsComponent implements OnInit {
-  livaisons: any[] = [];  // Initialisation de la propriété directement ici
-  livraisonDetail: any = {};
+  livaisons: any[] = [];
+  livraisonDetail: LivraisonDetail = {} as LivraisonDetail;
+  
   constructor(
     public dialogRef: MatDialogRef<DialogLivraisonDetailsComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private livraisonService: LivraisonService,
     private router: Router
   ) { }
-
   ngOnInit(): void {
     const livraisonId = this.data?.livraisonId;
-
+  
     if (!livraisonId) {
       console.error('ID de livraison manquant.');
       this.dialogRef.close();
       return;
     }
-
+  
     this.livraisonService.getLivraisonById(livraisonId).subscribe({
-      next: (res) => {
-        const camion = res.camion || {};
-        const citerne = camion.citerne || {};
-
+      next: (res: LivraisonResponse) => {
+        console.log('Données complètes de la réponse:', res); // Ajoute un log complet pour voir la structure exacte
+    
+        // Assure-toi que la structure de la réponse est celle que tu attends
+        if (res.commandes && res.commandes.length > 0) {
+          console.log('Nombre de commandes:', res.commandes.length);
+        } else {
+          console.log('Aucune commande trouvée dans la réponse.');
+        }
+    
+        // Formatage des détails de la livraison
         this.livraisonDetail = {
           id: res.id,
           codeLivraison: res.codeLivraison || 'Non définie',
           dateLivraison: res.dateLivraison || 'Non définie',
           statut: res.statut || 'Non défini',
-          codeCommande: res.commande?.codeCommande || 'Non définie',
-          marque: camion.marque || 'Non définie',
-          immatriculation: camion.immatriculation || 'Non définie',
+          marque: res.camion?.marque || 'Non définie',
+          immatriculation: res.camion?.immatriculation || 'Non définie',
           citerne: {
-            reference: citerne.reference || 'Non définie',
-            capacite: citerne.capacite || 'Non définie'
-          }
+            reference: res.citerne?.reference || 'Non définie',
+            capacite: res.citerne?.capacite || 'Non définie'
+          },
+          commandes: Array.isArray(res.commandes)
+          ? res.commandes.map((cmd: Commande) => ({
+              codeCommande: cmd.codeCommande || 'Non définie',
+              produitNom: cmd.commandeProduits?.[0]?.produit?.nomProduit || 'Non défini',
+              commandeQuantite: cmd.quantite || 'Non définie'
+            }))
+          : []
+        
         };
+    
+        console.log('Détails de livraison formatés:', this.livraisonDetail);
       },
       error: (err) => {
         console.error('Erreur lors du chargement des détails :', err);
         this.dialogRef.close();
       }
     });
+    
   }
   
-  
-  
-  
-  
-  
+
 
   closeDialog(): void {
     // Retirer le focus du bouton ou de tout élément en focus

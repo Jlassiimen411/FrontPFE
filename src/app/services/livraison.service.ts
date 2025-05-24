@@ -9,7 +9,7 @@ import { HttpHeaders } from '@angular/common/http';
 })
 export class LivraisonService  {
 
-  private livraisonURL: string = 'http://localhost:8080/api/livraisons';
+  private livraisonURL: string = 'http://localhost:8090/api/livraisons';
 
   constructor(private httpClient: HttpClient) { }
 
@@ -22,12 +22,12 @@ export class LivraisonService  {
     return this.httpClient.get<{ exists: boolean }>(`${this.livraisonURL}/check-code?codeLivraison=${code}`);
   }
   getCamionsDisponibles(date: string): Observable<any> {
-    return this.httpClient.get<any[]>(`http://localhost:8080/api/livraisons/camions/disponibles?date=${date}`);
+    return this.httpClient.get<any[]>(`http://localhost:8090/api/livraisons/camions/disponibles?date=${date}`);
   }
   
   // livraison.service.ts
 getCiterneDisponiblesPourDate(date: string): Observable<any[]> {
-  return this.httpClient.get<any[]>(`http://localhost:8080/api/livraisons/citerne/disponibles?date=${date}`);
+  return this.httpClient.get<any[]>(`http://localhost:8090/api/livraisons/citerne/disponibles?date=${date}`);
 }
 
   

@@ -14,6 +14,8 @@ export class ProduitsParTypeComponent implements OnInit {
   typeId!: number;  // Déclaration de l'ID du type de produit
   typeName: string = '';  // Nom du type de produit
   produits: any[] = [];  // Liste des produits à afficher
+  searchTerm: string = '';
+  produitsFiltres: any[] = [];  // Liste des produits filtrés affichés
 
   constructor(
     private route: ActivatedRoute,
@@ -43,17 +45,29 @@ export class ProduitsParTypeComponent implements OnInit {
     if (this.typeId) {
       this.produitService.getProduitsByType(this.typeId).subscribe({
         next: (data) => {
-          console.log('Produits récupérés:', data);
           this.produits = data;
+          this.produitsFiltres = data;  // initialiser la liste filtrée à la liste complète
         },
         error: (err) => {
           console.error('Erreur lors du chargement des produits:', err);
         }
       });
-    } else {
-      console.error('TypeId non valide:', this.typeId);
     }
   }
+  filterProduits(): void {
+    const term = this.searchTerm.toLowerCase().trim();
+    if (term) {
+      this.produitsFiltres = this.produits.filter(p =>
+        p.nomProduit.toLowerCase().includes(term) ||
+        p.libelle.toLowerCase().includes(term) ||
+        p.description.toLowerCase().includes(term) ||
+        p.codeProduit.toString().includes(term)
+      );
+    } else {
+      this.produitsFiltres = [...this.produits]; // reset à la liste complète
+    }
+  }
+  
   
   
   // Méthode pour ajouter un produit
@@ -61,6 +75,7 @@ export class ProduitsParTypeComponent implements OnInit {
     const dialogRef = this.dialog.open(AddProduitComponent, {
       width: '650px', // Taille du popup
       height: '750px',
+      disableClose: false,
       data: { typeId: this.typeId } // Passer l'ID du type de produit au popup
     });
   

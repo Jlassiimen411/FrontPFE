@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class CamionService {
 
-  private apiUrl = 'http://localhost:8080/api/camions'; // URL de ton API backend
+  private apiUrl = 'http://localhost:8090/api/camions'; // URL de ton API backend
 
   constructor(private http: HttpClient) { }
 
@@ -29,7 +29,7 @@ export class CamionService {
 
   // livraison.service.ts
 getCiterneDisponiblesPourDate(date: string): Observable<any[]> {
-  return this.http.get<any[]>(`http://localhost:8080/api/livraisons/citerne/disponibles?date=${date}`);
+  return this.http.get<any[]>(`http://localhost:8090/api/livraisons/citerne/disponibles?date=${date}`);
 }
 
 

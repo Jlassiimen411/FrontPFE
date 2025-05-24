@@ -2,6 +2,7 @@ import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CartService } from 'src/app/services/cart.service';
 import { ProduitService } from 'src/app/services/produit.service';
 import { Router } from '@angular/router';
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-cart',
@@ -11,22 +12,37 @@ import { Router } from '@angular/router';
 export class CartComponent implements OnInit {
   cartItems: any[] = [];
   total: number = 0;
+  showOrderModal: boolean = false;
+  
+  orderDetails: any = {
+    fullName: '',
+    fullAddress: '',
+    contactNumber: '',
+    alternateContactNumber: '',
+    orderProductQuantityList: []
+  };
 
   constructor(
     private cartService: CartService,
     private produitService: ProduitService,
     private router: Router,
-    private cdr: ChangeDetectorRef  // Inject ChangeDetectorRef
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    this.loadCartItems();
+  }
+
+  loadCartItems(): void {
     this.cartService.getCartItems().subscribe(
       data => {
         this.cartItems = data.map((item: any) => ({
           product: item.product,
           quantity: item.quantity || 1
         }));
-        this.getTotalPrice();  // Calculer le total au chargement
+        this.getTotalPrice();
+        // Préparer les produits pour la commande
+        this.prepareOrderProductList();
       },
       error => {
         console.error("Erreur de récupération du panier", error);
@@ -41,6 +57,7 @@ export class CartComponent implements OnInit {
         item.quantity = quantity;
         this.cartItems = [...this.cartItems];  // Crée une nouvelle référence pour forcer Angular à détecter les changements
         this.getTotalPrice();  // Recalcule le total
+        this.prepareOrderProductList(); // Met à jour la liste des produits pour la commande
       }
     } else {
       alert("La quantité ne peut pas être inférieure à 1");
@@ -49,12 +66,10 @@ export class CartComponent implements OnInit {
 
   getTotalPrice(): void {
     this.total = this.cartItems.reduce((acc, item) => acc + (item.product.prix * item.quantity), 0);
-    console.log("Total recalculé : ", this.total);
     this.cdr.detectChanges();  // Force la détection des changements
   }
 
   removeItem(id: number): void {
-    console.log("ID envoyé pour suppression :", id);  // 🔍 Ajoute ce log
     if (!id) {
       console.error("ID invalide !");
       return;
@@ -64,8 +79,8 @@ export class CartComponent implements OnInit {
       (response) => {
         console.log('Réponse du backend:', response);
         this.cartItems = this.cartItems.filter(item => item.product.id !== id);
-
         this.getTotalPrice();
+        this.prepareOrderProductList(); // Met à jour la liste des produits pour la commande
         this.cdr.detectChanges();
       },
       (error) => {
@@ -74,10 +89,48 @@ export class CartComponent implements OnInit {
     );
   }
   
+  // Préparation de la liste des produits pour la commande
+  prepareOrderProductList(): void {
+    this.orderDetails.orderProductQuantityList = this.cartItems.map(item => ({
+      id: item.product.id,
+      quantity: item.quantity
+    }));
+  }
 
-  
+  // Gestion du modal
+  openOrderModal(): void {
+    if (this.cartItems.length === 0) {
+      alert("Votre panier est vide. Veuillez ajouter des produits avant de valider la commande.");
+      return;
+    }
+    this.showOrderModal = true;
+  }
 
-  checkout() {
-    this.router.navigate(['/buyProduct', { isSingleProductCheckout: false, id: 0 }]);
+  closeOrderModal(): void {
+    this.showOrderModal = false;
+  }
+
+  placeOrder(orderForm: NgForm): void {
+    if (this.orderDetails.orderProductQuantityList.length === 0) {
+      alert("Votre panier est vide!");
+      return;
+    }
+
+    this.produitService.placeOrder(this.orderDetails).subscribe(
+      (response) => {
+        console.log('Commande placée avec succès:', response);
+        this.closeOrderModal();
+        orderForm.reset();
+        // Vider le panier
+        this.cartItems = [];
+        this.getTotalPrice();
+        // Rediriger vers la page de confirmation
+        this.router.navigate(['/orderConfirm']);
+      },
+      (error) => {
+        console.error('Erreur lors du placement de la commande:', error);
+        alert("Une erreur s'est produite lors du placement de la commande. Veuillez réessayer.");
+      }
+    );
   }
 }

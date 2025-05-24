@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { CamionService } from 'src/app/services/camion.service';
-
 import Swal from 'sweetalert2';
 @Component({
   selector: 'app-camions',
@@ -10,8 +9,10 @@ import Swal from 'sweetalert2';
 export class CamionsComponent implements OnInit {
   camions: any[] = [];
   statuts: string[] = ['Disponible', 'En maintenance', 'En livraison', 'Hors service'];
- 
-
+  camionsFiltres: any[] = []; 
+  searchTerm: string = ''; 
+  page: number = 1;
+  itemsPerPage: number = 5;
   
   nouveauCamion = {
     id: 0,
@@ -19,7 +20,7 @@ export class CamionsComponent implements OnInit {
     modele: '',
     immatriculation: '',
     kilometrage: null,
-    statut: 'Disponible',
+    statut: '',
     
   };
 
@@ -39,8 +40,8 @@ export class CamionsComponent implements OnInit {
   loadCamions(): void {
     this.camionService.getCamions().subscribe(
       (data) => {
-        this.camions = data; // 👈 ajout obligatoire pour afficher les camions
-        console.log('Camions:', data);
+        this.camions = data;
+        this.camionsFiltres = data; // Initialisation avec tous les camions
       },
       (error) => {
         console.error('Erreur lors du chargement des camions:', error);
@@ -48,6 +49,19 @@ export class CamionsComponent implements OnInit {
     );
   }
   
+
+  filtrerCamions(): void {
+    const term = this.searchTerm.toLowerCase();
+
+    this.camionsFiltres = this.camions.filter(camion => {
+      return (
+        camion.marque.toLowerCase().includes(term) ||
+        camion.modele.toLowerCase().includes(term) ||
+        camion.statut.toLowerCase().includes(term) ||
+        camion.immatriculation.toLowerCase().includes(term)
+      );
+    });
+  }
  
   
   
@@ -72,7 +86,7 @@ export class CamionsComponent implements OnInit {
             modele: '',
             immatriculation: '',
             kilometrage: null,
-            statut: 'Disponible',
+            statut: '',
           };
         },
         (error) => {

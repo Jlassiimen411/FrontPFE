@@ -1,33 +1,40 @@
 <app-header2></app-header2>
 <app-dash-receptionnaire></app-dash-receptionnaire>
-
-
 <main class="main-content position-relative max-height-vh-100 h-100 border-radius-lg">
     <section class="commande_menu">
-      <h1>Gestion des commandes</h1>
+      
         <div class="container">
-         
-<div class="menu_btn">
-  <button
-  type="button"
-  class="single_page_btn d-none d-sm-block add btn btn-outline-warning"
-  (click)="openAddCommandeDialog()">
-  <i class="fa fa-plus-circle"></i>&nbsp;&nbsp;<b>Ajouter une &nbsp; &nbsp; commande</b>
-</button>
+          <div class="heading_container heading_center">
+          <h2 class="lo">Gestion des commandes</h2>
 
-  
-  </div>
-  
-</div>
-</section>
+          
+            <button
+            type="button"
+            class="single_page_btn d-none d-sm-block add btn btn-outline-warning"
+            (click)="openAddCommandeDialog()">
+            <i class="fa fa-plus-circle"></i>&nbsp;&nbsp;<b>Ajouter une commande</b>
+          </button>
+          
+            
+            </div>
+
+          </div>
+          </section>
 </main>
+
 <div class="container-fluid py-2"> 
+  <div class="search-input-wrapper">
+    <i class="fas fa-search"></i>
+  <input [(ngModel)]="searchText" placeholder="Rechercher..."    type="text"
+  class="form-control custom-search" />
+  </div>  <br><br><br><br><br><br>
   <div class="row">
+   
     <div class="col-12">
       <div class="card my-4">
         <div class="card-header p-0 position-relative mt-n4 mx-3 z-index-2">
           <div class="bg-gradient-dark shadow-dark border-radius-lg pt-4 pb-3">
-            <h6 class="text-white text-capitalize ps-3"> Tableau de commandes</h6>
+            <h4 class="text-white text-capitalize ps-3">La liste des commandes</h4>
           </div>
         </div>
         <div class="card-body px-0 pb-2">
@@ -41,12 +48,14 @@
                   <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Produit</th>
                   <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quantité</th>
                   <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Date de Commande</th>
+                  <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Client</th>
                   <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Prix</th>
                   <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                <tr *ngFor="let produit of produits">
+                <tr *ngFor="let produit of produitsFiltres | paginate: { itemsPerPage: itemsPerPage, currentPage: page }">
+
                 
                   <td>
                     <p class="text-xs font-weight-bold mb-0">{{ produit.codeCommande }}</p>
@@ -63,7 +72,7 @@
                       <span>{{ produit.produitNom || 'Nom introuvable' }}</span>
                     </p>
                   </td>
-                  <td class="align-middle text-center text-sm">
+                  <td class="align-middle text-sm">
                     <span class="badge badge-sm">
                       {{ produit.commandeQuantite }} L
                     </span>
@@ -72,23 +81,36 @@
                   <td class="align-middle text-center">
                     <span class="text-secondary text-xs font-weight-bold">{{ produit.dateCommande | date }}</span>
                   </td>
-                  <td class="align-middle">
+                  <td>
+                    <p class="text-xs font-weight-bold mb-0">{{ produit.clientNom }}</p>
+                  </td>
+                  
+                  <td class="align-middle text-center">
                     <span class="badge badge-sm bg-gradient-success">{{ produit.prix }} DT</span>
                   </td>
                   <td class="align-middle text-center">
-                    <button type="button" class="btn btn-outline-dark" [routerLink]="['/editcommande', produit.idCommande]">Edit</button>
-                    <button class="btn btn-outline-dark" (click)="deleteCommandeById(produit.idCommande)">Delete</button>
+                    <button type="button" class="btn btn-outline-dark" [routerLink]="['/editcommande', produit.idCommande]"><b>Éditer</b></button>&nbsp;
+                    <button class="btn btn-outline-dark" (click)="deleteCommandeById(produit.idCommande)"><b>Éffacer</b></button>
                   </td>
                 </tr>
+              
               </tbody>
             </table>
+            <div class="pagination-container text-center mt-3">
+              <pagination-controls 
+                (pageChange)="page = $event"
+                previousLabel="Précédent"
+                nextLabel="Suivant"
+                [maxSize]="5"
+                [directionLinks]="true"
+                [autoHide]="true">
+              </pagination-controls>
+            </div>
           </div>
+          
+         
         </div>
       </div>
     </div>
   </div>
 </div>
-
-
-
-

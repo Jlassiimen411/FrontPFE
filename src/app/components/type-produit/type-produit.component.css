@@ -14,11 +14,47 @@ full-calendar {
   }
  
   .add{
-    margin-left: 50em;
-    background-color: black;
-    text-align: center;
+    right: -32em;
+   
+    
    
 }
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+ 
+}
+
+.search-input-wrapper i {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 16px;
+  pointer-events: none;
+}
+
+input.custom-search {
+  width: 100%;
+  padding: 10px 15px 10px 40px;
+  font-size: 16px;
+  border: 2px solid #ffc107;
+  border-radius: 30px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+input.custom-search:focus {
+  outline: none;
+  border-color: #e0a800;
+  box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+}
+
+
 .detail-box {
     position: relative;
     background-image: url('/assets/img/a1.jpg');
@@ -26,7 +62,7 @@ full-calendar {
     background-size: cover;
     background-position: center;
     padding: 20px;
-    color: white; /* Le texte reste noir */
+    color: #e12424; /* Le texte reste noir */
     
     
 }
@@ -39,7 +75,7 @@ full-calendar {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(128, 128, 128, 0.4); /* Gris avec une transparence de 40% */
+    background: rgba(88, 88, 88, 0.4); /* Gris avec une transparence de 40% */
     z-index: 1; /* Met le calque au-dessus de l'image */
 }
 
@@ -48,7 +84,7 @@ full-calendar {
     z-index: 2; /* Le texte passe au-dessus du calque transparent */
 }
 
-h3{
+.de{
     font-family: 'Times New Roman', Times, serif;
 }
 
@@ -116,8 +152,8 @@ span{
   }
   
   /* Surlignage des informations importantes */
-  .detail-box h3 span {
-    color: #e12424;
+  .detail-box h2 span {
+    color: white;
     font-weight: 500;
   }
   

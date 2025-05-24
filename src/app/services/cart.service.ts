@@ -6,7 +6,7 @@ import { catchError, Observable, tap, throwError } from 'rxjs';
   providedIn: 'root'
 })
 export class CartService {
-  private apiUrl = 'http://localhost:8080/api/cart';
+  private apiUrl = 'http://localhost:8090/api/cart';
 
   constructor(private http: HttpClient) {}
 

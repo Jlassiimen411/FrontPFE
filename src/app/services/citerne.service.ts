@@ -5,8 +5,8 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class CiterneService {
-  private baseUrl = 'http://localhost:8080/api/citernes';
-  private compartimentsUrl = 'http://localhost:8080/api/compartiments';  // Correct URL for compartiments
+  private baseUrl = 'http://localhost:8090/api/citernes';
+  private compartimentsUrl = 'http://localhost:8090/api/compartiments';  // Correct URL for compartiments
 
   constructor(private http: HttpClient) {}
 

@@ -6,7 +6,7 @@ import { catchError } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class CommandeService {
-  private commandeURL = 'http://localhost:8080/api/commandes/v1';
+  private commandeURL = 'http://localhost:8090/api/commandes/v1';
 
   constructor(private httpClient: HttpClient) {}
 
@@ -25,7 +25,7 @@ addCommande(commande: any): Observable<any> {
 
 // Dans ton service, exemple : commande.service.ts
 getTypeProduitsParCommande(idCommande: number): Observable<any[]> {
-  return this.httpClient.get<any[]>(`http://localhost:8080/commandes/${idCommande}/type-produits`);
+  return this.httpClient.get<any[]>(`http://localhost:8090/commandes/${idCommande}/type-produits`);
 }
 
 

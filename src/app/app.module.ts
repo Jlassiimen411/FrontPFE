@@ -50,9 +50,13 @@ import { GestionDispatcheurComponent } from './components/gestion-dispatcheur/ge
 import { CompartimentsComponent } from './components/compartiments/compartiments.component';
 import { OrderConfirmationComponent } from './components/order-confirmation/order-confirmation.component';
 import { ServiceHomeComponent } from './components/service-home/service-home.component';
-
-
-
+import { Ng2SearchPipeModule } from 'ng2-search-filter';
+import { LoginComponent } from './components/login/login.component';
+import { RegisterComponent } from './components/register/register.component';
+import { GestionClientComponent } from './components/gestion-client/gestion-client.component';
+import { NgChartsModule } from 'ng2-charts';
+import { NgxPaginationModule } from 'ngx-pagination';
+import { AddClientComponent } from './components/add-client/add-client.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -92,7 +96,11 @@ import { ServiceHomeComponent } from './components/service-home/service-home.com
     CompartimentsComponent,
     OrderConfirmationComponent,
     ServiceHomeComponent,
- 
+    LoginComponent,
+    RegisterComponent,
+    GestionClientComponent,
+    AddClientComponent,
+
   
   
   ],
@@ -105,9 +113,14 @@ import { ServiceHomeComponent } from './components/service-home/service-home.com
     BrowserAnimationsModule,
     MatDialogModule,
     HttpClientModule,
+    NgChartsModule,
     MatTableModule,
     MatSnackBarModule,
-  ToastrModule.forRoot()
+    
+  ToastrModule.forRoot(),
+  NgxPaginationModule
+   
+
    
     
     

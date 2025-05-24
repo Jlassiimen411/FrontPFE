@@ -8,7 +8,7 @@ import { Observable } from 'rxjs';
 export class ReceptionnairePageService {
 
   
-  private typeproduitURL = 'http://localhost:8080/api'; // Remplace par ton URL d'API
+  private typeproduitURL = 'http://localhost:8090/api'; // Remplace par ton URL d'API
 
   constructor(private http: HttpClient) {}
 

@@ -18,7 +18,7 @@
                             <p><b>* Nom du produit :&nbsp;&nbsp; </b><span>{{elt.nomProduit}}</span></p>
                             <h3><b>* Libellé : &nbsp;&nbsp;</b><span>{{elt.libelle}}</span> </h3>
                             <h3><b>* Prix :&nbsp;&nbsp; </b> <span>{{elt.prix}} </span>TND </h3>
-                            <h3><b>* Date :&nbsp;&nbsp; </b> <span>{{elt.date | date: 'dd/MM/yyyy' }}</span> </h3>
+                           
                             <h3><b>* Description :&nbsp;&nbsp;</b><span>{{elt.description }}</span> </h3>
                         </div>
                         
@@ -27,10 +27,7 @@
                            <a class="single_page_btn d-none d-sm-block" (click)="addToCart(elt.id)">
                            AJOUTER AU PANIER
                             </a><br><br>
-                            <a class="single_page_btn d-none d-sm-block" (click)="buyProduct(elt.id)">
-                                AcheteR
-                            </a>
-                        
+        
                         </div><br>
                         
                     </div>

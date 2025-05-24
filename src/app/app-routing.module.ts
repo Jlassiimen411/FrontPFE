@@ -31,10 +31,16 @@ import { GestionDispatcheurComponent } from './components/gestion-dispatcheur/ge
 import { GestionAdminComponent } from './components/gestion-admin/gestion-admin.component';
 import { CompartimentsComponent } from './components/compartiments/compartiments.component';
 import { OrderConfirmationComponent } from './components/order-confirmation/order-confirmation.component';
+import { ServiceHomeComponent } from './components/service-home/service-home.component';
+import { LoginComponent } from './components/login/login.component';
+import { AuthInterceptor } from './services/auth-interceptor.service';
+import { HTTP_INTERCEPTORS } from '@angular/common/http';
+import { GestionClientComponent } from './components/gestion-client/gestion-client.component';
 
  
 const routes: Routes = [
   { path: '', component: HomeComponent },
+  { path: 'login', component: LoginComponent },
   //////////receptionnaire////////////////
   { path: 'receptionnairepage', component: ReceptionnairePageComponent },
   { path: 'commandes', component: CommandesComponent },
@@ -51,7 +57,7 @@ const routes: Routes = [
   { path: 'addProduit/:typeId', component: AddProduitComponent },
   { path: 'citernes', component: CiternesComponent },
   { path: 'compartiments/:idCiterne', component: CompartimentsComponent },
-  
+  { path: 'service', component: ServiceHomeComponent },
   
   //////////////////admin////////////
   { path: 'adminpage', component: AdminPageComponent},
@@ -60,6 +66,7 @@ const routes: Routes = [
  
   { path: 'gestiondispatcheur', component: GestionDispatcheurComponent},
   { path: 'gestionadmin', component: GestionAdminComponent},
+  { path: 'gestionclient', component: GestionClientComponent},
 
 
   /////////////client//////////
@@ -83,6 +90,13 @@ const routes: Routes = [
 
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
+  providers: [
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }
+  ]
 })
 export class AppRoutingModule { }

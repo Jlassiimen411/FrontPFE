@@ -1,40 +1,36 @@
 <app-header2></app-header2>
 <app-dash-receptionnaire></app-dash-receptionnaire>
+
 <section>
-    <div class="container mt-5 lo">
-      <div class="row">
-        <div class="col-md-4">
-            <div class="card text-white bg mb-3">
-              <div class="card-body text-center">
-                <h5 class="card-title">Types de Produits</h5>
-                <h2 class="card-text">{{ allTypeProduits.length }}</h2>
-              </div>
-            </div>
-          </div>
-        <div class="col-md-4">
-          <div class="card text-white bg mb-3">
-            <div class="card-body text-center">
-              <h5 class="card-title">Produits</h5>
-              <h2 class="card-text">{{ allProduits.length }}</h2>
-            </div>
-          </div>
+  <div class="container mt-5">
+    <div class="row">
+      <div class="col-md-4">
+        <div class="stat-box">
+          <h5>Produits</h5>
+          <canvas id="chartProduits"></canvas>
         </div>
-        <div class="col-md-4">
-          <div class="card text-white bg mb-3">
-            <div class="card-body text-center">
-              <h5 class="card-title lo">Commandes</h5>
-              <h2 class="card-text lo">{{ allCommandes.length }}</h2>
-            </div>
-          </div>
-        </div><br><br><br><br><br><br><br><br><br>
-        <div class="col-md-4">
-          <div class="card text-white bg mb-3">
-            <div class="card-body text-center">
-              <h5 class="card-title lo">Livraisons</h5>
-              <h2 class="card-text lo">{{ calendarOptions.events.length }}</h2>
-            </div>
-          </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="stat-box">
+          <h5>Commandes</h5>
+          <canvas id="chartCommandes"></canvas>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="stat-box">
+          <h5>Livraisons</h5>
+          <canvas id="chartLivraisons"></canvas>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="stat-box">
+          <h5>Types de Produits</h5>
+          <canvas id="chartTypeProduits"></canvas>
         </div>
       </div>
     </div>
-    </section>
+  </div>
+</section>

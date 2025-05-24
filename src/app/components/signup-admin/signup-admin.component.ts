@@ -1,6 +1,8 @@
-import { Component,OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component, OnInit } from '@angular/core';
+import { NgForm } from '@angular/forms';
+import { UserService } from 'src/app/services/user.service';
 import { Router } from '@angular/router';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-signup-admin',
@@ -8,33 +10,84 @@ import { Router } from '@angular/router';
   styleUrls: ['./signup-admin.component.css']
 })
 export class SignupAdminComponent implements OnInit {
-  type: string="password";
+  type: string = "password";
   isText: boolean = false;
   eyeIcon: string = "fa-eye-slash";
-  signUpForm!: FormGroup;
-  constructor(private fb : FormBuilder){}
+  roles: string[] = [];
+
+  constructor(
+    private userService: UserService,
+    private router: Router
+  ) {}
+
   ngOnInit(): void {
-    this.signUpForm = this.fb.group({
-      firstName: new FormControl('', [ Validators.required]),
-      lastName: new FormControl('', [ Validators.required]),
-      username: new FormControl('', [ Validators.required]),
-      email: new FormControl('', Validators.email),
-      password: new FormControl('', [ Validators.required]),
-    })
-  }
-  hideShowPass(){
-    this.isText = !this.isText;
-    this.isText ? this.eyeIcon = "fa-eye" : this.eyeIcon = "fa-eye-slash";
-    this.isText ? this.type = "text" : this.type = "password";
-  }
- 
-  private validateAllFormFileds(formGroup:FormGroup){
-    Object.keys(formGroup.controls).forEach(field=> {
-      const control = formGroup.get(field);
-      if (control instanceof FormControl) {
-        control.markAsDirty({ onlySelf: true });
-      } else if (control instanceof FormGroup) {
-        this.validateAllFormFileds(control)
+    this.userService.getAllRoles().subscribe({
+      next: (roles: string[]) => {
+        console.log('Rôles récupérés:', roles);
+        this.roles = roles;
+      },
+      error: (error: any) => {
+        console.error("Erreur lors de la récupération des rôles:", error);
       }
-    })
-}}
+    });
+  }
+
+  hideShowPass(): void {
+    this.isText = !this.isText;
+    this.eyeIcon = this.isText ? "fa-eye" : "fa-eye-slash";
+    this.type = this.isText ? "text" : "password";
+  }
+
+  register(registerForm: NgForm): void {
+    if (registerForm.invalid) {
+      console.warn("❌ Formulaire invalide.");
+      return;
+    }
+  
+    const formData = registerForm.form.value;
+  
+    // Adapter le rôle à un tableau
+    formData.roles = [formData.role];
+    delete formData.role;
+  
+    this.userService.register(formData).subscribe(
+      () => {
+        const date = new Date();
+        const heure = date.toLocaleTimeString();
+        const jour = date.toLocaleDateString();
+  
+        Swal.fire({
+          title: '🎉 Inscription réussie !',
+          html: `
+            <p>Date : <strong>${jour}</strong></p>
+            <p>Heure : <strong>${heure}</strong></p>
+          `,
+          icon: 'success',
+          confirmButtonText: 'Super !',
+          confirmButtonColor: '#3085d6',
+          background: '#f0f8ff',
+          color: '#333',
+          customClass: {
+            popup: 'animated fadeInDown faster'
+          }
+        }).then(() => {
+          // ✅ Vider le formulaire après fermeture de l'alerte
+          registerForm.resetForm();
+        });
+      },
+      (error) => {
+        console.error("❌ Erreur lors de l'inscription :", error);
+        Swal.fire({
+          title: 'Erreur 😓',
+          text: 'Une erreur est survenue pendant l’inscription.',
+          icon: 'error',
+          confirmButtonText: 'OK'
+        });
+      }
+    );
+  }
+  
+  
+  
+  
+}

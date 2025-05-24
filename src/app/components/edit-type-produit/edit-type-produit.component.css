@@ -50,13 +50,12 @@ body{
     transform: translateY(-2px);
 }
 .produit-img{
-    margin-top: -5em;
+    margin-top: -10em;
     height: 25em;
     width: 40em;
     border-radius: 30px;
     opacity: 80%;
-    
-
+    margin-left: 13em;
 }
 /* Styles pour l'alerte personnalisée */
 .custom-alert {

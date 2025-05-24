@@ -10,12 +10,75 @@
     margin-right: 5em;
 }
 
+.btnn {
+    top: 0.4em;
+}
 
-/* Titre */
+
 h2 {
     font-size: 24px;
     margin-bottom: 20px;
 }
+
+.search-input-wrapper {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    margin: 20px auto;
+    display: flex;
+    align-items: center;
+}
+
+.pagination-container {
+    margin-top: 20px;
+}
+
+.pagination-container ::ng-deep .ngx-pagination .current {
+    background-color: #ffc107;
+    color: white;
+    border-color: #ffc107;
+}
+
+.search-input-wrapper i {
+    position: absolute;
+    left: 18px;
+    top: 3%;
+    transform: translateY(-50%);
+    color: #6c757d;
+    font-size: 18px;
+    pointer-events: none;
+    transition: color 0.3s ease;
+}
+
+input.custom-search.form-control {
+    margin-top: -1em;
+    width: 100%;
+    padding: 12px 20px 12px 45px;
+    font-size: 16px;
+    border: 2px solid #ffc107 !important;
+    border-radius: 50px !important;
+    background-color: #fff !important;
+    color: #333 !important;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08) !important;
+}
+
+
+input.custom-search:focus {
+    outline: none;
+    border-color: #e0a800;
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
+}
+
+input.custom-search::placeholder {
+    color: #aaa;
+    font-style: italic;
+}
+
+.search-input-wrapper:focus-within i {
+    color: #e0a800;
+}
+
 
 /* Formulaire */
 .form {
@@ -49,7 +112,8 @@ thead {
     color: white;
 }
 
-th, td {
+th,
+td {
     padding: 10px;
     border: 1px solid #ddd;
     text-align: center;
@@ -65,30 +129,37 @@ tbody tr:nth-child(even) {
 /* Style de la modale */
 .modal {
     display: none;
-    position: fixed; /* Stay in place */
-    z-index: 1; /* Sit on top */
+    position: fixed;
+    /* Stay in place */
+    z-index: 1;
+    /* Sit on top */
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgb(0,0,0); /* Fallback color */
-    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    overflow: auto;
+    /* Enable scroll if needed */
+    background-color: rgb(0, 0, 0);
+    /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Black w/ opacity */
     padding-top: 60px;
-  }
-  
-  .modal-content {
+}
+
+.modal-content {
     background-color: #fefefe;
     margin: 5% auto;
     padding: 20px;
     border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
-  }
-  
-  .modal.visible {
-    display: block; /* Show modal when visible class is applied */
-  }
-  
+    width: 80%;
+    /* Could be more or less, depending on screen size */
+}
+
+.modal.visible {
+    display: block;
+    /* Show modal when visible class is applied */
+}
+
 /* Bouton pour fermer la modale */
 .close {
     color: #aaa;
@@ -105,14 +176,17 @@ tbody tr:nth-child(even) {
 }
 
 /* Formulaire d'édition dans la modale */
-input[type="text"], input[type="number"], select {
+input[type="text"],
+input[type="number"],
+select {
     width: 100%;
     padding: 10px;
     margin: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
-a{
+
+a {
     color: white;
 }
 

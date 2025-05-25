@@ -7,23 +7,26 @@
       <h2><i class="fas fa-truck"></i> Ajouter une Livraison</h2>
       <p>Veuillez remplir tous les champs requis pour créer une nouvelle livraison</p>
     </div>
-    
+
     <div class="livraison-form">
       <form [formGroup]="addLivraisonForm" (ngSubmit)="onSubmit()">
         <div class="form-group position-relative">
           <label for="codeLivraison"><i class="fas fa-hashtag"></i> Code Livraison</label>
           <div class="input-container">
-            <input type="text" id="codeLivraison" class="form-control" formControlName="codeLivraison" readonly placeholder="Entrez le code unique">
+            <input type="text" id="codeLivraison" class="form-control" formControlName="codeLivraison" readonly
+              placeholder="Entrez le code unique">
             <i class="fas fa-fingerprint input-icon"></i>
           </div>
-          <button type="button" class="btn btn-sm btn-outline-secondary" style="position: absolute; right: 10px; top: 30px;" (click)="genererCodeLivraison()">
+          <button type="button" class="btn btn-sm btn-outline-secondary"
+            style="position: absolute; right: 10px; top: 30px;" (click)="genererCodeLivraison()">
             Générer
           </button>
           <div *ngIf="addLivraisonForm.get('codeLivraison')?.touched">
             <div *ngIf="addLivraisonForm.get('codeLivraison')?.hasError('required')" class="invalid-feedback">
               Le code livraison est requis.
             </div>
-            <div *ngIf="addLivraisonForm.get('codeLivraison')?.hasError('codeLivraisonExists')" class="invalid-feedback">
+            <div *ngIf="addLivraisonForm.get('codeLivraison')?.hasError('codeLivraisonExists')"
+              class="invalid-feedback">
               Ce code existe déjà.
             </div>
           </div>
@@ -31,16 +34,11 @@
         <div class="form-group">
           <label for="date"><i class="fas fa-calendar-alt"></i> Date Livraison</label>
           <div class="input-container">
-            <input 
-              type="date" 
-              id="date" 
-              class="form-control" 
-              formControlName="date"
-              [min]="minDate" 
-              required>
+            <input type="date" id="date" class="form-control" formControlName="date" [min]="minDate" required>
             <i class="fas fa-calendar-check input-icon"></i>
           </div>
-          <div *ngIf="addLivraisonForm.get('date')?.invalid && addLivraisonForm.get('date')?.touched" class="error-message">
+          <div *ngIf="addLivraisonForm.get('date')?.invalid && addLivraisonForm.get('date')?.touched"
+            class="error-message">
             <div *ngIf="addLivraisonForm.get('date')?.hasError('required')">
               <i class="fas fa-exclamation-circle"></i> La date de livraison est requise.
             </div>
@@ -60,15 +58,17 @@
             </select>
             <i class="fas fa-barcode input-icon"></i>
           </div>
-          <div *ngIf="addLivraisonForm.get('camionId')?.invalid && addLivraisonForm.get('camionId')?.touched" class="error-message">
+          <div *ngIf="addLivraisonForm.get('camionId')?.invalid && addLivraisonForm.get('camionId')?.touched"
+            class="error-message">
             <i class="fas fa-exclamation-circle"></i> L'immatriculation est requise.
           </div>
         </div>
-      
+
         <div class="form-group">
           <label for="citerne-id"><i class="fas fa-gas-pump"></i> Citerne</label>
           <div class="input-container">
-            <select id="citerne-id" class="form-control" formControlName="citerneId" required [disabled]="citernes.length === 0" (change)="onCiterneSelectionChange($event)">
+            <select id="citerne-id" class="form-control" formControlName="citerneId" required
+              [disabled]="citernes.length === 0" (change)="onCiterneSelectionChange($event)">
               <option value="" disabled selected>Sélectionnez une citerne</option>
               <option *ngFor="let citerne of citernes" [value]="citerne.id">
                 {{ citerne.reference }} ({{ citerne.capacite }} L)
@@ -76,11 +76,12 @@
             </select>
             <i class="fas fa-oil-can input-icon"></i>
           </div>
-          <div *ngIf="addLivraisonForm.get('citerneId')?.invalid && addLivraisonForm.get('citerneId')?.touched" class="error-message">
+          <div *ngIf="addLivraisonForm.get('citerneId')?.invalid && addLivraisonForm.get('citerneId')?.touched"
+            class="error-message">
             <i class="fas fa-exclamation-circle"></i> La citerne est requise.
           </div>
         </div>
-        
+
         <div class="form-group" *ngIf="compartiments.length > 0">
           <label class="table-title">
             <i class="fas fa-database me-1"></i> Compartiments de la citerne
@@ -92,7 +93,7 @@
                   <th>Référence</th>
                   <th>Capacité Maximale (L)</th>
                   <th>Type de compartiment</th>
-                  <th>Statut</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -100,27 +101,24 @@
                   <td>{{ compartiment.reference }}</td>
                   <td>{{ compartiment.capaciteMax }} L</td>
                   <td>
-                    
-                      {{ compartiment.typeProduit }}
-                   
-                  </td>
-                  <td>
-                    <span class="badge statut-badge" [ngClass]="{
-                      'bg-success': compartiment.statut === 'PLEIN',
-                      'bg-warning text-dark': compartiment.statut === 'EN_COURS',
-                      'bg-danger': compartiment.statut === 'VIDE'
-                    }">
-                      {{ compartiment.statut }}
+                    <span *ngFor="let typeProduit of compartiment.typeProduits" class="statut-badge" [ngClass]="{
+                        'bg-success': typeProduit.name === 'Gaz',
+                        'bg-warning text-dark': typeProduit.name === 'Carburant',
+                        'bg-danger': typeProduit.name === 'Lubrifiant'
+                      }">
+                      {{ typeProduit.name }}
                     </span>
                   </td>
+
                 </tr>
               </tbody>
             </table>
           </div>
-          
+
           <div *ngFor="let compartiment of compartiments" class="mt-4">
             <h5>
-              <i class="fas fa-box-open"></i> Commandes compatibles pour le compartiment {{ compartiment.reference }} ({{ compartiment.typeProduit }})
+              <i class="fas fa-box-open"></i> Commandes compatibles pour le compartiment {{ compartiment.reference }}
+              ({{ compartiment.typeProduits }})
             </h5>
             <div class="table-responsive">
               <table class="table table-bordered table-sm">
@@ -136,7 +134,8 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr *ngIf="!compartimentCommandesMap[compartiment.reference] || compartimentCommandesMap[compartiment.reference].length === 0">
+                  <tr
+                    *ngIf="!compartimentCommandesMap[compartiment.reference] || compartimentCommandesMap[compartiment.reference].length === 0">
                     <td colspan="7" class="text-center text-muted">
                       Aucune commande compatible disponible pour ce compartiment.
                     </td>
@@ -159,23 +158,24 @@
             </div>
           </div>
         </div>
-        
         <div class="form-group">
           <label for="statut"><i class="fas fa-info-circle"></i> Statut</label>
           <div class="input-container">
             <select id="statut" class="form-control" formControlName="statut" required>
               <option value="" disabled>Sélectionnez un statut</option>
-              <option value="EN_ATTENTE"><span class="status-indicator status-en-attente"></span> En Attente</option>
-              <option value="LIVRE"><span class="status-indicator status-livre"></span> Livré</option>
-              <option value="ANNULE"><span class="status-indicator status-annule"></span> Annulé</option>
+              <option value="EN_ATTENTE">En Attente</option>
+              <option value="LIVRE">Livré</option>
+              <option value="ANNULE">Annulé</option>
+
             </select>
             <i class="fas fa-toggle-on input-icon"></i>
           </div>
-          <div *ngIf="addLivraisonForm.get('statut')?.invalid && addLivraisonForm.get('statut')?.touched" class="error-message">
+          <div *ngIf="addLivraisonForm.get('statut')?.invalid && addLivraisonForm.get('statut')?.touched"
+            class="error-message">
             <i class="fas fa-exclamation-circle"></i> Le statut est requis.
           </div>
         </div>
-        
+
         <div class="btn-group">
           <button type="button" class="btn btn-secondary" [routerLink]="['/livraisons']">
             <i class="fas fa-times"></i> Annuler

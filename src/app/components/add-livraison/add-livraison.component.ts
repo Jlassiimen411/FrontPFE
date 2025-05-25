@@ -24,11 +24,19 @@ interface Compartiment {
   reference: string;
   capaciteMax: number;
   statut: string;
-  typeProduit: string;
+  typeProduits: TypeProduit[];  // <-- ici, pluriel 'typeProduits'
   capaciteRestante?: number;
   capaciteUtilisee: number;
   commandesAffectees?: Commande[];
 }
+
+export interface TypeProduit {
+  id: number;
+  name: string;
+  description?: string;
+  date?: string;
+}
+
 
 interface Livraison {
   id: number;
@@ -114,7 +122,7 @@ export class AddLivraisonComponent implements OnInit {
       date: ['', [Validators.required, this.dateValidator()]],
       camionId: ['', [Validators.required]],
       citerneId: ['', [Validators.required]],
-      statut: [{ value: 'EN_ATTENTE', disabled: true }, [Validators.required]] // Disable the field
+      statut: ['', [Validators.required]] // Disable the field
     });
   }
 
@@ -341,7 +349,9 @@ export class AddLivraisonComponent implements OnInit {
   filtrerEtTrierCommandes(commandes: Commande[], compartiment: Compartiment): Commande[] {
     return commandes
       .filter(cmd =>
-        cmd.typeProduit?.toLowerCase() === compartiment.typeProduit?.toLowerCase() &&
+        compartiment.typeProduits.some(tp => tp.name.toLowerCase() === cmd.typeProduit?.toLowerCase())
+
+ &&
         cmd.commandeQuantite <= (compartiment.capaciteRestante ?? compartiment.capaciteMax) &&
         !this.commandesDejaAffectees.has(cmd.idCommande) &&
         !this.isCommandeSelectedInCurrentForm(cmd.idCommande)

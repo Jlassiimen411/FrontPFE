@@ -14,7 +14,7 @@
 
     <!-- Liste déroulante pour le statut -->
     <select [(ngModel)]="nouveauCamion.statut" required>
-      <option value="" disabled>Sélectionner le statut du camion</option>
+      <option  value="" disabled>Sélectionner le statut du camion</option>
       <option *ngFor="let statut of statuts" [value]="statut">{{ statut }}</option>
     </select>
 

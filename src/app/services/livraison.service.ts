@@ -71,4 +71,7 @@ getCiterneDisponiblesPourDate(date: string): Observable<any[]> {
       return of(result as T);
     };
   }
+  getLivreurPosition(commandeId: number): Observable<{ lat: number, lng: number }> {
+    return this.httpClient.get<{ lat: number, lng: number }>(`${this.livraisonURL}/position/${commandeId}`);
+  }
 }

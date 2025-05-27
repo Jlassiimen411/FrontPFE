@@ -5,12 +5,22 @@
       <div class="heading_container heading_center">
         <h2 class="lo">
           Types Produits
-        </h2>
-
-        <br><br><br><br>
+        </h2><br><br>
+        
+        <br><br>
+        <div class="search-input-wrapper">
+          <i class="fas fa-search"></i>
+          <input
+            type="text"
+            class="form-control custom-search"
+            placeholder="Rechercher un type de produit..."
+            [(ngModel)]="searchTerm"
+            (input)="filterProduits()" />
+        </div>
+        <br><br>
       </div>
       <div class="row">
-        <div class="col-lg-4" *ngFor="let elt of allTypeProduits">
+        <div class="col-lg-4" *ngFor="let elt of filteredTypeProduits">
           <div class=" b1 lo">
             
             <div class="detail-box">

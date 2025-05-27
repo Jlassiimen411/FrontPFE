@@ -4,14 +4,25 @@
     <p><strong>Code Livraison :</strong> {{ livraisonDetail.codeLivraison || 'Non défini' }}</p>
 
     <div *ngIf="livraisonDetail.commandes && livraisonDetail.commandes.length > 0; else noCommande">
-      <p><strong>Commandes :</strong></p>
-      <ul>
-        <li *ngFor="let cmd of livraisonDetail.commandes">
-          {{ cmd.codeCommande || 'Sans code' }} - 
-          {{ cmd.produitNom || 'Produit non défini' }} - 
-          {{ cmd.commandeQuantite || 0 }} L
-        </li>
-      </ul>
+      <p class="section-title"><strong>Commandes :</strong></p>
+      <div class="table-wrapper">
+        <table class="styled-table">
+          <thead>
+            <tr>
+              <th>Code Commande</th>
+              <th>Nom Produit</th>
+              <th>Quantité (L)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let cmd of livraisonDetail.commandes">
+              <td>{{ cmd.codeCommande || 'Sans code' }}</td>
+              <td>{{ cmd.produitNom || 'Produit non défini' }}</td>
+              <td>{{ cmd.commandeQuantite || 0 }} L</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
     
     <ng-template #noCommande>
@@ -33,9 +44,18 @@
   </div>
 
   <!-- Boutons d'action -->
+  <!-- Boutons d'action -->
   <div class="button-group">
-    <button mat-button class="btn btn-warning" [disabled]="!livraisonDetail.id" (click)="editLivraison(livraisonDetail.id)">Modifier</button>
-    <button mat-button class="btn btn-danger" (click)="deleteLivraison()">Supprimer</button>
-    <button mat-button class="btn btn-secondary" (click)="closeDialog()">Fermer</button>
+    <button mat-button class="btn btn-outline-warning" [disabled]="!livraisonDetail.id" (click)="editLivraison(livraisonDetail.id)"><i class="fa-solid fa-pen"></i></button>
+    <button mat-button class="btn btn-outline-warning" (click)="deleteLivraison()"><i class="fa-solid fa-trash"></i></button>
+    <button type="button" mat-button class="btn btn-outline-warning" (click)="imprimerLivraison()">
+      <i class="fa-solid fa-print"></i> 
+    </button>
+    <button mat-button class="btn btn-outline-warning" (click)="closeDialog()">Fermer</button>
+  
+  
+  
   </div>
+  
+
 </div>

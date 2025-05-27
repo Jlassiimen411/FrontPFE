@@ -13,13 +13,14 @@ export class EditLivraisonComponent implements OnInit {
   livraisonId!: number;
   livraisonData: any = {};
   livraisonForm!: FormGroup;
-
+  livraisonCommandes: any[] = [];
+  minDate: string;
   constructor(
     private route: ActivatedRoute,
     private livraisonService: LivraisonService,
     private router: Router,
     private fb: FormBuilder
-  ) {}
+  ) {this.minDate = this.formatDateToYYYYMMDD(new Date());}
 
   ngOnInit(): void {
     this.livraisonId = this.route.snapshot.params['id'];
@@ -29,15 +30,17 @@ export class EditLivraisonComponent implements OnInit {
       marque: ['', Validators.required],
       immatriculation: ['', Validators.required],
       statut: ['', Validators.required],
-      reference: [{ value: '', disabled: true }, Validators.required]
+      reference: [{ value: '', disabled: true }, Validators.required],
+      commandes:this.fb.array([])
 
     });
-
+    
     // Récupérer les données de la livraison depuis l'API
     this.livraisonService.getLivraisonById(this.livraisonId).subscribe(
       (res) => {
         console.log('Données reçues de l\'API:', res);
         this.livraisonData = res;
+        this.livraisonCommandes = this.livraisonData.commandes || [];
 
         // Remplir le formulaire avec les données de la livraison
         this.livraisonForm.patchValue({
@@ -58,7 +61,12 @@ export class EditLivraisonComponent implements OnInit {
       }
     );
   }
-
+  private formatDateToYYYYMMDD(date: Date): string {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
   editLivraison(): void {
     if (this.livraisonForm.valid) {
       const formValue = this.livraisonForm.getRawValue();
@@ -67,7 +75,7 @@ export class EditLivraisonComponent implements OnInit {
         codeLivraison: formValue.codeLivraison,
         dateLivraison: formValue.dateLivraison,
         statut: formValue.statut,
-        commande: this.livraisonData.commande,  // 👈 conserver la commande actuelle
+        commandes: this.livraisonData.commandes,  // 👈 conserver la commande actuelle
         camion: this.livraisonData.camion       // 👈 conserver le camion + citerne
       };
   

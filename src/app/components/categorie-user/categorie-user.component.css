@@ -19,6 +19,51 @@ full-calendar {
     text-align: center;
    
 }
+.search-input-wrapper i {
+    position: absolute;
+    left: 42em;
+    top: 51.3%;
+    transform: translateY(-50%);
+    color: #aaa;
+    font-size: 16px;
+    pointer-events: none;
+  
+  }
+  input.custom-search {
+    width: 100%;
+    padding: 10px 15px 10px 40px;
+    font-size: 16px;
+    border: 2px solid #ffc107;
+    border-radius: 30px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  input.custom-search:focus {
+    outline: none;
+    border-color: #e0a800;
+    box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+  }
+  
+  
+  input.custom-search {
+    width: 150%;
+    padding: 10px 15px 10px 40px;
+    font-size: 16px;
+    border: 2px solid #ffc107;
+    border-radius: 30px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+  }
+  
+  input.custom-search:focus {
+    outline: none;
+    border-color: #e0a800;
+    box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+  }
 .detail-box {
     position: relative;
     background-image: url('/assets/img/a1.jpg');

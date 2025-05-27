@@ -74,7 +74,7 @@ export class LivraisonsComponent implements OnInit {
     });
   }
   
-  editLivraison(livraisonId: number): void {
+  /*editLivraison(livraisonId: number): void {
     const dialogRef = this.dialog.open(AddLivraisonComponent, {
       width: '600px',
       height: '800px',
@@ -87,7 +87,7 @@ export class LivraisonsComponent implements OnInit {
         this.loadLivraisons();
       }
     });
-  }
+  }*/
   
   
   
@@ -101,7 +101,7 @@ export class LivraisonsComponent implements OnInit {
   
     const dialogRef = this.dialog.open(DialogLivraisonDetailsComponent, {
       width: '600px',
-      height: '400px',
+      height: '500px',
       data: { livraisonId }
     });
   

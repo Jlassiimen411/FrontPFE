@@ -7,7 +7,11 @@
         <div class="table-responsive">
           <div class="container mt-5">
             <div align="right" class="mb-3">
-              <button (click)="openOrderModal()" color="warning" mat-raised-button>Validez la commande</button>
+              <button (click)="openOrderModal()" mat-raised-button class="btn btn-outline-warning"
+                [disabled]="cartItems.length === 0">
+                <b>Valider la commande</b>
+              </button>
+
             </div>
           </div><br>
           <table class="table">
@@ -30,27 +34,26 @@
                 <td class="align-middle">{{ item.product.prix }} TND</td>
                 <td class="align-middle">
                   <div class="d-flex">
-                    <input type="number" min="1" class="form-control w-auto mx-2" 
-                      [(ngModel)]="item.quantity" 
+                    <input type="number" min="1" class="form-control w-auto mx-2" [(ngModel)]="item.quantity"
                       (ngModelChange)="updateQuantity(item.product.codeProduit, item.quantity)">
                   </div>
                 </td>
                 <td class="align-middle">{{ item.product.prix * item.quantity }} TND</td>
                 <td class="align-middle">
-                    <button class="btn btn-danger" (click)="removeItem(item.product.id)">Supprimer</button>
+                  <button class="btn btn-outline-danger" (click)="removeItem(item.product.id)"><b>Supprimer</b></button>
                 </td>
               </tr>
             </tbody>
           </table>
-          <h4>Total: {{ total }} TND</h4>
+          <h4 style="text-align: right; font-weight: bold;">Total: {{ total }} TND</h4>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Modal pour les informations client -->
-<div class="modal" tabindex="-1" [ngClass]="{'show': showOrderModal}" [ngStyle]="{'display': showOrderModal ? 'block' : 'none'}">
+<div class="modal custom-modal" tabindex="-1" [ngClass]="{'show': showOrderModal}"
+  [ngStyle]="{'display': showOrderModal ? 'block' : 'none'}">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -61,32 +64,32 @@
         <form #orderForm="ngForm" (ngSubmit)="placeOrder(orderForm)">
           <div class="form-group mb-3">
             <label for="fullName" class="form-label">Nom complet</label>
-            <input type="text" id="fullName" class="form-control" 
-                  [(ngModel)]="orderDetails.fullName" name="fullName" required>
+            <input type="text" id="fullName" class="form-control" [(ngModel)]="orderDetails.fullName" name="fullName"
+              required>
           </div>
           <div class="form-group mb-3">
             <label for="fullAddress" class="form-label">Adresse de livraison</label>
-            <input type="text" id="fullAddress" class="form-control" 
-                  [(ngModel)]="orderDetails.fullAddress" name="fullAddress" required>
+            <input type="text" id="fullAddress" class="form-control" [(ngModel)]="orderDetails.fullAddress"
+              name="fullAddress" required>
           </div>
           <div class="form-group mb-3">
             <label for="contactNumber" class="form-label">Numéro de téléphone</label>
-            <input type="text" id="contactNumber" class="form-control" 
-                  [(ngModel)]="orderDetails.contactNumber" name="contactNumber" required>
+            <input type="text" id="contactNumber" class="form-control" [(ngModel)]="orderDetails.contactNumber"
+              name="contactNumber" required pattern="^[0-9]{8,15}$">
+
           </div>
           <div class="form-group mb-3">
             <label for="alternateContactNumber" class="form-label">Autre numéro de téléphone (optionnel)</label>
-            <input type="text" id="alternateContactNumber" class="form-control" 
-                  [(ngModel)]="orderDetails.alternateContactNumber" name="alternateContactNumber">
+            <input type="text" id="alternateContactNumber" class="form-control"
+              [(ngModel)]="orderDetails.alternateContactNumber" name="alternateContactNumber">
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" (click)="closeOrderModal()">Annuler</button>
-            <button type="submit" class="btn btn-primary" [disabled]="!orderForm.form.valid">Passer la commande</button>
+            <button type="button" class="btn btn-outline-secondary" (click)="closeOrderModal()"><b>Annuler</b></button>
+            <button type="submit" class="btn btn-outline-warning" [disabled]="!orderForm.form.valid"><b>Passer la commande</b></button>
           </div>
         </form>
       </div>
     </div>
   </div>
 </div>
-<!-- Overlay pour le modal -->
 <div class="modal-backdrop fade show" *ngIf="showOrderModal"></div>

@@ -6,11 +6,19 @@
              Nos produits
           </h2>
        </div>
-    <br>
-    </div>
+    <br><br><br>
+    </div> <div class="search-input-wrapper">
+        <i class="fas fa-search"></i>
+        <input
+          type="text"
+          class="form-control custom-search"
+          placeholder="Rechercher un produit..."
+          [(ngModel)]="searchTerm"
+          (input)="filterProduits()"
+        /></div>
       &nbsp;&nbsp;
             <div class="row">
-                <div class="col-sm-6 col-lg-6 detail-box" *ngFor="let elt of allProduits">
+                <div class="col-sm-6 col-lg-6 detail-box" *ngFor="let elt of produitsFiltres">
                     <div class="single_food_item media ">
                        
                         <div class="media-body align-self-center detail-box">

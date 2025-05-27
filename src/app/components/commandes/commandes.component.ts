@@ -62,14 +62,7 @@ export class CommandesComponent implements OnInit {
       }
     });
   }
-/*get produitsFiltres(): any[] {
-  return this.produits.filter(p =>
-    p.codeCommande.toLowerCase().includes(this.searchText.toLowerCase()) ||
-    p.produitNom.toLowerCase().includes(this.searchText.toLowerCase()) ||
-    p.clientNom.toLowerCase().includes(this.searchText.toLowerCase())
-  );
-}
-*/
+
   loadCommandes(): void {
 this.cService.getAllCommandes().subscribe({
   next: (data) => {
@@ -169,42 +162,41 @@ extractProduits(): void {
   });
 }
 
-  deleteCommandeById(id: number): void {
-    Swal.fire({
-      title: 'Êtes-vous sûr de vouloir supprimer cette commande ?',
-      text: `ID de la commande : ${id}`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#d33',
-      cancelButtonColor: '#3085d6',
-      confirmButtonText: 'Oui, supprimer',
-      cancelButtonText: 'Annuler'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        this.cService.deleteCommandeById(id).subscribe({
-          next: (data) => {
-            console.log('Commande supprimée', data);
-            Swal.fire({
-              title: 'Supprimée !',
-              text: 'La commande a été supprimée avec succès.',
-              icon: 'success',
-              confirmButtonColor: '#28a745'
-            });
-            this.loadCommandes();
-          },
-          error: (err) => {
-            console.error('Erreur lors de la suppression de la commande', err);
-            Swal.fire({
-              title: 'Erreur !',
-              text: `Erreur lors de la suppression de la commande. Détails: ${err?.message || 'Inconnu'}`,
-              icon: 'error',
-              confirmButtonColor: '#d33'
-            });
-          }
-        });
-      }
-    });
-  }
+deleteCommandeById(id: number): void {
+  Swal.fire({
+    title: 'Êtes-vous sûr de vouloir supprimer cette commande ?',
+    text: `ID de la commande : ${id}`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    cancelButtonColor: '#3085d6',
+    confirmButtonText: 'Oui, supprimer',
+    cancelButtonText: 'Annuler'
+  }).then((result) => {
+    if (result.isConfirmed) {
+      this.cService.deleteCommandeById(id).subscribe({
+        next: () => {
+          Swal.fire(
+            'Supprimé!',
+            'La commande a été supprimée.',
+            'success'
+          );
+
+          // Recharge les commandes
+          this.loadCommandes();
+        },
+        error: (err) => {
+          console.error('Erreur lors de la suppression de la commande', err);
+          Swal.fire(
+            'Erreur',
+            "La commande n'a pas pu être supprimée.",
+            'error'
+          );
+        }
+      });
+    }
+  });
+}
 
   openAddCommandeDialog(): void {
     console.log('Button clicked: Opening AddCommandeDialog');

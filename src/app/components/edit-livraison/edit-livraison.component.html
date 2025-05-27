@@ -3,35 +3,61 @@
   <h2 class="li">
     Edit Livraison
   </h2>
-<form [formGroup]="livraisonForm" (ngSubmit)="editLivraison()">
+<form [formGroup]="livraisonForm" (ngSubmit)="editLivraison()" class="formliv">
 <br>
 
 <div class="lo">
   <label for="codeLivraison">Code Livraison :</label>&nbsp;
   <input id="codeLivraison" formControlName="codeLivraison" type="text" readonly>
 </div>
-<div class="lo">
-  <label for="marque">Marque de camion :</label>&nbsp;
-  <input id="marque" formControlName="marque" type="text" readonly>
-</div>
+
 <div class="lo">
   <label for="immatriculation">Immatriculation de camion :</label>&nbsp;
   <input id="immatriculation" formControlName="immatriculation" type="text" readonly>
 </div>
-<div class="lo">
-  <label for="reference">Citene de camion :</label>&nbsp;
-  <input id="reference" formControlName="reference" type="text" readonly>
-
+<div *ngIf="livraisonCommandes.length > 0; else noCommande">
+  <p class="lo"><strong >Commandes :</strong></p>
+  <table class="styled-table">
+    <thead>
+      <tr>
+        <th>Code Commande</th>
+        <th>Nom Produit</th>
+        <th>Quantité (L)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let cmd of livraisonCommandes">
+        <ng-container *ngFor="let cp of cmd.commandeProduits; let i = index">
+          <tr>
+            <!-- Code commande affiché seulement à la 1re ligne, fusionné avec rowspan -->
+            <td *ngIf="i === 0" [attr.rowspan]="cmd.commandeProduits.length">
+              {{ cmd.codeCommande || 'Sans code' }}
+            </td>
+            <td>{{ cp.produit?.nomProduit || 'Produit non défini' }}</td>
+            <td>{{ cp.quantite || 0 }}</td>
+          </tr>
+        </ng-container>
+      </ng-container>
+    </tbody>
+  </table>
+  
+  
 </div>
+
+<ng-template #noCommande>
+  <p>Aucune commande associée.</p>
+</ng-template>
+
 
 
   <div class="lo">
-    <label for="dateLivraison">Date Livraison:</label>&nbsp;
-    <input id="dateLivraison" formControlName="dateLivraison" type="date" required>
+    <label for="dateLivraison">Date Livraison: (Modifiable)</label>&nbsp;
+    <input type="date" id="dateLivraison" class="form-control" formControlName="dateLivraison" [min]="minDate" required>
+    <!--<input id="dateLivraison" formControlName="dateLivraison" type="date" required>-->
   </div>
   
   <div class="la">
-    <label for="statut">Statut:</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <label for="statut">Statut: (Modifiable)</label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <select id="statut" formControlName="statut" required>
         <option value="EN_ATTENTE">En Attente</option>
         <option value="LIVRE">Livré</option>
@@ -40,9 +66,9 @@
   </div>
   <br>
   <div class="button-container">
-    <button mat-button class="btn btn-warning" type="submit"><b>Enregistrer</b></button>
+    <button mat-button class="btn btn-outline-warning" type="submit"><b>Enregistrer</b></button>
 &nbsp;
-    <button mat-button class="btn btn-warning" type="button" (click)="cancel()"><b>Annuler</b></button>
+    <button mat-button class="btn btn-outline-warning" type="button" (click)="cancel()"><b>Annuler</b></button>
   </div>
   
 </form>

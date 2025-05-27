@@ -40,7 +40,13 @@ export class SignupAdminComponent implements OnInit {
 
   register(registerForm: NgForm): void {
     if (registerForm.invalid) {
-      console.warn("❌ Formulaire invalide.");
+      Swal.fire({
+        title: 'Champs manquants ❗',
+        text: 'Veuillez remplir tous les champs requis.',
+        icon: 'warning',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#e74c3c'
+      });
       return;
     }
   
@@ -71,7 +77,6 @@ export class SignupAdminComponent implements OnInit {
             popup: 'animated fadeInDown faster'
           }
         }).then(() => {
-          // ✅ Vider le formulaire après fermeture de l'alerte
           registerForm.resetForm();
         });
       },

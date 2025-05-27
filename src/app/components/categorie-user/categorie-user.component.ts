@@ -8,6 +8,8 @@ import { TypeProduitService } from 'src/app/services/type-produit.service';
 })
 export class CategorieUserComponent {
   allTypeProduits: any[] = [];
+  searchTerm: string = ''; // ce que l'utilisateur tape
+  filteredTypeProduits: any[] = [];
   constructor( 
     private pService: TypeProduitService,
     private router: Router) {}
@@ -18,6 +20,7 @@ export class CategorieUserComponent {
   loadProduits(): void {
     this.pService.getAllTypeProduits().subscribe({
       next: (data) => {
+        this.filteredTypeProduits = data;
         this.allTypeProduits = data;
       },
       error: (err) => {
@@ -25,7 +28,13 @@ export class CategorieUserComponent {
       }
     });
   }
-
+  filterProduits(): void {
+    const term = this.searchTerm.toLowerCase();
+    this.filteredTypeProduits = this.allTypeProduits.filter(p =>
+      p.name.toLowerCase().includes(term) ||
+      (p.description && p.description.toLowerCase().includes(term))
+    );
+  }
 
   viewProduitsByType(typeId: number): void {
     if (typeId) {

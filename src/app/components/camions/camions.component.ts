@@ -79,7 +79,9 @@ export class CamionsComponent implements OnInit {
   
       this.camionService.addCamion(camionData).subscribe(
         (data) => {
-          this.camions.push(data); // 👈 ici on ajoute le camion au tableau
+          this.camions.push(data);
+  
+          // Réinitialiser le formulaire
           this.nouveauCamion = {
             id: 0,
             marque: '',
@@ -88,13 +90,33 @@ export class CamionsComponent implements OnInit {
             kilometrage: null,
             statut: '',
           };
+  
+          // ✅ Affichage d'une alerte de succès
+          Swal.fire({
+            title: 'Ajouté !',
+            text: 'Le camion a été ajouté avec succès.',
+            icon: 'success',
+            confirmButtonColor: '#28a745',
+            timer: 2000,
+            timerProgressBar: true,
+            showConfirmButton: false
+          });
         },
         (error) => {
           console.error("Erreur lors de l'ajout du camion:", error);
+  
+          // ❌ Alerte en cas d'erreur
+          Swal.fire({
+            title: 'Erreur !',
+            text: "Une erreur s'est produite lors de l'ajout.",
+            icon: 'error',
+            confirmButtonColor: '#d33'
+          });
         }
       );
     }
   }
+  
   
 
   supprimerCamion(id: number) {
@@ -113,8 +135,7 @@ export class CamionsComponent implements OnInit {
         if (result.isConfirmed) {
           this.camionService.deleteCamion(id).subscribe(
             () => {
-              this.camions = this.camions.filter(c => c.id !== id);
-              
+              this.loadCamions(); // <-- actualise la table ici
               Swal.fire({
                 title: 'Supprimé !',
                 text: 'Le camion a été supprimé avec succès.',
@@ -142,7 +163,8 @@ export class CamionsComponent implements OnInit {
         confirmButtonColor: '#d33'
       });
     }
-  } 
+  }
+  
  
   
 

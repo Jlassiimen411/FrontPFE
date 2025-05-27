@@ -11,6 +11,10 @@ export class GestionDispatcheurComponent implements OnInit{
 
 
   alldispatcheurs : any = [];
+  searchText: string = '';
+  filteredDispatcheurs: any[] = [];
+  page: number = 1; // page actuelle
+  itemsPerPage: number = 5;
   
   constructor(
     private uService :UserService,
@@ -23,12 +27,20 @@ export class GestionDispatcheurComponent implements OnInit{
   loadDispatcheurs() {
     this.uService.getUsersByRole("Dispatcheur").subscribe(
       data => {
-        console.log("Réponse reçue:", data);
+        this.filteredDispatcheurs = data;
         this.alldispatcheurs = data;
       },
       err => {
         console.error("Erreur lors du chargement des dispachers : ", err);
       }
+    );
+  }
+  filterDispatcheurs() {
+    this.filteredDispatcheurs = this.alldispatcheurs.filter((admin: any) =>
+      admin.userFirstName?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      admin.userLastName?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      admin.userName?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      admin.email?.toLowerCase().includes(this.searchText.toLowerCase())
     );
   }
    deleteDispatcheur(userName: string) {

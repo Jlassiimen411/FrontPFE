@@ -38,10 +38,12 @@
           <div class="mb-3 form-group">
             <label for="client" class="form-label">Client</label>
             <div class="input-group">
-            <select id="client" formControlName="client" class="form-control select-large">
-              <option [ngValue]="null" disabled>Sélectionnez un client</option>
-              <option *ngFor="let client of clients" [ngValue]="client.clientId">{{ client.fullName }}</option>
-            </select>
+              <select id="client" formControlName="client" class="form-control select-large custom-select-placeholder">
+                <option [ngValue]="null" disabled>Sélectionner un client</option>
+
+                <option *ngFor="let client of clients" [value]="client.clientId">{{ client.fullName }}</option>
+              </select>
+              
               <button type="button" class="btn btn-outline-primary btnn" (click)="openAddClientDialog()" style="background-color: rgb(247, 183, 51); border-color: rgb(247, 183, 51); color: black;">
           <i class="fa fa-plus me-2"></i>Nouveau Client
         </button>

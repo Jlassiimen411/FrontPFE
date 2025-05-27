@@ -79,9 +79,9 @@ export class AddCommandeComponent implements OnInit {
       next: (data) => {
         this.clients = data;
         // Si des clients sont disponibles, sélectionner le premier par défaut
-        if (data.length > 0) {
+      /*  if (data.length > 0) {
           this.addCommandeForm.get('client')?.setValue(data[0].clientId);
-        }
+        }*/
         this.cdr.detectChanges();
       },
       error: (err) => {

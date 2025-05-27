@@ -21,9 +21,9 @@
 button {
   position: relative; /* Permet de déplacer précisément le bouton */
   top: -500px; /* Déplace le bouton vers le haut */
-right: -80%; /* Centre le bouton horizontalement */
+  right: -80%; /* Centre le bouton horizontalement */
  /* transform: translateX(-50%); /* Centrer horizontalement avec la position relative */
- color: black;
+
 }
 h2{
   margin-top: -25em;

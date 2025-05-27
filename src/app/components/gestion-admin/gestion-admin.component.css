@@ -4,22 +4,76 @@
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
-  margin-top: -38em;
+  margin-top: -43.3em;
   color: rgb(41, 37, 36);
   z-index: 1;
 }
 
-::ng-deep .my-pagination {
-  margin-top: 1em;
+::ng-deep .custom-pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  list-style: none;
+  gap: 8px;
 }
 
-::ng-deep .ngx-pagination .current {
-  background: #0d6efd;
+::ng-deep .custom-pagination .ngx-pagination li {
+  display: inline-block;
+}
+
+::ng-deep .custom-pagination .ngx-pagination li a,
+::ng-deep .custom-pagination .ngx-pagination li span {
+  padding: 8px 12px;
+  border-radius: 20px;
+  background-color: transparent;
+  border: 1px solid #ccc;
+  color: #333;
+  cursor: pointer;
+  transition: 0.3s ease-in-out;
+  font-size: 14px;
+}
+
+
+
+.pagination-container ::ng-deep .ngx-pagination .current {
+  background-color: #ffc107;
   color: white;
-  border-radius: 50%;
+  border-color: #ffc107;
 }
 
 
+.search-input-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+ 
+}
+input.custom-search {
+  width: 100%;
+  padding: 10px 15px 10px 40px;
+  font-size: 16px;
+  border: 2px solid #ffc107;
+  border-radius: 30px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+input.custom-search:focus {
+  outline: none;
+  border-color: #e0a800;
+  box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+}
+.search-input-wrapper i {
+  position: absolute;
+  left: 25px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 16px;
+  pointer-events: none;
+}
 .card{
   top: 3em;
   width: 80%;  
@@ -65,5 +119,5 @@ background-color: rgb(41, 37, 36);
 
 }
 .outer{
-  height: 100vh;
+  height: 120vh;
 }

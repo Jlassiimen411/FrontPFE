@@ -89,6 +89,7 @@ export class TypeProduitComponent {
     const dialogRef = this.dialog.open(AddTypeProduitComponent, {
       width: '900px',
       height: '410px',
+  
       disableClose: false
      
     });

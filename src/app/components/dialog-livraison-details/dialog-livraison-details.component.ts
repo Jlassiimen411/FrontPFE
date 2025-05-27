@@ -19,6 +19,10 @@ interface Commande {
   codeCommande: string;
   quantite?: number;
   commandeProduits?: CommandeProduit[];
+  price?: number;
+
+
+
 }
 
 interface Citerne {
@@ -56,7 +60,10 @@ interface LivraisonDetail {
     codeCommande: string;
     produitNom: string;
     commandeQuantite: number | string;
+    price?: number
+
   }>;
+
 }
 
 @Component({
@@ -67,7 +74,7 @@ interface LivraisonDetail {
 export class DialogLivraisonDetailsComponent implements OnInit {
   livaisons: any[] = [];
   livraisonDetail: LivraisonDetail = {} as LivraisonDetail;
-  
+
   constructor(
     public dialogRef: MatDialogRef<DialogLivraisonDetailsComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -76,24 +83,24 @@ export class DialogLivraisonDetailsComponent implements OnInit {
   ) { }
   ngOnInit(): void {
     const livraisonId = this.data?.livraisonId;
-  
+
     if (!livraisonId) {
       console.error('ID de livraison manquant.');
       this.dialogRef.close();
       return;
     }
-  
+
     this.livraisonService.getLivraisonById(livraisonId).subscribe({
       next: (res: LivraisonResponse) => {
         console.log('Données complètes de la réponse:', res); // Ajoute un log complet pour voir la structure exacte
-    
+
         // Assure-toi que la structure de la réponse est celle que tu attends
         if (res.commandes && res.commandes.length > 0) {
           console.log('Nombre de commandes:', res.commandes.length);
         } else {
           console.log('Aucune commande trouvée dans la réponse.');
         }
-    
+
         // Formatage des détails de la livraison
         this.livraisonDetail = {
           id: res.id,
@@ -107,15 +114,16 @@ export class DialogLivraisonDetailsComponent implements OnInit {
             capacite: res.citerne?.capacite || 'Non définie'
           },
           commandes: Array.isArray(res.commandes)
-          ? res.commandes.map((cmd: Commande) => ({
+            ? res.commandes.map((cmd: Commande) => ({
               codeCommande: cmd.codeCommande || 'Non définie',
               produitNom: cmd.commandeProduits?.[0]?.produit?.nomProduit || 'Non défini',
-              commandeQuantite: cmd.quantite || 'Non définie'
+              commandeQuantite: cmd.quantite || 'Non définie',
+              price: cmd.price
             }))
-          : []
-        
+            : []
+
         };
-    
+
         console.log('Détails de livraison formatés:', this.livraisonDetail);
       },
       error: (err) => {
@@ -123,9 +131,184 @@ export class DialogLivraisonDetailsComponent implements OnInit {
         this.dialogRef.close();
       }
     });
-    
+
   }
+  imprimerLivraison(): void {
+    console.log('🖨️ Fonction imprimerLivraison() appelée');
+
+    if (!this.livraisonDetail) {
+      console.error('❌ livraisonDetail est undefined ou null.');
+      return;
+    }
+
+    let totalPrix = 0;
+
+    const commandesTableRows = this.livraisonDetail.commandes.map(cmd => {
+      const quantite = Number(cmd.commandeQuantite) || 0;
+      const prixUnitaire = Number(cmd.price) || 0;
+      const prixTotalCommande = quantite * prixUnitaire;
+
+      totalPrix += prixTotalCommande;
+
+      return `
+        <tr>
+          <td>${cmd.codeCommande}</td>
+          <td>${cmd.produitNom}</td>
+          <td>${quantite} L</td>
+          <td>${prixUnitaire.toFixed(2)} DT</td>
+        </tr>
+      `;
+    }).join('');
+
+    const contenu = `
+      <div class="container">
+        <div class="header-flex">
+      <img src="assets/img/logo1.png" alt="Logo" class="header-image">
+      <h1 class="titre">Détails de la Livraison</h1>
+    </div>
   
+        <table class="main-table">
+          <tr><th>Code Livraison</th><td>${this.livraisonDetail.codeLivraison}</td></tr>
+          <tr><th>Date de Livraison</th><td>${this.livraisonDetail.dateLivraison}</td></tr>
+          <tr><th>Immatriculation</th><td>${this.livraisonDetail.immatriculation}</td></tr>
+          <tr><th>Citerne</th><td>${this.livraisonDetail.citerne.reference} (${this.livraisonDetail.citerne.capacite} L)</td></tr>
+          <tr><th>Statut</th><td>${this.livraisonDetail.statut}</td></tr>
+          
+          <tr>
+            <th>Commandes</th>
+            <td>
+              <table class="sub-table">
+                <thead>
+                  <tr><th>Réf. Commande</th><th>Produit</th><th>Quantité (L)</th><th>Prix Unitaire</th></tr>
+                </thead>
+                <tbody>
+                  ${commandesTableRows}
+                </tbody>
+              </table>
+            </td>
+          </tr>
+          <tr><th>Prix total</th><td><strong>${totalPrix.toFixed(2)} DT</strong></td></tr>
+        </table>
+        <h4 class="signature">Signature</h4>
+      </div>
+    `;
+
+    const fenetreImpression = window.open('', '_blank', 'width=1300,height=1000');
+    if (!fenetreImpression) {
+      console.error("❌ Impossible d'ouvrir la fenêtre d'impression.");
+      return;
+    }
+
+    fenetreImpression.document.open();
+    fenetreImpression.document.write(`
+      <html>
+        <head>
+          <title>Impression - Livraison</title>
+          <style>
+            @media print {
+              @page {
+                size: A4 landscape;
+                margin: 5mm;
+              }
+              body {
+                margin: 0;
+              }
+            }
+            body {
+              font-family: Arial, sans-serif;
+              font-size: 16px;
+              margin: 0;
+              padding: 0;
+              background: #fff;
+              color: #000;
+            }
+            .container {
+              width: 100%;
+              padding: 15px;
+              box-sizing: border-box;
+            }
+           .header-flex {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              position: relative;
+            }
+            .header-image {
+              width: 80px;
+              height: auto;
+            }
+            .titre {
+              position: absolute;
+              left: 50%;
+              transform: translateX(-50%);
+              font-size: 26px;
+              margin: 0;
+            }
+
+
+            h1 {
+              text-align: center;
+              font-size: 26px;
+              margin: 20px 0;
+            }
+            .main-table {
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 16px;
+              margin-top: 20px;
+            }
+            .main-table th, .main-table td {
+              border: 2px solid #000;
+              padding: 12px;
+              text-align: left;
+              vertical-align: top;
+            }
+            .main-table th {
+              background-color: #dcdcdc;
+            }
+            .sub-table {
+              width: 100%;
+              border-collapse: collapse;
+              margin-top: 10px;
+              font-size: 15px;
+            }
+            .sub-table th, .sub-table td {
+              border: 2px solid #555;
+              padding: 10px;
+              text-align: center;
+            }
+            .sub-table thead {
+              background-color: #f5f5f5;
+            }
+            .signature {
+              text-align: right;
+              margin-top: 50px;
+              margin-right: 20px;
+            }
+          </style>
+        </head>
+        <body>
+          ${contenu}
+          <script>
+            window.onload = () => {
+              window.print();
+              setTimeout(() => window.close(), 500);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    fenetreImpression.document.close();
+  }
+
+
+
+
+
+
+
+
+
 
 
   closeDialog(): void {
@@ -134,21 +317,21 @@ export class DialogLivraisonDetailsComponent implements OnInit {
     if (button) {
       button.blur(); // Retirer le focus
     }
-  
+
     // Appliquer aria-hidden à l'élément racine
     const appRoot = document.querySelector('app-root');
     if (appRoot) {
       appRoot.setAttribute('aria-hidden', 'true');
     }
-  
+
     // Fermer le dialogue
     this.dialogRef.close();
   }
-  
+
 
   deleteLivraison(): void {
     const livraisonId = this.data?.livraisonId;
-  
+
     if (!livraisonId || livraisonId === 'ID inconnu') {
       Swal.fire({
         title: 'Erreur !',
@@ -158,7 +341,7 @@ export class DialogLivraisonDetailsComponent implements OnInit {
       });
       return;
     }
-  
+
     Swal.fire({
       title: 'Êtes-vous sûr de vouloir supprimer cette livraison ?',
       text: `ID de livraison : ${livraisonId}`,
@@ -196,8 +379,8 @@ export class DialogLivraisonDetailsComponent implements OnInit {
       }
     });
   }
-  
-  
+
+
 
   removeLivraisonFromCalendar(livraisonId: number): void {
     if (!this.data?.calendarApi) {
@@ -217,22 +400,22 @@ export class DialogLivraisonDetailsComponent implements OnInit {
     }
   }
 
-  
 
- editLivraison(id: number): void {
-  const livraisonId = id;
-  if (!livraisonId) {
-    alert("L'ID de livraison est manquant pour l'édition.");
-    return;
+
+  editLivraison(id: number): void {
+    const livraisonId = id;
+    if (!livraisonId) {
+      alert("L'ID de livraison est manquant pour l'édition.");
+      return;
+    }
+
+    console.log("Modification de la livraison avec l'ID:", livraisonId);
+
+    // Fermer le dialogue avant la redirection
+    this.dialogRef.close();
+
+    // Rediriger vers la page de modification de la livraison
+    this.router.navigate(['/edit-livraison', livraisonId]);
   }
-
-  console.log("Modification de la livraison avec l'ID:", livraisonId);
-
-  // Fermer le dialogue avant la redirection
-  this.dialogRef.close();
-
-  // Rediriger vers la page de modification de la livraison
-  this.router.navigate(['/edit-livraison', livraisonId]);
-}
 
 }

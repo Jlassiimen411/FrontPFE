@@ -57,6 +57,8 @@ import { GestionClientComponent } from './components/gestion-client/gestion-clie
 import { NgChartsModule } from 'ng2-charts';
 import { NgxPaginationModule } from 'ngx-pagination';
 import { AddClientComponent } from './components/add-client/add-client.component';
+import { MapComponent } from './components/map/map.component';
+import { TrackingComponent } from './components/tracking/tracking.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -100,6 +102,8 @@ import { AddClientComponent } from './components/add-client/add-client.component
     RegisterComponent,
     GestionClientComponent,
     AddClientComponent,
+    MapComponent,
+    TrackingComponent,
 
   
   

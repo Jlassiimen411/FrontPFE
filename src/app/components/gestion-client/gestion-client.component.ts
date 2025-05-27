@@ -11,6 +11,10 @@ export class GestionClientComponent implements OnInit{
 
 
   allclients : any = [];
+  searchText: string = '';
+  filteredClients: any[] = [];
+  page: number = 1; // page actuelle
+  itemsPerPage: number = 5;
   
   constructor(
     private uService :UserService,
@@ -23,12 +27,20 @@ export class GestionClientComponent implements OnInit{
   loadClients() {
     this.uService.getUsersByRole("User").subscribe(
       data => {
-        console.log("Réponse reçue:", data);
+        this.filteredClients = data;
         this.allclients = data;
       },
       err => {
         console.error("Erreur lors du chargement des clients : ", err);
       }
+    );
+  }
+  filterClients() {
+    this.filteredClients = this.allclients.filter((admin: any) =>
+      admin.userFirstName?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      admin.userLastName?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      admin.userName?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      admin.email?.toLowerCase().includes(this.searchText.toLowerCase())
     );
   }
   deleteClient(userName: string) {

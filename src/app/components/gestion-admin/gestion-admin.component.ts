@@ -11,7 +11,10 @@ import Swal from 'sweetalert2';
 export class GestionAdminComponent implements OnInit {
 
   alladmins: any = [];
-  p: number = 1;  // Page courante pour la pagination
+  searchText: string = '';
+  filteredAdmins: any[] = [];
+  page: number = 1; 
+  itemsPerPage: number = 5;
 
   constructor(
     private uService: UserService,
@@ -21,19 +24,30 @@ export class GestionAdminComponent implements OnInit {
   ngOnInit() {
     this.loadAdmins();
   }
+  
 
   loadAdmins() {
     this.uService.getUsersByRole("Admin").subscribe(
       data => {
-        console.log("Réponse reçue:", data);
         this.alladmins = data;
+        this.filteredAdmins = data; // initialiser la liste filtrée
       },
       err => {
         console.error("Erreur lors du chargement des admins : ", err);
       }
     );
   }
+  
 
+  filterAdmins() {
+    this.filteredAdmins = this.alladmins.filter((admin: any) =>
+      admin.userFirstName?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      admin.userLastName?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      admin.userName?.toLowerCase().includes(this.searchText.toLowerCase()) ||
+      admin.email?.toLowerCase().includes(this.searchText.toLowerCase())
+    );
+  }
+  
   deleteAdmin(userName: string) {
     Swal.fire({
       title: '❗ Confirmation',

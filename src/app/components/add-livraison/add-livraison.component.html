@@ -118,7 +118,7 @@
           <div *ngFor="let compartiment of compartiments" class="mt-4">
             <h5>
               <i class="fas fa-box-open"></i> Commandes compatibles pour le compartiment {{ compartiment.reference }}
-              ({{ compartiment.typeProduits }})
+       
             </h5>
             <div class="table-responsive">
               <table class="table table-bordered table-sm">
@@ -144,7 +144,7 @@
                     <td>{{ cmd.codeCommande }}</td>
                     <td>{{ cmd.typeProduit }}</td>
                     <td>{{ cmd.produitNom }}</td>
-                    <td>{{ cmd.commandeQuantite }}</td>
+             <td>{{ cmd.commandeQuantite !== 0 ? cmd.commandeQuantite : 'N/A' }}</td>
                     <td>{{ cmd.dateCommande | date }}</td>
                     <td>{{ cmd.prix }}</td>
                     <td>

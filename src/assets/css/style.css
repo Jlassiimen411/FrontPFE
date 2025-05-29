@@ -510,10 +510,9 @@ a:focus {
       -ms-flex-pack: center;
           justify-content: center;
   color: rgb(255, 255, 255);
-  background-color: #000f3c;
- 
-
+  background-color: rgba(41, 37, 36, 0.7); /* <-- couleur foncée avec 70% d’opacité */
 }
+
 
 .service_section .box .detail-box h5 {
   font-weight: bold;

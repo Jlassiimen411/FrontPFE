@@ -24,7 +24,7 @@ interface Compartiment {
   reference: string;
   capaciteMax: number;
   statut: string;
-  typeProduits: TypeProduit[];  // <-- ici, pluriel 'typeProduits'
+  typeProduits: TypeProduit[];
   capaciteRestante?: number;
   capaciteUtilisee: number;
   commandesAffectees?: Commande[];
@@ -36,7 +36,6 @@ export interface TypeProduit {
   description?: string;
   date?: string;
 }
-
 
 interface Livraison {
   id: number;
@@ -67,7 +66,7 @@ export class AddLivraisonComponent implements OnInit {
   allCamions: any[] = [];
   allCiternes: any[] = [];
   livraisons: Livraison[] = [];
-  minDate: string; // Pour stocker la date minimale autorisée (aujourd'hui)
+  minDate: string;
 
   constructor(
     private fb: FormBuilder,
@@ -80,7 +79,6 @@ export class AddLivraisonComponent implements OnInit {
     private typeProduitService: TypeProduitService,
     private snackBar: MatSnackBar
   ) {
-    // Initialiser la date minimale à aujourd'hui au format YYYY-MM-DD
     this.minDate = this.formatDateToYYYYMMDD(new Date());
   }
 
@@ -93,7 +91,6 @@ export class AddLivraisonComponent implements OnInit {
 
     this.addLivraisonForm.get('date')?.valueChanges.subscribe(date => {
       if (date) {
-        // Vérifier si la date est valide (pas dans le passé)
         if (this.isDateInPast(date)) {
           this.addLivraisonForm.get('date')?.setErrors({ 'pastDate': true });
           this.snackBar.open('La date de livraison ne peut pas être dans le passé.', 'Fermer', { duration: 3000 });
@@ -103,6 +100,7 @@ export class AddLivraisonComponent implements OnInit {
       }
     });
 
+    // Load typeproduits and then commands
     this.typeProduitService.getAllTypeProduits().pipe(
       first(),
       catchError(err => {
@@ -110,9 +108,14 @@ export class AddLivraisonComponent implements OnInit {
         this.snackBar.open('Erreur lors du chargement des types de produits', 'Fermer', { duration: 3000 });
         return of([]);
       })
-    ).subscribe((typeProduitsData: any[]) => {
+    ).subscribe(typeProduitsData => {
       this.typeproduits = typeProduitsData;
-      this.chargerCommandes();
+      this.chargerCommandes(); // Load commands only after typeproduits are available
+    });
+
+    // Subscribe to command updates
+    this.cService.commandeUpdated$.subscribe(() => {
+      this.chargerCommandes(); // Reload commands on update
     });
   }
 
@@ -122,11 +125,10 @@ export class AddLivraisonComponent implements OnInit {
       date: ['', [Validators.required, this.dateValidator()]],
       camionId: ['', [Validators.required]],
       citerneId: ['', [Validators.required]],
-      statut: ['', [Validators.required]] // Disable the field
+      statut: ['', [Validators.required]]
     });
   }
 
-  // Méthode pour formater une date en YYYY-MM-DD
   private formatDateToYYYYMMDD(date: Date): string {
     const year = date.getFullYear();
     const month = (date.getMonth() + 1).toString().padStart(2, '0');
@@ -134,77 +136,75 @@ export class AddLivraisonComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-  // Validateur pour vérifier si une date est dans le passé
   private isDateInPast(dateStr: string): boolean {
     const selectedDate = new Date(dateStr);
     selectedDate.setHours(0, 0, 0, 0);
-    
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
     return selectedDate < today;
   }
 
-  // Validateur personnalisé pour la date
   private dateValidator(): ValidationErrors | null {
     return (control: AbstractControl): ValidationErrors | null => {
       if (!control.value) return null;
-      
       const selectedDate = new Date(control.value);
       selectedDate.setHours(0, 0, 0, 0);
-      
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
-      if (selectedDate < today) {
-        return { 'pastDate': true };
-      }
-      
-      return null;
+      return selectedDate < today ? { 'pastDate': true } : null;
     };
   }
 
   private chargerCommandes(): void {
-    this.cService.getAllCommandes().pipe(
-      catchError(err => {
-        console.error('Erreur lors du chargement des commandes:', err);
-        this.snackBar.open('Erreur lors du chargement des commandes', 'Fermer', { duration: 3000 });
-        return of([]);
-      })
-    ).subscribe((data: any[]) => {
-      data.forEach(commande => {
-        commande.commandeProduits.forEach((cp: any) => {
-          const produit = cp.produit;
-          const typeProduit = this.typeproduits.find(tp =>
-            tp.produits.some((p: any) => p.id === produit.id)
-          );
-          if (typeProduit) {
-            produit.typeProduit = typeProduit;
-          }
-        });
-      });
+  if (!this.typeproduits || this.typeproduits.length === 0) {
+    console.warn('Typeproduits not loaded yet, skipping chargerCommandes');
+    return;
+  }
 
-      const toutesCommandes = data.map(cmd => {
-        const produit = cmd.commandeProduits[0]?.produit;
-        return {
-          idCommande: cmd.id,
-          codeCommande: cmd.codeCommande,
-          produitNom: produit ? produit.nomProduit : 'Nom inconnu',
-          typeProduit: produit ? (produit.typeProduit?.name || produit.typeProduit || 'Type inconnu') : 'Type inconnu',
-          commandeQuantite: cmd.quantite,
-          dateCommande: new Date(cmd.dateCommande),
-          prix: cmd.price
-        };
-      });
-
-      this.listeCommandes = toutesCommandes.filter(cmd => 
-        !this.commandesDejaAffectees.has(cmd.idCommande));
-      
-      if (this.compartiments.length > 0) {
-        this.initialiserCompartimentCommandesMap();
+  this.cService.getAllCommandes().pipe(
+    catchError(err => {
+      console.error('Erreur lors du chargement des commandes:', err);
+      this.snackBar.open('Erreur lors du chargement des commandes', 'Fermer', { duration: 3000 });
+      return of([]);
+    })
+  ).subscribe((data: any[]) => {
+    data.forEach(commande => {
+      // Map typeProduit from commande_produits if available
+      if (commande.commandeProduits && commande.commandeProduits.length > 0) {
+        const cp = commande.commandeProduits[0];
+        const produit = cp.produit;
+        const typeProduit = this.typeproduits.find(tp =>
+          tp.produits.some((p: any) => p.id === produit.id)
+        );
+        if (typeProduit) {
+          produit.typeProduit = typeProduit;
+        }
       }
     });
-  }
+
+    const toutesCommandes = data.map(cmd => {
+      const produit = cmd.commandeProduits?.[0]?.produit;
+      // Prioritize quantite from commandes table, fallback to commande_produits
+      const quantite = cmd.quantite ?? cmd.commandeProduits?.[0]?.quantite ?? 0;
+      return {
+        idCommande: cmd.id,
+        codeCommande: cmd.codeCommande,
+        produitNom: produit ? produit.nomProduit : 'Nom inconnu',
+        typeProduit: produit ? (produit.typeProduit?.name || produit.typeProduit || 'Type inconnu') : 'Type inconnu',
+        commandeQuantite: quantite,
+        dateCommande: new Date(cmd.dateCommande),
+        prix: cmd.price
+      };
+    });
+
+    this.listeCommandes = toutesCommandes.filter(cmd => 
+      !this.commandesDejaAffectees.has(cmd.idCommande));
+    
+    if (this.compartiments.length > 0) {
+      this.initialiserCompartimentCommandesMap();
+    }
+  });
+}
 
   private chargerLivraisons(): void {
     this.lService.getAllLivraisons().pipe(
@@ -224,14 +224,11 @@ export class AddLivraisonComponent implements OnInit {
         }
       });
 
-      if (this.listeCommandes.length > 0) {
-        this.chargerCommandes();
-      }
-
       const dateSelectionnee = this.addLivraisonForm.get('date')?.value;
       if (dateSelectionnee) {
         this.filtrerElementsDisponibles(dateSelectionnee);
       }
+      this.chargerCommandes(); // Ensure commands are reloaded after livraisons
     });
   }
 
@@ -349,9 +346,7 @@ export class AddLivraisonComponent implements OnInit {
   filtrerEtTrierCommandes(commandes: Commande[], compartiment: Compartiment): Commande[] {
     return commandes
       .filter(cmd =>
-        compartiment.typeProduits.some(tp => tp.name.toLowerCase() === cmd.typeProduit?.toLowerCase())
-
- &&
+        compartiment.typeProduits.some(tp => tp.name.toLowerCase() === cmd.typeProduit?.toLowerCase()) &&
         cmd.commandeQuantite <= (compartiment.capaciteRestante ?? compartiment.capaciteMax) &&
         !this.commandesDejaAffectees.has(cmd.idCommande) &&
         !this.isCommandeSelectedInCurrentForm(cmd.idCommande)
@@ -399,53 +394,51 @@ export class AddLivraisonComponent implements OnInit {
       this.snackBar.open('Veuillez remplir tous les champs obligatoires.', 'Fermer', { duration: 3000 });
       return;
     }
-  
+
     const formValue = this.addLivraisonForm.value;
     if (!formValue.camionId || !formValue.citerneId) {
       this.snackBar.open('Veuillez sélectionner un camion et une citerne.', 'Fermer', { duration: 3000 });
       return;
     }
-  
-    // Vérifier le statut du camion sélectionné
+
     const selectedCamion = this.camions.find(c => c.id === Number(formValue.camionId));
     if (!selectedCamion || selectedCamion.statut !== 'Disponible') {
       this.snackBar.open('Le camion sélectionné n\'est pas disponible.', 'Fermer', { duration: 4000 });
       this.addLivraisonForm.get('camionId')?.setValue('');
       return;
     }
-  
-    // Vérifier que tous les compartiments ont au moins une commande affectée
+
     const compartimentsVides = this.compartiments.filter(
       compartiment => !compartiment.commandesAffectees || compartiment.commandesAffectees.length === 0
     );
-  
+
     if (compartimentsVides.length > 0) {
       this.snackBar.open('Tous les compartiments doivent avoir au moins une commande affectée.', 'Fermer', { duration: 4000 });
       return;
     }
-  
+
     const selectedCommandes: Commande[] = [];
     for (const compartiment of this.compartiments) {
       if (compartiment.commandesAffectees && compartiment.commandesAffectees.length > 0) {
         selectedCommandes.push(...compartiment.commandesAffectees);
       }
     }
-  
+
     if (selectedCommandes.length === 0) {
       this.snackBar.open('Veuillez affecter au moins une commande.', 'Fermer', { duration: 3000 });
       return;
     }
-  
+
     const commandesDejaAffectees = selectedCommandes.filter(cmd => this.commandesDejaAffectees.has(cmd.idCommande));
     if (commandesDejaAffectees.length > 0) {
       this.snackBar.open('Certaines commandes sont déjà affectées.', 'Fermer', { duration: 3000 });
       return;
     }
-  
+
     if (this.isSubmitting) return;
     this.isSubmitting = true;
     this.addLivraisonForm.disable();
-  
+
     const livraisonPayload = {
       codeLivraison: formValue.codeLivraison,
       camion: { id: Number(formValue.camionId) },
@@ -454,7 +447,7 @@ export class AddLivraisonComponent implements OnInit {
       dateLivraison: formValue.date,
       statut: 'EN_ATTENTE'
     };
-  
+
     this.lService.addLivraison(livraisonPayload).subscribe({
       next: () => {
         this.snackBar.open('Livraison ajoutée avec succès.', 'Fermer', { duration: 3000 });

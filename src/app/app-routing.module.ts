@@ -26,7 +26,8 @@ import { CiternesComponent } from './components/citernes/citernes.component';
 import { AdminPageComponent } from './components/admin-page/admin-page.component';
 import { CreerDispatcheurComponent } from './components/creer-dispatcheur/creer-dispatcheur.component';
 import { SignupAdminComponent } from './components/signup-admin/signup-admin.component';
-
+import { RoleGuard } from './auth/role.guard';
+ 
 import { GestionDispatcheurComponent } from './components/gestion-dispatcheur/gestion-dispatcheur.component';
 import { GestionAdminComponent } from './components/gestion-admin/gestion-admin.component';
 import { CompartimentsComponent } from './components/compartiments/compartiments.component';
@@ -36,51 +37,92 @@ import { LoginComponent } from './components/login/login.component';
 import { AuthInterceptor } from './services/auth-interceptor.service';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { GestionClientComponent } from './components/gestion-client/gestion-client.component';
-
+import { UserRole } from './model/user-role'; 
+import { ServicesComponent } from './components/services/services.component';
+import { AboutComponent } from './components/about/about.component';
  
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
-  //////////receptionnaire////////////////
-  { path: 'receptionnairepage', component: ReceptionnairePageComponent },
-  { path: 'commandes', component: CommandesComponent },
-  { path: 'produits/:id', component: ProduitsParTypeComponent },
-  { path: 'livraisons', component: LivraisonsComponent },
-  { path: 'camions', component: CamionsComponent },
-  { path: 'addcommande', component: AddCommandeComponent },
-  { path: 'addlivraison', component: AddLivraisonComponent },
-  { path: 'editcommande/:id', component: EditCommandeComponent },
-  { path: 'editproduit/:id', component: EditProduitComponent },
-  { path: 'edit-livraison/:id', component: EditLivraisonComponent },
-  { path: 'type_produit', component: TypeProduitComponent },
-  { path: 'edit_type_produit/:id', component: EditTypeProduitComponent },
-  { path: 'addProduit/:typeId', component: AddProduitComponent },
-  { path: 'citernes', component: CiternesComponent },
-  { path: 'compartiments/:idCiterne', component: CompartimentsComponent },
-  { path: 'service', component: ServiceHomeComponent },
+  { path: 'servicehome', component: ServiceHomeComponent },
+  { path: 'services', component: ServicesComponent },
+  { path: 'about', component: AboutComponent },
   
-  //////////////////admin////////////
-  { path: 'adminpage', component: AdminPageComponent},
-  { path: 'creerdispatcheur', component: CreerDispatcheurComponent},
-  { path: 'signupadmin', component: SignupAdminComponent},
+  //////////Dispatcheur////////////////
+  { path: 'receptionnairepage', component: ReceptionnairePageComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
+  { path: 'commandes', component: CommandesComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
+  { path: 'produits/:id', component: ProduitsParTypeComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
+  { path: 'livraisons', component: LivraisonsComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
+  { path: 'camions', component: CamionsComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
+  { path: 'addcommande', component: AddCommandeComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
+  { path: 'addlivraison', component: AddLivraisonComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
+  { path: 'editcommande/:id', component: EditCommandeComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
+  { path: 'editproduit/:id', component: EditProduitComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
+  { path: 'edit-livraison/:id', component: EditLivraisonComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
+  { path: 'type_produit', component: TypeProduitComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
+  { path: 'edit_type_produit/:id', component: EditTypeProduitComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
+  { path: 'addProduit/:typeId', component: AddProduitComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
+  { path: 'citernes', component: CiternesComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
+  { path: 'compartiments/:idCiterne', component: CompartimentsComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
  
-  { path: 'gestiondispatcheur', component: GestionDispatcheurComponent},
-  { path: 'gestionadmin', component: GestionAdminComponent},
-  { path: 'gestionclient', component: GestionClientComponent},
+  //////////////////admin////////////
+  { 
+    path: 'adminpage',
+    component: AdminPageComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRoles: [UserRole.ROLE_ADMIN] }
+  },
+  { 
+    path: 'creerdispatcheur',
+    component: CreerDispatcheurComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRoles: [UserRole.ROLE_ADMIN] }
+  },
+  { 
+    path: 'signupadmin',
+    component: SignupAdminComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRoles: [UserRole.ROLE_ADMIN] }
+  },
+  { 
+    path: 'gestiondispatcheur',
+    component: GestionDispatcheurComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRoles: [UserRole.ROLE_ADMIN] }
+  },
+  { 
+    path: 'gestionadmin',
+    component: GestionAdminComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRoles: [UserRole.ROLE_ADMIN] }
+  },
+  { 
+    path: 'gestionclient',
+    component: GestionClientComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRoles: [UserRole.ROLE_ADMIN] }
+  },
 
 
   /////////////client//////////
-  { path: 'categories', component: CategorieUserComponent },
-  { path: 'produits_user/:typeId', component: ProduitUserComponent },
-  { path: 'cart', component: CartComponent },
+  { path: 'categories', component: CategorieUserComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_USER] }},
+  { path: 'produits_user/:typeId', component: CategorieUserComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_USER] }},
+  { path: 'cart', component: CartComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_USER] }},
   {
     path: 'buyProduct/:id',
     component: BuyProductComponent,
     resolve: {
       productDetails: BuyProductResolverService
-    }
+    },
+    canActivate: [RoleGuard],
+    data: { expectedRoles: [UserRole.ROLE_USER] }
   },
-  { path: 'orderConfirm', component: OrderConfirmationComponent }
+  {
+    path: 'orderConfirm',
+    component: OrderConfirmationComponent,
+    canActivate: [RoleGuard],
+    data: { expectedRoles: [UserRole.ROLE_USER] }
+  }
   
   
  

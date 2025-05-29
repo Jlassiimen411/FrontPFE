@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, Observable, tap, throwError } from 'rxjs';
 
 @Injectable({
@@ -17,7 +17,7 @@ export class CartService {
   addToCart(item: any): Observable<any> {
     return this.http.get(`${this.apiUrl}/addToCart/${item.id}`);
   }
-
+  
   updateQuantity(id: number, quantity: number): Observable<any> {
     return this.http.put(`${this.apiUrl}/${id}/${quantity}`, {});
   }

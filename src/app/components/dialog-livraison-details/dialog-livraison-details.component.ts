@@ -1,7 +1,9 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { Router } from '@angular/router';
 import { LivraisonService } from 'src/app/services/livraison.service';
+import { CommandeService } from 'src/app/services/commande.service'; // Import CommandeService
+import { Subscription } from 'rxjs'; // Import Subscription for cleanup
 import Swal from 'sweetalert2';
 
 // Définition des interfaces
@@ -12,6 +14,7 @@ interface Produit {
 
 interface CommandeProduit {
   produit?: Produit;
+  quantite?: number;
 }
 
 interface Commande {
@@ -20,9 +23,6 @@ interface Commande {
   quantite?: number;
   commandeProduits?: CommandeProduit[];
   price?: number;
-
-
-
 }
 
 interface Citerne {
@@ -60,10 +60,8 @@ interface LivraisonDetail {
     codeCommande: string;
     produitNom: string;
     commandeQuantite: number | string;
-    price?: number
-
+    price?: number;
   }>;
-
 }
 
 @Component({
@@ -71,16 +69,18 @@ interface LivraisonDetail {
   templateUrl: './dialog-livraison-details.component.html',
   styleUrls: ['./dialog-livraison-details.component.css']
 })
-export class DialogLivraisonDetailsComponent implements OnInit {
+export class DialogLivraisonDetailsComponent implements OnInit, OnDestroy {
   livaisons: any[] = [];
   livraisonDetail: LivraisonDetail = {} as LivraisonDetail;
-
+private commandeUpdateSubscription!: Subscription;
   constructor(
     public dialogRef: MatDialogRef<DialogLivraisonDetailsComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private livraisonService: LivraisonService,
+    private commandeService: CommandeService, // Inject CommandeService
     private router: Router
-  ) { }
+  ) {}
+
   ngOnInit(): void {
     const livraisonId = this.data?.livraisonId;
 
@@ -90,18 +90,35 @@ export class DialogLivraisonDetailsComponent implements OnInit {
       return;
     }
 
+    // Initial load of livraison details
+    this.loadLivraisonDetails(livraisonId);
+
+    // Subscribe to command updates to refresh data
+    this.commandeUpdateSubscription = this.commandeService.commandeUpdated$.subscribe(() => {
+      console.log('Commande updated, refreshing livraison details...');
+      this.loadLivraisonDetails(livraisonId); // Re-fetch details on update
+    });
+  }
+
+  ngOnDestroy(): void {
+    // Cleanup subscription to avoid memory leaks
+    if (this.commandeUpdateSubscription) {
+      this.commandeUpdateSubscription.unsubscribe();
+    }
+  }
+
+  private loadLivraisonDetails(livraisonId: number): void {
     this.livraisonService.getLivraisonById(livraisonId).subscribe({
       next: (res: LivraisonResponse) => {
-        console.log('Données complètes de la réponse:', res); // Ajoute un log complet pour voir la structure exacte
+        console.log('Données complètes de la réponse:', res);
 
-        // Assure-toi que la structure de la réponse est celle que tu attends
         if (res.commandes && res.commandes.length > 0) {
           console.log('Nombre de commandes:', res.commandes.length);
         } else {
           console.log('Aucune commande trouvée dans la réponse.');
         }
 
-        // Formatage des détails de la livraison
+        // Formatage des détails de la livraison avec correction de la quantité
         this.livraisonDetail = {
           id: res.id,
           codeLivraison: res.codeLivraison || 'Non définie',
@@ -115,13 +132,12 @@ export class DialogLivraisonDetailsComponent implements OnInit {
           },
           commandes: Array.isArray(res.commandes)
             ? res.commandes.map((cmd: Commande) => ({
-              codeCommande: cmd.codeCommande || 'Non définie',
-              produitNom: cmd.commandeProduits?.[0]?.produit?.nomProduit || 'Non défini',
-              commandeQuantite: cmd.quantite || 'Non définie',
-              price: cmd.price
-            }))
+                codeCommande: cmd.codeCommande || 'Non définie',
+                produitNom: cmd.commandeProduits?.[0]?.produit?.nomProduit || 'Non défini',
+                commandeQuantite: cmd.quantite ?? cmd.commandeProduits?.[0]?.quantite ?? 0, // Prioritize commandes.quantite
+                price: cmd.price
+              }))
             : []
-
         };
 
         console.log('Détails de livraison formatés:', this.livraisonDetail);
@@ -131,8 +147,8 @@ export class DialogLivraisonDetailsComponent implements OnInit {
         this.dialogRef.close();
       }
     });
-
   }
+
   imprimerLivraison(): void {
     console.log('🖨️ Fonction imprimerLivraison() appelée');
 
@@ -163,17 +179,15 @@ export class DialogLivraisonDetailsComponent implements OnInit {
     const contenu = `
       <div class="container">
         <div class="header-flex">
-      <img src="assets/img/logo1.png" alt="Logo" class="header-image">
-      <h1 class="titre">Détails de la Livraison</h1>
-    </div>
-  
+          <img src="assets/img/logo1.png" alt="Logo" class="header-image">
+          <h1 class="titre">Détails de la Livraison</h1>
+        </div>
         <table class="main-table">
           <tr><th>Code Livraison</th><td>${this.livraisonDetail.codeLivraison}</td></tr>
           <tr><th>Date de Livraison</th><td>${this.livraisonDetail.dateLivraison}</td></tr>
           <tr><th>Immatriculation</th><td>${this.livraisonDetail.immatriculation}</td></tr>
           <tr><th>Citerne</th><td>${this.livraisonDetail.citerne.reference} (${this.livraisonDetail.citerne.capacite} L)</td></tr>
           <tr><th>Statut</th><td>${this.livraisonDetail.statut}</td></tr>
-          
           <tr>
             <th>Commandes</th>
             <td>
@@ -227,7 +241,7 @@ export class DialogLivraisonDetailsComponent implements OnInit {
               padding: 15px;
               box-sizing: border-box;
             }
-           .header-flex {
+            .header-flex {
               display: flex;
               align-items: center;
               justify-content: space-between;
@@ -244,8 +258,6 @@ export class DialogLivraisonDetailsComponent implements OnInit {
               font-size: 26px;
               margin: 0;
             }
-
-
             h1 {
               text-align: center;
               font-size: 26px;
@@ -301,33 +313,19 @@ export class DialogLivraisonDetailsComponent implements OnInit {
     fenetreImpression.document.close();
   }
 
-
-
-
-
-
-
-
-
-
-
   closeDialog(): void {
-    // Retirer le focus du bouton ou de tout élément en focus
     const button = document.querySelector('button');
     if (button) {
-      button.blur(); // Retirer le focus
+      button.blur();
     }
 
-    // Appliquer aria-hidden à l'élément racine
     const appRoot = document.querySelector('app-root');
     if (appRoot) {
       appRoot.setAttribute('aria-hidden', 'true');
     }
 
-    // Fermer le dialogue
     this.dialogRef.close();
   }
-
 
   deleteLivraison(): void {
     const livraisonId = this.data?.livraisonId;
@@ -361,9 +359,8 @@ export class DialogLivraisonDetailsComponent implements OnInit {
               icon: 'success',
               confirmButtonColor: '#28a745'
             });
-            // Fermer la boîte de dialogue
             this.dialogRef.close({ deleted: true, livraisonId: livraisonId });
-            this.removeLivraisonFromCalendar(livraisonId); // Retirer de l'API calendrier
+            this.removeLivraisonFromCalendar(livraisonId);
           },
           error: (err) => {
             console.error('Erreur lors de la suppression:', err);
@@ -379,8 +376,6 @@ export class DialogLivraisonDetailsComponent implements OnInit {
       }
     });
   }
-
-
 
   removeLivraisonFromCalendar(livraisonId: number): void {
     if (!this.data?.calendarApi) {
@@ -400,8 +395,6 @@ export class DialogLivraisonDetailsComponent implements OnInit {
     }
   }
 
-
-
   editLivraison(id: number): void {
     const livraisonId = id;
     if (!livraisonId) {
@@ -411,11 +404,7 @@ export class DialogLivraisonDetailsComponent implements OnInit {
 
     console.log("Modification de la livraison avec l'ID:", livraisonId);
 
-    // Fermer le dialogue avant la redirection
     this.dialogRef.close();
-
-    // Rediriger vers la page de modification de la livraison
     this.router.navigate(['/edit-livraison', livraisonId]);
   }
-
 }

@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { NgForm } from '@angular/forms';
 import Swal from 'sweetalert2';
 import { OrderServiceService } from 'src/app/services/order-service.service';
+import { AdresseService } from 'src/app/services/adresse.service';
 
 
 @Component({
@@ -18,8 +19,11 @@ export class CartComponent implements OnInit {
   cartItems: any[] = [];
   total: number = 0;
   showOrderModal: boolean = false;
+  latitude: number | null = null;
+longitude: number | null = null;
 
-  orderDetails: any = {
+
+orderDetails: any = {
     fullName: '',
     fullAddress: '',
     contactNumber: '',
@@ -30,6 +34,7 @@ export class CartComponent implements OnInit {
   constructor(
     private cartService: CartService,
     private produitService: ProduitService,
+    private adresseService: AdresseService,
     private commandeService: CommandeService, // Ajouter CommandeService
     private router: Router,
     private cdr: ChangeDetectorRef,
@@ -39,14 +44,28 @@ export class CartComponent implements OnInit {
   ngOnInit(): void {
     this.loadCartItems();
   }
-
   loadCartItems(): void {
     this.cartService.getCartItems().subscribe(
       data => {
-        this.cartItems = data.map((item: any) => ({
-          product: item.product,
-          quantity: item.quantity || 1
-        }));
+        console.log("Panier reçu du backend :", data);
+        
+        const uniqueItems: any[] = [];
+  
+        data.forEach((item: any) => {
+          const prod = item.product[0];
+          const existing = uniqueItems.find(ui => ui.product.id === prod.id);
+          
+          if (existing) {
+            existing.quantity += item.quantity || 1;
+          } else {
+            uniqueItems.push({
+              product: prod,
+              quantity: item.quantity || 1
+            });
+          }
+        });
+  
+        this.cartItems = uniqueItems;
         this.getTotalPrice();
         this.prepareOrderProductList();
       },
@@ -61,6 +80,8 @@ export class CartComponent implements OnInit {
       }
     );
   }
+  
+  
 
   updateQuantity(codeProduit: number, quantity: number): void {
     if (quantity > 0) {
@@ -86,30 +107,41 @@ export class CartComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  removeItem(id: number): void {
-    if (!id) {
-      console.error('ID invalide !');
-      return;
-    }
-
-    this.cartService.removeFromCart(id).subscribe(
-      () => {
-        this.cartItems = this.cartItems.filter(item => item.product.id !== id);
-        this.getTotalPrice();
-        this.prepareOrderProductList();
-        this.cdr.detectChanges();
-      },
-      error => {
-        console.error('Erreur lors de la suppression :', error);
-        Swal.fire({
-          title: 'Erreur !',
-          text: 'Erreur lors de la suppression de l\'article.',
-          icon: 'error',
-          confirmButtonColor: '#d33'
-        });
-      }
-    );
+ removeItem(id: number): void {
+  if (!id) {
+    console.error('ID invalide !');
+    return;
   }
+
+  // Suppression immédiate du panier côté client
+  const originalCart = [...this.cartItems]; // Pour rollback en cas d'erreur
+  this.cartItems = this.cartItems.filter(item => item.product.id !== id);
+  this.getTotalPrice();
+  this.prepareOrderProductList();
+  this.cdr.detectChanges();
+
+  // Appel backend
+  this.cartService.removeFromCart(id).subscribe(
+    () => {
+      // Suppression confirmée par le backend (rien à faire ici)
+    },
+    error => {
+      // En cas d'erreur, rollback
+      console.error('Erreur lors de la suppression :', error);
+      this.cartItems = originalCart;
+      this.getTotalPrice();
+      this.prepareOrderProductList();
+      this.cdr.detectChanges();
+
+      Swal.fire({
+        title: 'Erreur !',
+        text: 'Erreur lors de la suppression de l\'article.',
+        icon: 'error',
+        confirmButtonColor: '#d33'
+      });
+    }
+  );
+}
 
   prepareOrderProductList(): void {
     this.orderDetails.orderProductQuantityList = this.cartItems.map(item => ({
@@ -154,70 +186,85 @@ export class CartComponent implements OnInit {
       });
       return;
     }
-
-    // Préparer les données de la commande au format attendu par le backend
-    const commandeData = {
-      codeCommande: this.generateCommandeCode(),
-      dateCommande: new Date().toISOString(),
-      price: this.total,
-      client: {
-        fullName: this.orderDetails.fullName,
-        fullAddress: this.orderDetails.fullAddress,
-        contactNumber: this.orderDetails.contactNumber,
-        alternateContactNumber: this.orderDetails.alternateContactNumber || null
-      },
-      commandeProduits: this.orderDetails.orderProductQuantityList.map((item: any) => {
-        const cartItem = this.cartItems.find(ci => ci.product.id === item.id);
-        return {
-          produit: {
-            id: item.id,
-            nomProduit: cartItem?.product.nomProduit,
-            prix: cartItem?.product.prix,
-            codeProduit: cartItem?.product.codeProduit,
-            libelle: cartItem?.product.libelle
+  
+    this.adresseService.validateAddress(this.orderDetails.fullAddress).subscribe({
+      next: (result: any) => {
+        console.log('Résultat de validation adresse :', result);
+    
+        const latitude = result.latitude ?? result.lat;
+        const longitude = result.longitude ?? result.lon;
+    
+        if (latitude == null || longitude == null) {
+          Swal.fire('Erreur', 'Adresse invalide ou coordonnées non disponibles.', 'error');
+          return;
+        }
+    
+        const commandeData = {
+          codeCommande: this.generateCommandeCode(),
+          dateCommande: new Date().toISOString(),
+          price: this.total,
+          client: {
+            fullName: this.orderDetails.fullName,
+            fullAddress: this.orderDetails.fullAddress,
+            contactNumber: this.orderDetails.contactNumber,
+            alternateContactNumber: this.orderDetails.alternateContactNumber || null,
+            latitude: latitude,
+            longitude: longitude
           },
-          quantite : item.quantity
+          commandeProduits: this.orderDetails.orderProductQuantityList.map((item: any) => {
+            const cartItem = this.cartItems.find(ci => ci.product.id === item.id);
+            return {
+              produit: {
+                id: item.id,
+                nomProduit: cartItem?.product.nomProduit,
+                prix: cartItem?.product.prix,
+                codeProduit: cartItem?.product.codeProduit,
+                libelle: cartItem?.product.libelle
+              },
+              quantite: item.quantity
+            };
+          })
         };
-      })
-    };
-
-    console.log('Données de commande à envoyer:', commandeData);
-
-    // Utiliser CommandeService au lieu de ProduitService
-    this.commandeService.addCommande(commandeData).subscribe(
-      (response) => {
-        console.log('Commande créée avec succès:', response);
-        this.closeOrderModal();
-        orderForm.reset();
-        
-        // Notifier les autres composants
-        this.orderService.notifyOrderPlaced();
-
-        // Vider le panier côté service
-        this.clearCartAfterOrder();
-
-        // Afficher le message de succès
-        Swal.fire({
-          title: 'Succès !',
-          text: `Votre commande ${commandeData.codeCommande} a été passée avec succès.`,
-          icon: 'success',
-          confirmButtonColor: '#28a745',
-          showCancelButton: true,
-          confirmButtonText: 'Suivre le livreur',
-          cancelButtonText: 'Retour'
-        }).then((result) => {
-          if (result.isConfirmed) {
-            // Naviguer vers la page de suivi
-            this.router.navigate(['/tracking', response.id]); // ou response.codeCommande
-          } else {
-            this.router.navigate(['/categories']);
+  
+        console.log('Commande avec adresse validée :', commandeData);
+  
+        this.commandeService.addCommande(commandeData).subscribe({
+          next: (response) => {
+            Swal.fire('Succès', 'Commande envoyée avec succès !', 'success');
+            this.clearCartAfterOrder();
+            this.showOrderModal = false;
+            orderForm.reset();
+  
+            // Naviguer vers le suivi
+            Swal.fire({
+              title: 'Commande passée !',
+              text: `Code : ${commandeData.codeCommande}`,
+              icon: 'success',
+              confirmButtonText: 'Suivre le livreur',
+              showCancelButton: true,
+              cancelButtonText: 'Retour'
+            }).then((result) => {
+              if (result.isConfirmed) {
+                this.router.navigate(['/tracking', response.id]);
+              } else {
+                this.router.navigate(['/categories']);
+              }
+            });
+          },
+          error: (err) => {
+            console.error(err);
+            Swal.fire('Erreur', 'Impossible d’envoyer la commande.', 'error');
           }
         });
-        
+      },
+      error: (err) => {
+        console.error('Erreur lors de la validation de l’adresse :', err);
+        Swal.fire('Erreur', 'Adresse invalide ou erreur réseau.', 'error');
       }
-    );
+    });
   }
-
+  
+  
   // Générer un code de commande unique
   private generateCommandeCode(): string {
     const timestamp = Date.now();

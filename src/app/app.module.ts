@@ -14,7 +14,7 @@ import { ReceptionnairePageComponent } from './components/receptionnaire-page/re
 import { AddCommandeComponent } from './components/add-commande/add-commande.component';
 import { ReactiveFormsModule } from '@angular/forms';
 import { MatDialogModule } from '@angular/material/dialog';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { FullCalendarModule } from '@fullcalendar/angular';
 import { AddLivraisonComponent } from './components/add-livraison/add-livraison.component';
 import { FormsModule } from '@angular/forms';
@@ -59,6 +59,8 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { AddClientComponent } from './components/add-client/add-client.component';
 import { MapComponent } from './components/map/map.component';
 import { TrackingComponent } from './components/tracking/tracking.component';
+import { AuthInterceptor } from './services/auth-interceptor.service';
+import { ServicesComponent } from './components/services/services.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -104,6 +106,7 @@ import { TrackingComponent } from './components/tracking/tracking.component';
     AddClientComponent,
     MapComponent,
     TrackingComponent,
+    ServicesComponent,
 
   
   
@@ -133,7 +136,11 @@ import { TrackingComponent } from './components/tracking/tracking.component';
     
     
   ],
-  providers: [],
+  providers: [{
+    provide: HTTP_INTERCEPTORS,
+    useClass: AuthInterceptor,
+    multi: true
+  }],
 
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   bootstrap: [AppComponent]

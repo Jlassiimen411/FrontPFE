@@ -34,7 +34,10 @@ export class LoginComponent implements OnInit {
       if (response?.user?.role?.length > 0) {
         this.userAuthService.setRoles(response.user.role);
         this.userAuthService.setToken(response.jwtToken);
-
+        localStorage.setItem(
+          'roles',
+          JSON.stringify(response.user.role.map((r: { roleName: string }) => r.roleName))
+        );
         const role = response.user.role[0].roleName;
 
         if (role === 'Admin') {

@@ -51,7 +51,7 @@ const routes: Routes = [
   //////////Dispatcheur////////////////
   { path: 'receptionnairepage', component: ReceptionnairePageComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
   { path: 'commandes', component: CommandesComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
-  { path: 'produits/:id', component: ProduitsParTypeComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
+  { path: 'produits/:id', component: ProduitsParTypeComponent ,canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
   { path: 'livraisons', component: LivraisonsComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
   { path: 'camions', component: CamionsComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
   { path: 'addcommande', component: AddCommandeComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
@@ -59,7 +59,7 @@ const routes: Routes = [
   { path: 'editcommande/:id', component: EditCommandeComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
   { path: 'editproduit/:id', component: EditProduitComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
   { path: 'edit-livraison/:id', component: EditLivraisonComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
-  { path: 'type_produit', component: TypeProduitComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
+  { path: 'type_produit', component: TypeProduitComponent ,canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
   { path: 'edit_type_produit/:id', component: EditTypeProduitComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
   { path: 'addProduit/:typeId', component: AddProduitComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
   { path: 'citernes', component: CiternesComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
@@ -105,8 +105,8 @@ const routes: Routes = [
 
 
   /////////////client//////////
-  { path: 'categories', component: CategorieUserComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_USER] }},
-  { path: 'produits_user/:typeId', component: CategorieUserComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_USER] }},
+  { path: 'categories', component: CategorieUserComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_USER] } },
+  { path: 'produits_user/:typeId', component: ProduitUserComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_USER] }},
   { path: 'cart', component: CartComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_USER] }},
   {
     path: 'buyProduct/:id',
@@ -114,8 +114,7 @@ const routes: Routes = [
     resolve: {
       productDetails: BuyProductResolverService
     },
-    canActivate: [RoleGuard],
-    data: { expectedRoles: [UserRole.ROLE_USER] }
+     canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_USER] }
   },
   {
     path: 'orderConfirm',

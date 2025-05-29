@@ -61,6 +61,7 @@ import { MapComponent } from './components/map/map.component';
 import { TrackingComponent } from './components/tracking/tracking.component';
 import { AuthInterceptor } from './services/auth-interceptor.service';
 import { ServicesComponent } from './components/services/services.component';
+import { AboutComponent } from './components/about/about.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -107,6 +108,7 @@ import { ServicesComponent } from './components/services/services.component';
     MapComponent,
     TrackingComponent,
     ServicesComponent,
+    AboutComponent,
 
   
   

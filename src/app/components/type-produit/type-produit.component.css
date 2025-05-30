@@ -132,6 +132,9 @@ span{
       transform: translateY(0);
     }
   }
+  .service_section{
+    height: 190em;
+  }
   
   /* Amélioration pour les boutons de la page principale */
   .single_page_btn.btn-outline-warning {

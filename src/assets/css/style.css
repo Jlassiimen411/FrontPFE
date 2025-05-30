@@ -781,7 +781,7 @@ a:focus {
 }
 
 .info_section {
-  background-color: #000f3c;
+  background: rgb(41, 37, 36);
   color: #ffffff;
   padding: 75px 0 10px 0;
 }

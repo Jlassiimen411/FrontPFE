@@ -34,6 +34,16 @@ export class CartService {
     
     
   }
+  cleanCart(): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/clean`, { responseType: 'text' }).pipe(
+      tap(response => console.log('Panier vidé. Réponse du serveur:', response)),
+      catchError(error => {
+        console.error('Erreur lors du nettoyage du panier:', error);
+        return throwError(() => new Error(error));
+      })
+    );
+  }
+  
   
   
 

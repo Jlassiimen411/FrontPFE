@@ -18,6 +18,10 @@ export class CommandeService {
     );
   }
 
+  getCommandesByUser(): Observable<any[]> {
+    return this.httpClient.get<any[]>(`${this.commandeURL}/mesCommandes`);
+  }
+
   addCommande(commande: any): Observable<any> {
     return this.httpClient.post<any>(`${this.commandeURL}`, commande).pipe(
       catchError(this.handleError<any>('addCommande'))

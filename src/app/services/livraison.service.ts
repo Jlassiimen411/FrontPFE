@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
+import { Observable, of, Subject, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { HttpHeaders } from '@angular/common/http';
 
@@ -10,6 +10,7 @@ import { HttpHeaders } from '@angular/common/http';
 export class LivraisonService  {
 
   private livraisonURL: string = 'http://localhost:8090/api/livraisons';
+  private calendarUpdateSubject = new Subject<{ livraisonId: number, action: 'remove' | 'update' }>();
 
   constructor(private httpClient: HttpClient) { }
 
@@ -34,7 +35,10 @@ getCiterneDisponiblesPourDate(date: string): Observable<any[]> {
   /*getCiternesDisponibles(date: string): Observable<Citerne[]> {
     return this.http.get<any[]>(`/api/citernes/disponibles?date=${date}`);
   }*/
-  
+    getLivraisonsByUser(username: string): Observable<any[]> {
+      return this.httpClient.get<any[]>(`${this.livraisonURL}/user/${username}`);
+    }
+    
   
   addLivraison(livraisonData: any): Observable<any> {
     return this.httpClient.post(this.livraisonURL, livraisonData);
@@ -74,4 +78,13 @@ getCiterneDisponiblesPourDate(date: string): Observable<any[]> {
   getLivreurPosition(commandeId: number): Observable<{ lat: number, lng: number }> {
     return this.httpClient.get<{ lat: number, lng: number }>(`${this.livraisonURL}/position/${commandeId}`);
   }
+  
+  notifyCalendarUpdate(livraisonId: number, action: 'remove' | 'update') {
+    this.calendarUpdateSubject.next({ livraisonId, action });
+  }
+
+  getCalendarUpdates(): Observable<{ livraisonId: number, action: 'remove' | 'update' }> {
+    return this.calendarUpdateSubject.asObservable();
+  }
+
 }

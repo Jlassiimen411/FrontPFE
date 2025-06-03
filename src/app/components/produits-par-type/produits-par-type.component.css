@@ -1,7 +1,4 @@
-section{
-    margin-top: -45em;
-   
-}
+
 .foul{
     margin-left: 20em;
 }
@@ -132,7 +129,7 @@ span{
     margin:  auto; /* Centre le bouton horizontalement */
 }
 section{
-    margin-top: -45em;
+   
     margin-left: 2em;
 }
 .row {

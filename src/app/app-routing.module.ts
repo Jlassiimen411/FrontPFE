@@ -40,6 +40,8 @@ import { GestionClientComponent } from './components/gestion-client/gestion-clie
 import { UserRole } from './model/user-role'; 
 import { ServicesComponent } from './components/services/services.component';
 import { AboutComponent } from './components/about/about.component';
+import { MesCommandesComponent } from './components/mes-commandes/mes-commandes.component';
+import { SuivreLivraisonComponent } from './components/suivre-livraison/suivre-livraison.component';
  
 const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -121,10 +123,11 @@ const routes: Routes = [
     component: OrderConfirmationComponent,
     canActivate: [RoleGuard],
     data: { expectedRoles: [UserRole.ROLE_USER] }
-  }
+  },
+  { path: 'mes-commandes', component: MesCommandesComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_USER] } },
+  { path: 'suivre_livraison', component: SuivreLivraisonComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_USER] } },
   
   
- 
 
 
 ];

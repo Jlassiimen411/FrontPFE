@@ -265,6 +265,7 @@ orderDetails: any = {
   }
   
   
+  
   // Générer un code de commande unique
   private generateCommandeCode(): string {
     const timestamp = Date.now();

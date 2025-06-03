@@ -182,7 +182,8 @@ body {
 }
 
 .header_top {
-  padding: 15px 0;
+  padding: 15px 0px;
+  
 }
 
 .header_top .contact_link-container {

@@ -21,44 +21,50 @@ export class LoginComponent implements OnInit {
     this.loginForm = this.fb.group({
       firstName: new FormControl('', [ Validators.required]),
       lastName: new FormControl('', [ Validators.required]),
-      username: new FormControl('', [ Validators.required]),
+      userName: new FormControl('', [ Validators.required]),
       email: new FormControl('', Validators.email),
-      password: new FormControl('', [ Validators.required]),
+      userPassword: new FormControl('', [ Validators.required]),
     })
   }
 
   login(loginForm: NgForm) {
-  this.userService.login(loginForm.value).subscribe(
-    (response: any) => {
-      console.log("Contenu user :", response.user);
-      if (response?.user?.role?.length > 0) {
-        this.userAuthService.setRoles(response.user.role);
-        this.userAuthService.setToken(response.jwtToken);
-        localStorage.setItem(
-          'roles',
-          JSON.stringify(response.user.role.map((r: { roleName: string }) => r.roleName))
-        );
-        const role = response.user.role[0].roleName;
-
-        if (role === 'Admin') {
-          this.router.navigate(['/adminpage']);
-        }  else if (role === 'Dispatcheur')  {
-          this.router.navigate(['/receptionnairepage']);
-        } else {
-          this.router.navigate(['/categories']);
+    this.userService.login(loginForm.value).subscribe(
+      (response: any) => {
+        console.log("Contenu user :", response.user);
+  
+        // Stocker le username dans le localStorage
+        if(response.user && response.user.userName) {
+          localStorage.setItem('username', response.user.userName);
         }
-      } else {
-        console.error("Rôle utilisateur manquant ou vide :", response);
-        alert("Erreur de connexion : rôle utilisateur non trouvé.");
+  
+        if (response?.user?.role?.length > 0) {
+          this.userAuthService.setRoles(response.user.role);
+          this.userAuthService.setToken(response.jwtToken);
+          localStorage.setItem(
+            'roles',
+            JSON.stringify(response.user.role.map((r: { roleName: string }) => r.roleName))
+          );
+          const role = response.user.role[0].roleName;
+  
+          if (role === 'Admin') {
+            this.router.navigate(['/adminpage']);
+          } else if (role === 'Dispatcheur')  {
+            this.router.navigate(['/receptionnairepage']);
+          } else {
+            this.router.navigate(['/categories']);
+          }
+        } else {
+          console.error("Rôle utilisateur manquant ou vide :", response);
+          alert("Erreur de connexion : rôle utilisateur non trouvé.");
+        }
+      },
+      (error) => {
+        console.error("Erreur lors du login :", error);
+        alert("Échec de connexion. Vérifiez vos identifiants.");
       }
-    },
-    (error) => {
-      console.error("Erreur lors du login :", error);
-      alert("Échec de connexion. Vérifiez vos identifiants.");
-    }
-  );
-}
-
+    );
+  }
+  
   hideShowPass(){
     this.isText = !this.isText;
     this.isText ? this.eyeIcon = "fa-eye" : this.eyeIcon = "fa-eye-slash";

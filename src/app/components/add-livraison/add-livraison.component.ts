@@ -99,7 +99,7 @@ export class AddLivraisonComponent implements OnInit {
         }
       }
     });
-
+    
     // Load typeproduits and then commands
     this.typeProduitService.getAllTypeProduits().pipe(
       first(),
@@ -231,7 +231,8 @@ export class AddLivraisonComponent implements OnInit {
       this.chargerCommandes(); // Ensure commands are reloaded after livraisons
     });
   }
-
+  
+  
   filtrerElementsDisponibles(date: string): void {
     if (!date) return;
     const dateSelectionnee = new Date(date);
@@ -486,6 +487,7 @@ export class AddLivraisonComponent implements OnInit {
     }
     this.addLivraisonForm.get('codeLivraison')?.setValue(codeLivraison);
   }
+  
 
   onCamionChange(event: Event): void {
     const selectedId = (event.target as HTMLSelectElement).value;

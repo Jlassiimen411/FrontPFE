@@ -1,5 +1,5 @@
 section{
-    margin-top: -45em;
+ 
     margin-left: 20em;
 }
 .lo{
@@ -14,9 +14,7 @@ full-calendar {
   }
  
   .add{
-    right: -32em;
-   
-    
+    right: -32em;  
    
 }
 .search-input-wrapper {
@@ -64,7 +62,7 @@ input.custom-search:focus {
     background-size: cover;
     background-position: center;
     padding: 20px;
-    color: #e12424; /* Le texte reste noir */
+    color: #e12424;
     
     
 }
@@ -156,7 +154,7 @@ span{
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
   }
   
-  /* Surlignage des informations importantes */
+
   .detail-box h2 span {
     color: white;
     font-weight: 500;

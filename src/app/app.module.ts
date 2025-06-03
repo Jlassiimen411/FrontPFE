@@ -62,6 +62,8 @@ import { TrackingComponent } from './components/tracking/tracking.component';
 import { AuthInterceptor } from './services/auth-interceptor.service';
 import { ServicesComponent } from './components/services/services.component';
 import { AboutComponent } from './components/about/about.component';
+import { MesCommandesComponent } from './components/mes-commandes/mes-commandes.component';
+import { SuivreLivraisonComponent } from './components/suivre-livraison/suivre-livraison.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -109,6 +111,8 @@ import { AboutComponent } from './components/about/about.component';
     TrackingComponent,
     ServicesComponent,
     AboutComponent,
+    MesCommandesComponent,
+    SuivreLivraisonComponent,
 
   
   

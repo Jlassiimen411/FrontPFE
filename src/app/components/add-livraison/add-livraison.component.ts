@@ -4,7 +4,7 @@ import { LivraisonService } from 'src/app/services/livraison.service';
 import { CommandeService } from 'src/app/services/commande.service';
 import { CamionService } from 'src/app/services/camion.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { debounceTime, map, catchError, of, first } from 'rxjs';
+import { debounceTime, map, catchError, of, first, forkJoin } from 'rxjs';
 import { CompartimentService } from 'src/app/services/compartiment.service';
 import { CiterneService } from 'src/app/services/citerne.service';
 import { TypeProduitService } from 'src/app/services/type-produit.service';
@@ -47,6 +47,14 @@ interface Livraison {
   commandes?: any[];
 }
 
+interface Citerne {
+  id: number;
+  reference: string;
+  capacite: number;
+  camionId?: number;
+  compartimentTypes?: string[]; // Add this to store compartment types
+}
+
 @Component({
   selector: 'app-add-livraison',
   templateUrl: './add-livraison.component.html',
@@ -58,7 +66,7 @@ export class AddLivraisonComponent implements OnInit {
   commandesDejaAffectees: Set<number> = new Set();
   addLivraisonForm!: FormGroup;
   camions: any[] = [];
-  citernes: { id: number, reference: string, capacite: number, camionId?: number }[] = [];
+citernes: Citerne[] = [];
   compartiments: Compartiment[] = [];
   typeproduits: any[] = [];
   compartimentCommandesMap: { [reference: string]: Commande[] } = {};
@@ -99,7 +107,7 @@ export class AddLivraisonComponent implements OnInit {
         }
       }
     });
-    
+
     // Load typeproduits and then commands
     this.typeProduitService.getAllTypeProduits().pipe(
       first(),
@@ -119,15 +127,14 @@ export class AddLivraisonComponent implements OnInit {
     });
   }
 
-  private initForm(): void {
-    this.addLivraisonForm = this.fb.group({
-      codeLivraison: ['', [Validators.required], [this.codeLivraisonAsyncValidator()]],
-      date: ['', [Validators.required, this.dateValidator()]],
-      camionId: ['', [Validators.required]],
-      citerneId: ['', [Validators.required]],
-      statut: ['', [Validators.required]]
-    });
-  }
+private initForm(): void {
+  this.addLivraisonForm = this.fb.group({
+    codeLivraison: ['', [Validators.required], [this.codeLivraisonAsyncValidator()]],
+    date: ['', [Validators.required, this.dateValidator()]],
+    camionId: ['', [Validators.required]],
+    citerneId: ['', [Validators.required]]
+  });
+}
 
   private formatDateToYYYYMMDD(date: Date): string {
     const year = date.getFullYear();
@@ -231,8 +238,7 @@ export class AddLivraisonComponent implements OnInit {
       this.chargerCommandes(); // Ensure commands are reloaded after livraisons
     });
   }
-  
-  
+
   filtrerElementsDisponibles(date: string): void {
     if (!date) return;
     const dateSelectionnee = new Date(date);
@@ -305,18 +311,39 @@ export class AddLivraisonComponent implements OnInit {
     });
   }
 
-  private chargerCiternes(): void {
-    this.citerneService.getCiternes().pipe(
-      catchError(err => {
-        console.error('Erreur lors du chargement des citernes:', err);
-        this.snackBar.open('Erreur lors du chargement des citernes', 'Fermer', { duration: 3000 });
-        return of([]);
-      })
-    ).subscribe(data => {
-      this.allCiternes = data;
+private chargerCiternes(): void {
+  this.citerneService.getCiternes().pipe(
+    catchError(err => {
+      console.error('Erreur lors du chargement des citernes:', err);
+      this.snackBar.open('Erreur lors du chargement des citernes', 'Fermer', { duration: 3000 });
+      return of([]);
+    })
+  ).subscribe(data => {
+    // Map citernes and fetch their compartments
+    const citernePromises = data.map((citerne: any) => {
+      return this.compartimentService.getCompartimentsByCiterneId(citerne.id).pipe(
+        map(compartiments => {
+          const compartimentTypes = [...new Set(
+            compartiments.flatMap((comp: Compartiment) =>
+              comp.typeProduits.map(tp => tp.name)
+            )
+          )]; // Extract unique compartment types
+          return { ...citerne, compartimentTypes };
+        }),
+        catchError(err => {
+          console.error(`Erreur lors du chargement des compartiments pour la citerne ${citerne.id}:`, err);
+          return of({ ...citerne, compartimentTypes: [] });
+        })
+      );
+    });
+
+    // Resolve all promises and update citernes
+    forkJoin(citernePromises).subscribe((updatedCiternes: Citerne[]) => {
+      this.allCiternes = updatedCiternes;
       this.citernes = [...this.allCiternes];
     });
-  }
+  });
+}
 
   onCiterneSelectionChange(event: any): void {
     const citerneId = event.target.value;
@@ -386,97 +413,99 @@ export class AddLivraisonComponent implements OnInit {
     }
   }
 
-  onSubmit(): void {
-    if (this.addLivraisonForm.invalid) {
-      if (this.addLivraisonForm.get('date')?.hasError('pastDate')) {
-        this.snackBar.open('La date de livraison ne peut pas être dans le passé.', 'Fermer', { duration: 3000 });
-        return;
-      }
-      this.snackBar.open('Veuillez remplir tous les champs obligatoires.', 'Fermer', { duration: 3000 });
+  
+
+onSubmit(): void {
+  if (this.addLivraisonForm.invalid) {
+    if (this.addLivraisonForm.get('date')?.hasError('pastDate')) {
+      this.snackBar.open('La date de livraison ne peut pas être dans le passé.', 'Fermer', { duration: 3000 });
       return;
     }
-
-    const formValue = this.addLivraisonForm.value;
-    if (!formValue.camionId || !formValue.citerneId) {
-      this.snackBar.open('Veuillez sélectionner un camion et une citerne.', 'Fermer', { duration: 3000 });
-      return;
-    }
-
-    const selectedCamion = this.camions.find(c => c.id === Number(formValue.camionId));
-    if (!selectedCamion || selectedCamion.statut !== 'Disponible') {
-      this.snackBar.open('Le camion sélectionné n\'est pas disponible.', 'Fermer', { duration: 4000 });
-      this.addLivraisonForm.get('camionId')?.setValue('');
-      return;
-    }
-
-    const compartimentsVides = this.compartiments.filter(
-      compartiment => !compartiment.commandesAffectees || compartiment.commandesAffectees.length === 0
-    );
-
-    if (compartimentsVides.length > 0) {
-      this.snackBar.open('Tous les compartiments doivent avoir au moins une commande affectée.', 'Fermer', { duration: 4000 });
-      return;
-    }
-
-    const selectedCommandes: Commande[] = [];
-    for (const compartiment of this.compartiments) {
-      if (compartiment.commandesAffectees && compartiment.commandesAffectees.length > 0) {
-        selectedCommandes.push(...compartiment.commandesAffectees);
-      }
-    }
-
-    if (selectedCommandes.length === 0) {
-      this.snackBar.open('Veuillez affecter au moins une commande.', 'Fermer', { duration: 3000 });
-      return;
-    }
-
-    const commandesDejaAffectees = selectedCommandes.filter(cmd => this.commandesDejaAffectees.has(cmd.idCommande));
-    if (commandesDejaAffectees.length > 0) {
-      this.snackBar.open('Certaines commandes sont déjà affectées.', 'Fermer', { duration: 3000 });
-      return;
-    }
-
-    if (this.isSubmitting) return;
-    this.isSubmitting = true;
-    this.addLivraisonForm.disable();
-
-    const livraisonPayload = {
-      codeLivraison: formValue.codeLivraison,
-      camion: { id: Number(formValue.camionId) },
-      citerne: { id: Number(formValue.citerneId) },
-      commandes: selectedCommandes.map((commande: Commande) => ({ id: commande.idCommande })),
-      dateLivraison: formValue.date,
-      statut: 'EN_ATTENTE'
-    };
-
-    this.lService.addLivraison(livraisonPayload).subscribe({
-      next: () => {
-        this.snackBar.open('Livraison ajoutée avec succès.', 'Fermer', { duration: 3000 });
-        selectedCommandes.forEach(cmd => this.commandesDejaAffectees.add(cmd.idCommande));
-        this.chargerLivraisons();
-        this.router.navigate(['/livraisons']);
-      },
-      error: err => {
-        console.error('Erreur lors de l\'ajout de la livraison:', err);
-        const errorMsg = err.error?.message || err.error;
-        if (err.status === 409) {
-          if (errorMsg === 'Camion non disponible à cette date') {
-            this.snackBar.open('Le camion sélectionné est déjà utilisé à cette date.', 'Fermer', { duration: 4000 });
-          } else if (errorMsg === 'Citerne non disponible à cette date') {
-            this.snackBar.open('La citerne sélectionnée est déjà utilisée à cette date.', 'Fermer', { duration: 4000 });
-          } else {
-            this.snackBar.open('Conflit détecté : ' + errorMsg, 'Fermer', { duration: 4000 });
-          }
-        } else {
-          this.snackBar.open('Une erreur est survenue.', 'Fermer', { duration: 3000 });
-        }
-      },
-      complete: () => {
-        this.isSubmitting = false;
-        this.addLivraisonForm.enable();
-      }
-    });
+    this.snackBar.open('Veuillez remplir tous les champs obligatoires.', 'Fermer', { duration: 3000 });
+    return;
   }
+
+  const formValue = this.addLivraisonForm.value;
+  if (!formValue.camionId || !formValue.citerneId) {
+    this.snackBar.open('Veuillez sélectionner un camion et une citerne.', 'Fermer', { duration: 3000 });
+    return;
+  }
+
+  const selectedCamion = this.camions.find(c => c.id === Number(formValue.camionId));
+  if (!selectedCamion || selectedCamion.statut !== 'Disponible') {
+    this.snackBar.open('Le camion sélectionné n\'est pas disponible.', 'Fermer', { duration: 4000 });
+    this.addLivraisonForm.get('camionId')?.setValue('');
+    return;
+  }
+
+  const compartimentsVides = this.compartiments.filter(
+    compartiment => !compartiment.commandesAffectees || compartiment.commandesAffectees.length === 0
+  );
+
+  if (compartimentsVides.length > 0) {
+    this.snackBar.open('Tous les compartiments doivent avoir au moins une commande affectée.', 'Fermer', { duration: 4000 });
+    return;
+  }
+
+  const selectedCommandes: Commande[] = [];
+  for (const compartiment of this.compartiments) {
+    if (compartiment.commandesAffectees && compartiment.commandesAffectees.length > 0) {
+      selectedCommandes.push(...compartiment.commandesAffectees);
+    }
+  }
+
+  if (selectedCommandes.length === 0) {
+    this.snackBar.open('Veuillez affecter au moins une commande.', 'Fermer', { duration: 3000 });
+    return;
+  }
+
+  const commandesDejaAffectees = selectedCommandes.filter(cmd => this.commandesDejaAffectees.has(cmd.idCommande));
+  if (commandesDejaAffectees.length > 0) {
+    this.snackBar.open('Certaines commandes sont déjà affectées.', 'Fermer', { duration: 3000 });
+    return;
+  }
+
+  if (this.isSubmitting) return;
+  this.isSubmitting = true;
+  this.addLivraisonForm.disable();
+
+  const livraisonPayload = {
+    codeLivraison: formValue.codeLivraison,
+    camion: { id: Number(formValue.camionId) },
+    citerne: { id: Number(formValue.citerneId) },
+    commandes: selectedCommandes.map((commande: Commande) => ({ id: commande.idCommande })),
+    dateLivraison: formValue.date,
+    statut: 'EN_ATTENTE' // Hardcode status to EN_ATTENTE
+  };
+
+  this.lService.addLivraison(livraisonPayload).subscribe({
+    next: () => {
+      this.snackBar.open('Livraison ajoutée avec succès.', 'Fermer', { duration: 3000 });
+      selectedCommandes.forEach(cmd => this.commandesDejaAffectees.add(cmd.idCommande));
+      this.chargerLivraisons();
+      this.router.navigate(['/livraisons']);
+    },
+    error: err => {
+      console.error('Erreur lors de l\'ajout de la livraison:', err);
+      const errorMsg = err.error?.message || err.error;
+      if (err.status === 409) {
+        if (errorMsg === 'Camion non disponible à cette date') {
+          this.snackBar.open('Le camion sélectionné est déjà utilisé à cette date.', 'Fermer', { duration: 4000 });
+        } else if (errorMsg === 'Citerne non disponible à cette date') {
+          this.snackBar.open('La citerne sélectionnée est déjà utilisée à cette date.', 'Fermer', { duration: 4000 });
+        } else {
+          this.snackBar.open('Conflit détecté : ' + errorMsg, 'Fermer', { duration: 4000 });
+        }
+      } else {
+        this.snackBar.open('Une erreur est survenue.', 'Fermer', { duration: 3000 });
+      }
+    },
+    complete: () => {
+      this.isSubmitting = false;
+      this.addLivraisonForm.enable();
+    }
+  });
+}
 
   genererCodeLivraison(): void {
     const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -487,7 +516,6 @@ export class AddLivraisonComponent implements OnInit {
     }
     this.addLivraisonForm.get('codeLivraison')?.setValue(codeLivraison);
   }
-  
 
   onCamionChange(event: Event): void {
     const selectedId = (event.target as HTMLSelectElement).value;

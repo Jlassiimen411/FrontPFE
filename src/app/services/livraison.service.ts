@@ -11,7 +11,7 @@ export class LivraisonService  {
 
   private livraisonURL: string = 'http://localhost:8090/api/livraisons';
   private calendarUpdateSubject = new Subject<{ livraisonId: number, action: 'remove' | 'update' }>();
-
+  private commandeArchiveSubject = new Subject<number[]>(); 
   constructor(private httpClient: HttpClient) { }
 
   getAllLivraisons(): Observable<any[]> {
@@ -81,6 +81,14 @@ getCiterneDisponiblesPourDate(date: string): Observable<any[]> {
   
   notifyCalendarUpdate(livraisonId: number, action: 'remove' | 'update') {
     this.calendarUpdateSubject.next({ livraisonId, action });
+  }
+
+  notifyCommandeArchive(commandeIds: number[]): void {
+    this.commandeArchiveSubject.next(commandeIds);
+  }
+
+  getCommandeArchiveUpdates(): Observable<number[]> {
+    return this.commandeArchiveSubject.asObservable();
   }
 
   getCalendarUpdates(): Observable<{ livraisonId: number, action: 'remove' | 'update' }> {

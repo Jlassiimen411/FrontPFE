@@ -1,15 +1,8 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LivraisonService } from 'src/app/services/livraison.service';
 import { MatSnackBar } from '@angular/material/snack-bar';
-
-// Define status options as a constant
-export const STATUS_OPTIONS = {
-  EN_ATTENTE: { value: 'EN_ATTENTE', label: 'En Attente' },
-  LIVRE: { value: 'LIVRE', label: 'Livré' },
-  ANNULE: { value: 'ANNULE', label: 'Annulé' }
-};
 
 @Component({
   selector: 'app-edit-livraison',
@@ -29,8 +22,7 @@ export class EditLivraisonComponent implements OnInit {
     private livraisonService: LivraisonService,
     private router: Router,
     private fb: FormBuilder,
-    private snackBar: MatSnackBar,
-    private cdr: ChangeDetectorRef // Added for change detection
+    private snackBar: MatSnackBar
   ) {
     this.minDate = this.formatDateToYYYYMMDD(new Date());
   }
@@ -56,7 +48,7 @@ export class EditLivraisonComponent implements OnInit {
         console.log('Données reçues de l\'API:', res);
         this.livraisonData = res;
         this.livraisonCommandes = this.livraisonData.commandes || [];
-        this.originalStatus = (this.livraisonData.statut?.toUpperCase() || 'EN_ATTENTE'); // Fallback to EN_ATTENTE
+        this.originalStatus = this.livraisonData.statut?.toUpperCase();
 
         this.livraisonForm.patchValue({
           codeLivraison: this.livraisonData.codeLivraison,
@@ -66,7 +58,6 @@ export class EditLivraisonComponent implements OnInit {
           dateLivraison: this.livraisonData.dateLivraison,
           statut: this.originalStatus
         });
-        this.cdr.detectChanges(); // Ensure form updates are reflected
       },
       (err) => {
         console.error('Erreur lors de la récupération des données de la livraison:', err);
@@ -83,18 +74,18 @@ export class EditLivraisonComponent implements OnInit {
   }
 
   isStatusLocked(): boolean {
-    return this.originalStatus === STATUS_OPTIONS.LIVRE.value;
+    return this.originalStatus === 'LIVRE';
   }
 
   getAvailableStatusOptions(): { value: string, label: string }[] {
     const allOptions = [
-      STATUS_OPTIONS.EN_ATTENTE,
-      STATUS_OPTIONS.LIVRE,
-      STATUS_OPTIONS.ANNULE
+      { value: 'EN_ATTENTE', label: 'En Attente' },
+      { value: 'LIVRE', label: 'Livré' },
+      { value: 'ANNULE', label: 'Annulé' }
     ];
 
     if (this.isStatusLocked()) {
-      return [STATUS_OPTIONS.LIVRE];
+      return [{ value: 'LIVRE', label: 'Livré' }];
     }
 
     return allOptions;
@@ -105,8 +96,7 @@ export class EditLivraisonComponent implements OnInit {
       const formValue = this.livraisonForm.getRawValue();
       const newStatus = formValue.statut.toUpperCase();
 
-      if (this.originalStatus === STATUS_OPTIONS.LIVRE.value && 
-          (newStatus === STATUS_OPTIONS.EN_ATTENTE.value || newStatus === STATUS_OPTIONS.ANNULE.value)) {
+      if (this.originalStatus === 'LIVRE' && (newStatus === 'EN_ATTENTE' || newStatus === 'ANNULE')) {
         this.snackBar.open('Impossible de modifier un statut "Livré" vers "En Attente" ou "Annulé".', 'Fermer', { duration: 3000 });
         return;
       }
@@ -123,15 +113,17 @@ export class EditLivraisonComponent implements OnInit {
       this.livraisonService.updateLivraison(this.livraisonId, updatedLivraison).subscribe(
         (res) => {
           console.log('Livraison mise à jour:', res);
+
+          // Mettre à jour originalStatus et les données après modification
           this.originalStatus = newStatus;
           this.livraisonData.statut = newStatus;
 
+          // Mettre à jour la valeur affichée dans le formulaire
           this.livraisonForm.patchValue({
             statut: newStatus
           });
-          this.cdr.detectChanges(); // Force view update
 
-          if (newStatus === STATUS_OPTIONS.ANNULE.value) {
+          if (newStatus === 'ANNULE') {
             this.livraisonService.notifyCalendarUpdate(this.livraisonId, 'remove');
             this.snackBar.open('Livraison annulée et supprimée du calendrier.', 'Fermer', { duration: 3000 });
           } else {
@@ -153,9 +145,9 @@ export class EditLivraisonComponent implements OnInit {
 
   private getStatusLabel(status: string): string {
     const statusMap: { [key: string]: string } = {
-      [STATUS_OPTIONS.EN_ATTENTE.value]: STATUS_OPTIONS.EN_ATTENTE.label,
-      [STATUS_OPTIONS.LIVRE.value]: STATUS_OPTIONS.LIVRE.label,
-      [STATUS_OPTIONS.ANNULE.value]: STATUS_OPTIONS.ANNULE.label
+      'EN_ATTENTE': 'En Attente',
+      'LIVRE': 'Livré',
+      'ANNULE': 'Annulé'
     };
     return statusMap[status] || status;
   }

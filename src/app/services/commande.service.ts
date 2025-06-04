@@ -1,16 +1,18 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, Subject, throwError } from 'rxjs';
+import { Observable, of, Subject, throwError, BehaviorSubject, forkJoin  } from 'rxjs';
 import { catchError, tap } from 'rxjs/operators';
 
 @Injectable({ providedIn: 'root' })
 export class CommandeService {
   private commandeURL = 'http://localhost:8090/api/commandes/v1';
-
+  
   constructor(private httpClient: HttpClient) {}
 
   private commandeUpdated = new Subject<void>();
   commandeUpdated$ = this.commandeUpdated.asObservable();
+  private archivedCommandeIdsSubject = new BehaviorSubject<Set<number>>(new Set());
+  public archivedCommandeIds$ = this.archivedCommandeIdsSubject.asObservable();
 
   getAllCommandes(): Observable<any[]> {
     return this.httpClient.get<any[]>(this.commandeURL).pipe(
@@ -33,7 +35,24 @@ export class CommandeService {
       catchError(this.handleError<any[]>('getTypeProduitsParCommande', []))
     );
   }
-
+  archiveCommandes(commandeIds: number[]): void {
+    const currentArchived = this.archivedCommandeIdsSubject.value;
+    commandeIds.forEach(id => currentArchived.add(id));
+    this.archivedCommandeIdsSubject.next(currentArchived);
+  }
+  updateCommandesStatut(commandeIds: number[], nouveauStatut: string): Observable<any> {
+    const requests = commandeIds.map(id =>
+      this.httpClient.patch(`${this.commandeURL}/${id}/statut`, { statut: nouveauStatut })
+    );
+    return forkJoin(requests).pipe(
+      tap(() => {
+        this.archiveCommandes(commandeIds); // Archive after updating status
+        this.commandeUpdated.next(); // Notify subscribers
+      }),
+      catchError(this.handleError<any>('updateCommandesStatut'))
+    );
+  }
+  
   checkCodeCommandeExists(code: string) {
     return this.httpClient.get<any>(`${this.commandeURL}/check-code`, {
       params: { codeCommande: code }

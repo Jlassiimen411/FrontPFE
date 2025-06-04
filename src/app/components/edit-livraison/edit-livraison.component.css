@@ -1,7 +1,7 @@
 .heading_container.container {
   display: flex;
   justify-content: center; /* Centre horizontalement */
-  margin-top: -33em; /* ✅ Tu peux ajuster la valeur */
+ 
 }
 
 

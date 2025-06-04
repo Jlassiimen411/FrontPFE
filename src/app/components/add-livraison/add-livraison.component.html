@@ -64,23 +64,23 @@
           </div>
         </div>
 
-        <div class="form-group">
-          <label for="citerne-id"><i class="fas fa-gas-pump"></i> Citerne</label>
-          <div class="input-container">
-            <select id="citerne-id" class="form-control" formControlName="citerneId" required
-              [disabled]="citernes.length === 0" (change)="onCiterneSelectionChange($event)">
-              <option value="" disabled selected>Sélectionnez une citerne</option>
-              <option *ngFor="let citerne of citernes" [value]="citerne.id">
-                {{ citerne.reference }} ({{ citerne.capacite }} L)
-              </option>
-            </select>
-            <i class="fas fa-oil-can input-icon"></i>
-          </div>
-          <div *ngIf="addLivraisonForm.get('citerneId')?.invalid && addLivraisonForm.get('citerneId')?.touched"
-            class="error-message">
-            <i class="fas fa-exclamation-circle"></i> La citerne est requise.
-          </div>
-        </div>
+<div class="form-group">
+  <label for="citerne-id"><i class="fas fa-gas-pump"></i> Citerne</label>
+  <div class="input-container">
+    <select id="citerne-id" class="form-control" formControlName="citerneId" required
+      [disabled]="citernes.length === 0" (change)="onCiterneSelectionChange($event)">
+      <option value="" disabled selected>Sélectionnez une citerne</option>
+      <option *ngFor="let citerne of citernes" [value]="citerne.id">
+        {{ citerne.reference }} ({{ citerne.capacite }} L) - {{ citerne.compartimentTypes?.join(', ') || 'Aucun type' }}
+      </option>
+    </select>
+    <i class="fas fa-oil-can input-icon"></i>
+  </div>
+  <div *ngIf="addLivraisonForm.get('citerneId')?.invalid && addLivraisonForm.get('citerneId')?.touched"
+    class="error-message">
+    <i class="fas fa-exclamation-circle"></i> La citerne est requise.
+  </div>
+</div>
 
         <div class="form-group" *ngIf="compartiments.length > 0">
           <label class="table-title">
@@ -156,23 +156,6 @@
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="statut"><i class="fas fa-info-circle"></i> Statut</label>
-          <div class="input-container">
-            <select id="statut" class="form-control" formControlName="statut" required>
-              <option value="" disabled>Sélectionnez un statut</option>
-              <option value="EN_ATTENTE">En Attente</option>
-              <option value="LIVRE">Livré</option>
-              <option value="ANNULE">Annulé</option>
-
-            </select>
-            <i class="fas fa-toggle-on input-icon"></i>
-          </div>
-          <div *ngIf="addLivraisonForm.get('statut')?.invalid && addLivraisonForm.get('statut')?.touched"
-            class="error-message">
-            <i class="fas fa-exclamation-circle"></i> Le statut est requis.
           </div>
         </div>
 

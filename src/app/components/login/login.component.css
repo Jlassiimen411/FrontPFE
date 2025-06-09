@@ -13,6 +13,7 @@
     padding: 20px;
     box-sizing: border-box;
     z-index: 1;
+  
 }
 
 /* Overlay sombre */
@@ -24,6 +25,7 @@
     background-color: rgba(0, 0, 0, 0.4);
     z-index: -1;
 }
+
 
 .panel.bg-white {
     background: linear-gradient(to right, #F9F1EA, #F9F1EA);
@@ -61,7 +63,7 @@
 }
 
 /* Style général pour tous les écrans (mobile-first) */
-/* Style général pour tous les écrans (mobile-first) */
+
 .input-field {
     display: flex;
     align-items: center;

@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { LivraisonService } from 'src/app/services/livraison.service'; // ajuste le chemin si besoin
 import { ActivatedRoute } from '@angular/router';
+import { TypeProduit } from '../add-livraison/add-livraison.component';
+import { TypeProduitService } from 'src/app/services/type-produit.service';
 
 @Component({
   selector: 'app-suivre-livraison',
@@ -10,11 +12,12 @@ import { ActivatedRoute } from '@angular/router';
 export class SuivreLivraisonComponent implements OnInit {
   livraisons: any[] = [];
   username: string = '';
+  typesProduits: any[] = [];
   
   // Nouvelle propriété pour stocker les livraisons avec commandes filtrées
   livraisonsFiltres: any[] = [];
 
-  constructor(private lService: LivraisonService) {}
+  constructor(private lService: LivraisonService, private typeProduitService: TypeProduitService) {}
 
   ngOnInit(): void {
     this.username = localStorage.getItem('username') || '';
@@ -27,33 +30,55 @@ export class SuivreLivraisonComponent implements OnInit {
     }
   }
   
-  getLivraisons(): void {
-    this.lService.getLivraisonsByUser(this.username).subscribe({
+  loadTypesProduits(): void {
+    this.typeProduitService.getAllTypeProduitsAvecProduits().subscribe({
       next: (data) => {
-        console.log("Data brute reçue:", data);
-        this.livraisons = data;
-        console.log(this.livraisons[0].commandes[0]);
-
-        // Pour chaque livraison, on filtre ses commandes pour ne garder que celles du user connecté
-        this.livraisonsFiltres = this.livraisons.map(livraison => {
-          const commandesFiltrees = livraison.commandes.filter((cmd: any) => cmd.user?.userName === this.username
-        );
-
-          return {
-            ...livraison,
-            commandes: commandesFiltrees
-          };
-        })
-        // On peut aussi retirer les livraisons sans commande pour cet utilisateur
-        .filter(livraison => livraison.commandes.length > 0);
-  
-        console.log("Livraisons filtrées à afficher:", this.livraisonsFiltres);
+        console.log('Réponse reçue : ', data);
+        this.typesProduits = data;
       },
-      error: (err) => {
-        console.error('Erreur :', err);
-      }
+      error: (err) => console.error(err)
     });
   }
+
+  getLivraisons(): void {
+    this.lService.getLivraisonsByUser(this.username).subscribe({
+      next: (livraisons) => {
+        this.livraisons = livraisons;
+  
+        const livraisonsAvecProduitsLivres: any[] = [];
+  
+        this.livraisons.forEach((livraison) => {
+          const commandesFiltrees = livraison.commandes.filter((cmd: any) => cmd.user?.userName === this.username);
+  
+          if (commandesFiltrees.length > 0) {
+            livraison.commandes = commandesFiltrees;
+  
+            // Récupérer les produits livrés pour la livraison
+            this.lService.getProduitsLivresParLivraison(livraison.id).subscribe({
+              next: (produitsLivres) => {
+                console.log(`Produits livrés pour la livraison ${livraison.id}:`, produitsLivres);
+                livraison.produitsLivres = produitsLivres;
+              },
+              error: () => {
+                livraison.produitsLivres = [];
+              }
+            });
+            
+  
+            livraisonsAvecProduitsLivres.push(livraison);
+          }
+        });
+  
+        this.livraisonsFiltres = livraisonsAvecProduitsLivres;
+      },
+      error: (err) => console.error(err)
+    });
+  }
+  
+
+  
+  
+  
   
 }  
 

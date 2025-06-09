@@ -1,0 +1,35 @@
+<app-header2></app-header2>
+
+
+<div class="container mt-5">
+  <div class="card">
+    <div class="card-header">
+      <h2>Mon Profil</h2>
+    </div>
+    <div class="card-body">
+     <form [formGroup]="profileForm" (ngSubmit)="onSubmit()">
+        <div class="mb-3">
+          <label for="userName" class="form-label">Nom d'utilisateur</label>
+          <input type="text" class="form-control" id="userName" formControlName="userName" readonly>
+        </div>
+        <div class="mb-3">
+          <label for="userFirstName" class="form-label">Prénom</label>
+          <input type="text" class="form-control" id="userFirstName" formControlName="userFirstName">
+        </div>
+        <div class="mb-3">
+          <label for="userLastName" class="form-label">Nom</label>
+          <input type="text" class="form-control" id="userLastName" formControlName="userLastName">
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input type="email" class="form-control" id="email" formControlName="email">
+        </div>
+        <div class="mb-3">
+          <label for="userPassword" class="form-label">Nouveau mot de passe</label>
+          <input type="password" class="form-control" id="userPassword" formControlName="userPassword">
+        </div>
+        <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid">Mettre à jour</button>
+      </form>
+    </div>
+  </div>
+</div>

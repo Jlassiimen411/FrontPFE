@@ -36,7 +36,7 @@
                   <div class="d-flex">
                     <input type="number" min="1" class="form-control w-auto mx-2"
                            [(ngModel)]="item.quantity"
-                           (ngModelChange)="updateQuantity(item.product.codeProduit, item.quantity)">
+                           (ngModelChange)="updateQuantity(item.product.codeProduit, item.quantity)">L
                   </div>
                 </td>
                 <td class="align-middle">{{ item.product.prix * item.quantity }} TND</td>

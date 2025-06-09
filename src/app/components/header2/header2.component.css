@@ -36,9 +36,8 @@
     font-weight: bold;
   }
   
-  /* Bordure rouge pour visualiser la taille du header */
+
   .app-header2 {
-    border: 2px solid red;
     display: block;
     width: 100%;
   }

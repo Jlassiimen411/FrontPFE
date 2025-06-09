@@ -2,17 +2,25 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { UserAuthService } from './user-auth.service';
 import { Observable } from 'rxjs'; 
+import { User } from '../model/user';
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
 
-  private readonly PATH_OF_API = "http://localhost:8090";
+  private readonly API = "http://localhost:8090";
 
   constructor(
     private httpclient: HttpClient,
     private userAuthService: UserAuthService
   ) {}
+  getCurrentUserProfile(): Observable<User> {
+    return this.httpclient.get<User>(`${this.API}/profile`);
+  }
+
+  updateUserProfile(user: User): Observable<User> {
+    return this.httpclient.put<User>(`${this.API}/profile`, user);
+  }
 
   // Méthode pour récupérer les en-têtes avec ou sans Auth
   private getHeaders(withAuth: boolean): HttpHeaders {
@@ -30,26 +38,26 @@ export class UserService {
 
   // ✅ Inscription
   public register(registerData: any) {
-    return this.httpclient.post(`${this.PATH_OF_API}/register`, registerData, {
+    return this.httpclient.post(`${this.API}/register`, registerData, {
       headers: this.getHeaders(false) // Pas besoin de token pour l'inscription
     });
   }
   
   // ✅ Connexion
   public login(loginData: any) {
-    return this.httpclient.post(`${this.PATH_OF_API}/authenticate`, loginData, {
+    return this.httpclient.post(`${this.API}/authenticate`, loginData, {
       headers: this.getHeaders(false) // Pas besoin de token pour la connexion
     });
   }
 
   // ✅ Récupération des rôles
   public getAllRoles() {
-    return this.httpclient.get<string[]>(`${this.PATH_OF_API}/roles`, {
+    return this.httpclient.get<string[]>(`${this.API}/roles`, {
       headers: this.getHeaders(false) // Authentification nécessaire pour récupérer les rôles
     });
   }
   public getUsersByRole(roleName: string): Observable<any[]> {
-    return this.httpclient.get<any[]>(`${this.PATH_OF_API}/users/byRole/${roleName}`, {
+    return this.httpclient.get<any[]>(`${this.API}/users/byRole/${roleName}`, {
      
     });
   }
@@ -63,11 +71,17 @@ export class UserService {
     return userRoles.some(role => allowedRoles.includes(role));
   }
   deleteUser(userName: string): Observable<any> {
-    return this.httpclient.delete(`${this.PATH_OF_API}/${userName}`, {
+    return this.httpclient.delete(`${this.API}/${userName}`, {
       headers: this.getHeaders(true)  // Auth requise pour supprimer
     });
   }
- 
+  sendResetLink(email: string): Observable<any> {
+    return this.httpclient.post(`${this.API}/request-reset`, { email });
+  }
+  resetPassword(data: { token: string, newPassword: string }): Observable<any> {
+    return this.httpclient.post(`${this.API}/reset-password`, data);
+  }
+  
   
   
 }

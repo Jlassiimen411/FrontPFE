@@ -42,14 +42,19 @@ import { ServicesComponent } from './components/services/services.component';
 import { AboutComponent } from './components/about/about.component';
 import { MesCommandesComponent } from './components/mes-commandes/mes-commandes.component';
 import { SuivreLivraisonComponent } from './components/suivre-livraison/suivre-livraison.component';
+import { ForgotPasswordComponent } from './components/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './components/reset-password/reset-password.component';
+import { ProfileComponent } from './components/profile/profile.component';
  
 const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'login', component: LoginComponent },
   { path: 'servicehome', component: ServiceHomeComponent },
   { path: 'services', component: ServicesComponent },
+  { path: 'forgot-password', component: ForgotPasswordComponent },
   { path: 'about', component: AboutComponent },
-  
+  { path: 'reset-password', component: ResetPasswordComponent },
+
   //////////Dispatcheur////////////////
   { path: 'receptionnairepage', component: ReceptionnairePageComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
   { path: 'commandes', component: CommandesComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
@@ -66,7 +71,7 @@ const routes: Routes = [
   { path: 'addProduit/:typeId', component: AddProduitComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
   { path: 'citernes', component: CiternesComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
   { path: 'compartiments/:idCiterne', component: CompartimentsComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_DISPATCHEUR] }},
- 
+  { path:'profile' , component: ProfileComponent },
   //////////////////admin////////////
   { 
     path: 'adminpage',
@@ -104,7 +109,7 @@ const routes: Routes = [
     canActivate: [RoleGuard],
     data: { expectedRoles: [UserRole.ROLE_ADMIN] }
   },
-
+  
 
   /////////////client//////////
   { path: 'categories', component: CategorieUserComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_USER] } },
@@ -126,9 +131,8 @@ const routes: Routes = [
   },
   { path: 'mes-commandes', component: MesCommandesComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_USER] } },
   { path: 'suivre_livraison', component: SuivreLivraisonComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_USER] } },
-  
-  
 
+  
 
 ];
 

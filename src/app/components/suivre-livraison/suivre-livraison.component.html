@@ -1,7 +1,7 @@
 <app-header2></app-header2>
 
 <br><br><br>
-<h2><strong>Suivre ma livraison</strong></h2>
+<h2><strong>Suivre mes livraisons</strong></h2>
 <br><br><br>
 
 <table *ngIf="livraisonsFiltres && livraisonsFiltres.length > 0; else noLivraisons">
@@ -25,10 +25,16 @@
             <li *ngFor="let cmd of livraison.commandes">{{ cmd.codeCommande }}</li>
           </ul>
         </td>
+        <td>
+          
+          
+          
       </tr>
     </tbody>
   </table>
+  
   <ng-template #noLivraisons>
-    <p>Aucune livraison trouvée pour cet utilisateur.</p>
+    <p>Aucune livraison trouvée.</p>
   </ng-template>
+  
   

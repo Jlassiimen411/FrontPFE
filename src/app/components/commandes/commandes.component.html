@@ -1,6 +1,6 @@
 <app-header2></app-header2>
 <app-dash-receptionnaire></app-dash-receptionnaire>
-
+<br>
 <main class="main-content top" [class.archives-only-mode]="showArchives">
 <section class="commande_menu">
   <div class="container">
@@ -30,7 +30,7 @@
       <i class="fas fa-search"></i>
       <input [(ngModel)]="searchText" placeholder="Rechercher..." type="text" class="form-control custom-search" />
     </div>
-    <br><br><br><br><br><br>
+    <br><br>
     <div class="row">
       <div class="col-12">
         <div class="card my-4">
@@ -60,17 +60,17 @@
                     <td>
                       <p class="text-xs font-weight-bold mb-0">{{ produit.codeCommande }}</p>
                     </td>
-<td>
-  <span class="badge badge-sm" 
-        [ngClass]="{
-          'bg-gradient-warning': produit.statutCommande === 'PLANNIFIER',
-          'bg-gradient-info': produit.statutCommande === 'LIVRE',
-          'bg-gradient-success': produit.statutCommande === 'EN_ATTENTE'
-        }">
-    {{ getStatutCommandeLabel(produit.statutCommande) }}
-  </span>
-</td>
-                    <td>
+                      <td>
+                        <span class="badge badge-sm" 
+                              [ngClass]="{
+                                'bg-gradient-warning': produit.statutCommande === 'PLANNIFIER',
+                                'bg-gradient-info': produit.statutCommande === 'LIVRE',
+                                'bg-gradient-success': produit.statutCommande === 'EN_ATTENTE'
+                              }">
+                          {{ getStatutCommandeLabel(produit.statutCommande) }}
+                        </span>
+                      </td>
+                      <td>
                       <p class="text-xs font-weight-bold mb-0">{{ produit.typeProduit }}</p>
                     </td>
                     <td>

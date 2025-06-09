@@ -19,6 +19,11 @@ export class LivraisonService  {
       catchError(this.handleError<any[]>('getAllLivraison', []))
     );
   }
+  getProduitsLivresParLivraison(livraisonId: number): Observable<any[]> {
+    return this.httpClient.get<any[]>(`${this.livraisonURL}/${livraisonId}/produits-livres`);
+  }
+  
+  
   checkCodeLivraisonExists(code: string) {
     return this.httpClient.get<{ exists: boolean }>(`${this.livraisonURL}/check-code?codeLivraison=${code}`);
   }

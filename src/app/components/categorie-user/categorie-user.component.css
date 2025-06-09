@@ -1,99 +1,157 @@
-inputsection.service_section {
-    padding: 3rem 1rem;
-    
-  }
-  
-  .lo {
-    font-weight: bold;
-  }
-  
-  .de {
-    font-family: 'Times New Roman', Times, serif;
-  }
-  
+
+
+.dashboard-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  max-width: 800px;
+  margin: 2rem auto 2rem auto; /* Espacement après l'en-tête et avant la section produits */
+}
+
+.icon-container {
+  font-size: 2rem;
+  color: #f7b733;
+  align-self: flex-start;
+  margin-right: auto; /* Pushes it to the left */
+  margin-left: -25rem; /* Further shift left, adjust as needed */
+}
+
+.links-container {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-right: -25rem; /* Reset any previous margin */
+}
+
+.btn-outline-warning {
+  width: 250px;
+  background-color: transparent;
+  border-color: #f7b733;
+  color: #f7b733;
+  transition: all 0.3s ease;
+}
+
+.btn-outline-warning:hover {
+  background-color: #f7b733;
+  color: white;
+  border-color: #f7b733;
+}
+
+.mb-4 {
+  margin-bottom: 1.5rem !important;
+}
+
+.text-center {
+  text-align: center;
+}
+
+/* Styles pour la section des produits */
+.service-section {
+  padding: 3rem 1rem;
+}
+
+.lo {
+  font-weight: bold;
+}
+
+.de {
+  font-family: 'Times New Roman', Times, serif;
+}
+
+.detail-box {
+  position: relative;
+  background-image: url('/assets/img/a1.jpg');
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  padding: 20px;
+  border-radius: 12px;
+  color: #e12424;
+  min-height: 250px;
+}
+
+.detail-box::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(128, 128, 128, 0.4);
+  z-index: 1;
+}
+
+.detail-box > * {
+  position: relative;
+  z-index: 2;
+}
+
+.detail-box h2 span {
+  color: white;
+  font-weight: 500;
+}
+
+span {
+  font-size: 1.2em;
+  color: red;
+}
+
+b {
+  font-size: 1.1em;
+}
+
+.single_page_btn {
+  display: block;
+  margin: 10px auto 0 auto;
+}
+
+/* Search input and icon */
+.search-input-wrapper {
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aaa;
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.custom-search {
+  width: 100%;
+  padding: 10px 15px 10px 40px;
+  font-size: 16px;
+  border: 2px solid #ffc107;
+  border-radius: 30px;
+  background-color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.custom-search:focus {
+  outline: none;
+  border-color: #e0a800;
+  box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+}
+
+/* Responsive spacing */
+@media (max-width: 768px) {
   .detail-box {
-    position: relative;
-    background-image: url('/assets/img/a1.jpg');
-    background-repeat: no-repeat;
-    background-size: cover;
-    background-position: center;
-    padding: 20px;
-    border-radius: 12px;
-    color: #e12424;
-    min-height: 250px;
+    padding: 15px;
   }
-  
-  .detail-box::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: rgba(128, 128, 128, 0.4);
-    z-index: 1;
-  }
-  
-  .detail-box > * {
-    position: relative;
-    z-index: 2;
-  }
-  
-  .detail-box h2 span {
-    color: white;
-    font-weight: 500;
-  }
-  
-  span {
-    font-size: 1.2em;
-    color: red;
-  }
-  
-  b {
-    font-size: 1.1em;
-  }
-  
-  .single_page_btn {
-    display: block;
-    margin: 10px auto 0 auto;
-  }
-  
-  /* Search input and icon */
-  .search-input-wrapper {
-    position: relative;
-  }
-  
-  .search-icon {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #aaa;
-    font-size: 16px;
-    pointer-events: none;
-  }
-  
   .custom-search {
-    width: 100%;
-    padding: 10px 15px 10px 40px;
-    font-size: 16px;
-    border: 2px solid #ffc107;
-    border-radius: 30px;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: all 0.3s ease;
+    font-size: 15px;
   }
-  
-  .custom-search:focus {
-    outline: none;
-    border-color: #e0a800;
-    box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
+  .dashboard-actions {
+    flex-direction: column;
+    text-align: center;
   }
-  
-  /* Responsive spacing */
-  @media (max-width: 768px) {
-    .detail-box {
-      padding: 15px;
-    }
-    .custom-search {
-      font-size: 15px;
-    }
+  .icon-container {
+    margin-bottom: 1rem;
   }
-  
+  .links-container {
+    align-items: center;
+  }
+}

@@ -130,7 +130,7 @@ const routes: Routes = [
     data: { expectedRoles: [UserRole.ROLE_USER] }
   },
   { path: 'mes-commandes', component: MesCommandesComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_USER] } },
-  { path: 'suivre_livraison', component: SuivreLivraisonComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_USER] } },
+  { path: 'suivre-livraison', component: SuivreLivraisonComponent , canActivate: [RoleGuard],data: { expectedRoles: [UserRole.ROLE_USER] } },
 
   
 

@@ -82,17 +82,23 @@ export class SignupAdminComponent implements OnInit {
       },
       (error) => {
         console.error("❌ Erreur lors de l'inscription :", error);
-        Swal.fire({
-          title: 'Erreur 😓',
-          text: 'Une erreur est survenue pendant l’inscription.',
-          icon: 'error',
-          confirmButtonText: 'OK'
-        });
+  
+        if (error.status === 409) {
+          Swal.fire({
+            title: 'Utilisateur déjà existant 😐',
+            text: 'Un compte avec cet identifiant existe déjà. Veuillez en choisir un autre.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+        } else {
+          Swal.fire({
+            title: 'Erreur 😓',
+            text: 'Une erreur est survenue pendant l’inscription.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+          });
+        }
       }
     );
   }
-  
-  
-  
-  
-}
+}  

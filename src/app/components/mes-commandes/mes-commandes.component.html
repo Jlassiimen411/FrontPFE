@@ -25,7 +25,7 @@
               <p><strong>Code :</strong> {{ commande.codeCommande }}</p>
               <p><strong>Date :</strong> {{ currentDate | date:'medium' }}</p>
 
-              <p><strong>Client :</strong> {{ commande.client?.fullName || commande.clientNom || 'N/A' }}</p>
+        
               <p><strong>Produits :</strong></p>
               <ul>
                 <li *ngFor="let cp of commande.commandeProduits">

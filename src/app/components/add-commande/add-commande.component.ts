@@ -1,3 +1,15 @@
+
+
+
+
+
+
+
+
+
+
+//add comande
+
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AsyncValidatorFn, AbstractControl, FormArray } from '@angular/forms';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -179,80 +191,79 @@ export class AddCommandeComponent implements OnInit {
     return produit ? produit.nomProduit : 'Produit inconnu';
   }
 
-  addCommande(): void {
-    // Vérification manuelle des produits
-    if (this.produitsFormArray.length === 0) {
-      this.errorMessage = "Veuillez sélectionner au moins un produit.";
-      this.isFailed = true;
-      return;
-    }
-
-    // Vérification manuelle du client
-    if (!this.addCommandeForm.get('client')?.value) {
-      this.errorMessage = "Veuillez sélectionner un client.";
-      this.isFailed = true;
-      return;
-    }
-
-    // Vérification du code commande
-    if (!this.addCommandeForm.get('codeCommande')?.value) {
-      this.genererCodeCommande(); // Générer un code s'il est manquant
-    }
-
-    this.isLoading = true;
-    const formValue = this.addCommandeForm.value;
-    const produitsTransformes = this.produitsFormArray.controls.map(group => ({
-      produitId: group.get('produit')?.value,
-      quantite: group.get('quantite')?.value
-    }));
-
-    const commandesPromises = produitsTransformes.map((p, index) => {
-      const produit = this.produits.find(prod => prod.id === p.produitId);
-      if (!produit) return of(null);
-
- const codeUnique = `${formValue.codeCommande}-${index + 1}`;
-
-
-      const commandeIndividuelle = {
-        codeCommande: codeUnique,
-        quantite: p.quantite,
-        dateCommande: formValue.dateCommande,
-        price: produit.prix * p.quantite,
-        totalPrice: produit.prix * p.quantite,
-        client: { clientId: formValue.client },
-        commandeProduits: [{ produit: { id: p.produitId }, quantite: p.quantite }]
-      };
-
-      return this.cService.addCommande(commandeIndividuelle);
-    });
-
-    forkJoin(commandesPromises).subscribe({
-      next: (responses) => {
-        const allSuccessful = responses.every(res => res !== null);
-        if (allSuccessful) {
-          this.isSuccessful = true;
-          this.isFailed = false;
-          this.isLoading = false;
-  this.addCommandeForm.reset({
-  codeCommande: '',
-  dateCommande: this.getTodayDate(),
-  client: null,
-  totalPrice: 0
-});
-
-          this.produitsFormArray.clear();
-          this._dialogRef.close('success');
-        }
-      },
-      error: (err) => {
-        console.error('Erreur lors de l\'ajout des commandes:', err);
-        this.isFailed = true;
-        this.isSuccessful = false;
-        this.isLoading = false;
-        this.errorMessage = err?.error?.message || "Une ou plusieurs commandes ont échoué.";
-      }
-    });
+addCommande(): void {
+  // Vérification manuelle des produits
+  if (this.produitsFormArray.length === 0) {
+    this.errorMessage = "Veuillez sélectionner au moins un produit.";
+    this.isFailed = true;
+    return;
   }
 
+  // Vérification manuelle du client
+  if (!this.addCommandeForm.get('client')?.value) {
+    this.errorMessage = "Veuillez sélectionner un client.";
+    this.isFailed = true;
+    return;
+  }
+
+  // Vérification du code commande
+  if (!this.addCommandeForm.get('codeCommande')?.value) {
+    this.genererCodeCommande(); // Générer un code s'il est manquant
+  }
+
+  this.isLoading = true;
+  const formValue = this.addCommandeForm.value;
+  const produitsTransformes = this.produitsFormArray.controls.map(group => ({
+    produitId: group.get('produit')?.value,
+    quantite: group.get('quantite')?.value
+  }));
+
+  const commandesPromises = produitsTransformes.map((p, index) => {
+    const produit = this.produits.find(prod => prod.id === p.produitId);
+    if (!produit) return of(null);
+
+    const codeUnique = `${formValue.codeCommande}-${index + 1}`;
+
+    const commandeIndividuelle = {
+      codeCommande: codeUnique,
+      quantite: p.quantite,
+      dateCommande: formValue.dateCommande,
+      price: produit.prix * p.quantite,
+      totalPrice: produit.prix * p.quantite,
+      client: { clientId: formValue.client },
+      commandeProduits: [{ produit: { id: p.produitId }, quantite: p.quantite }],
+      statut: 'EN_COURS' // Set default status to EN_COURS
+    };
+
+    return this.cService.addCommande(commandeIndividuelle);
+  });
+
+  forkJoin(commandesPromises).subscribe({
+    next: (responses) => {
+      const allSuccessful = responses.every(res => res !== null);
+      if (allSuccessful) {
+        this.isSuccessful = true;
+        this.isFailed = false;
+        this.isLoading = false;
+        this.addCommandeForm.reset({
+          codeCommande: '',
+          dateCommande: this.getTodayDate(),
+          client: null,
+          totalPrice: 0
+        });
+
+        this.produitsFormArray.clear();
+        this._dialogRef.close('success');
+      }
+    },
+    error: (err) => {
+      console.error('Erreur lors de l\'ajout des commandes:', err);
+      this.isFailed = true;
+      this.isSuccessful = false;
+      this.isLoading = false;
+      this.errorMessage = err?.error?.message || "Une ou plusieurs commandes ont échoué.";
+    }
+  });
+}
   
 }

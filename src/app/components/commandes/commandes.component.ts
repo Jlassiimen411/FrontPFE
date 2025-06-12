@@ -1,3 +1,4 @@
+
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommandeService } from 'src/app/services/commande.service';
 import { TypeProduitService } from 'src/app/services/type-produit.service';
@@ -108,31 +109,33 @@ export class CommandesComponent implements OnInit, OnDestroy {
 
   // Nouvelle méthode pour mapper les statuts de livraison vers les statuts de commande
 private mapLivraisonStatutToCommandeStatut(livraisonStatut: string): string {
-    if (!livraisonStatut) {
-        return 'PLANNIFIER'; // Par défaut, si aucun statut de livraison
-    }
+  if (!livraisonStatut) {
+    return 'EN_COURS'; // Default to EN_COURS if no delivery status
+  }
 
-    switch (livraisonStatut.trim().toUpperCase()) {
-        case 'ANNULE':
-        case 'ANNULÉ':
-            return 'EN_ATTENTE';
-        case 'LIVRE':
-        case 'LIVRÉ':
-            return 'LIVRE';
-        case 'EN_ATTENTE':
-            return 'PLANNIFIER';
-        default:
-            console.warn(`⚠️ Statut de livraison inconnu: ${livraisonStatut}. Retour à PLANNIFIER.`);
-            return 'PLANNIFIER';
-    }
+  switch (livraisonStatut.trim().toUpperCase()) {
+    case 'ANNULE':
+    case 'ANNULÉ':
+      return 'EN_ATTENTE';
+    case 'LIVRE':
+    case 'LIVRÉ':
+      return 'LIVRE';
+    case 'EN_ATTENTE':
+      return 'PLANNIFIER';
+    case 'EN_COURS': // Handle delivery status EN_COURS if it exists
+      return 'EN_COURS';
+    default:
+      console.warn(`⚠️ Statut de livraison inconnu: ${livraisonStatut}. Retour à EN_COURS.`);
+      return 'EN_COURS';
+  }
 }
-
   // Méthode pour archiver des commandes par leurs IDs
-  archiveCommandesByIds(commandeIds: number[]): void {
-    commandeIds.forEach(commandeId => {
-      const commandeIndex = this.allCommandes.findIndex(c => c.id === commandeId);
-      if (commandeIndex !== -1) {
-        const commande = this.allCommandes[commandeIndex];
+archiveCommandesByIds(commandeIds: number[]): void {
+  commandeIds.forEach(commandeId => {
+    const commandeIndex = this.allCommandes.findIndex(c => c.id === commandeId);
+    if (commandeIndex !== -1) {
+      const commande = this.allCommandes[commandeIndex];
+      if (commande.statut === 'LIVRE') { // Only archive LIVRE commands
         const alreadyArchived = this.archivedCommandes.some(c => c.id === commandeId);
         if (!alreadyArchived) {
           this.archivedCommandes.push({ ...commande });
@@ -140,72 +143,75 @@ private mapLivraisonStatutToCommandeStatut(livraisonStatut: string): string {
         this.allCommandes.splice(commandeIndex, 1);
         console.log(`📦 Commande ${commandeId} archivée automatiquement`);
       }
-    });
-    this.extractProduits();
-  }
-
+    }
+  });
+  this.extractProduits();
+}
   // Obtenir le libellé du statut de commande
 getStatutCommandeLabel(statut: string | null | undefined): string {
-    if (!statut) {
-        return 'Non défini';
-    }
-    switch (statut.toUpperCase()) {
-        case 'PLANNIFIER':
-            return 'Planifiée';
-        case 'LIVRE':
-            return 'Livrée';
-        case 'EN_ATTENTE':
-            return 'En attente';
-        default:
-            console.warn(`⚠️ Statut de commande inconnu: ${statut}`);
-            return 'Non défini';
-    }
+  if (!statut) {
+    return 'Non défini';
+  }
+  switch (statut.toUpperCase()) {
+    case 'PLANNIFIER':
+      return 'Planifiée';
+    case 'LIVRE':
+      return 'Livrée';
+    case 'EN_ATTENTE':
+      return 'En attente';
+    case 'EN_COURS':
+      return 'En cours';
+    default:
+      console.warn(`⚠️ Statut de commande inconnu: ${statut}`);
+      return 'Non défini';
+  }
 }
 
   // Ouvrir le dialog pour modifier le statut de commande
-  openStatutDialog(produit: any): void {
-    const statutsOptions = [
-      { value: 'PLANNIFIER', label: 'Planifiée' },
-      { value: 'LIVRE', label: 'Livrée' },
-      { value: 'EN_ATTENTE', label: 'En attente' }
-    ];
+openStatutDialog(produit: any): void {
+  const statutsOptions = [
+    { value: 'PLANNIFIER', label: 'Planifiée' },
+    { value: 'LIVRE', label: 'Livrée' },
+    { value: 'EN_ATTENTE', label: 'En attente' },
+    { value: 'EN_COURS', label: 'En cours' }
+  ];
 
-    const selectOptions = statutsOptions.map(s => 
-      `<option value="${s.value}" ${s.value === produit.statutCommande ? 'selected' : ''}>${s.label}</option>`
-    ).join('');
+  const selectOptions = statutsOptions.map(s => 
+    `<option value="${s.value}" ${s.value === produit.statutCommande ? 'selected' : ''}>${s.label}</option>`
+  ).join('');
 
-    Swal.fire({
-      title: `Modifier le statut de la commande ${produit.codeCommande}`,
-      html: `
-        <div class="form-group">
-          <label for="statutSelect" class="form-label">Nouveau statut :</label>
-          <select id="statutSelect" class="form-control">
-            ${selectOptions}
-          </select>
-        </div>
-      `,
-      showCancelButton: true,
-      confirmButtonText: 'Modifier',
-      cancelButtonText: 'Annuler',
-      confirmButtonColor: '#28a745',
-      cancelButtonColor: '#6c757d',
-      preConfirm: () => {
-        const select = document.getElementById('statutSelect') as HTMLSelectElement;
-        const nouveauStatut = select.value;
-        
-        if (!nouveauStatut) {
-          Swal.showValidationMessage('Veuillez sélectionner un statut');
-          return false;
-        }
-        
-        return nouveauStatut;
+  Swal.fire({
+    title: `Modifier le statut de la commande ${produit.codeCommande}`,
+    html: `
+      <div class="form-group">
+        <label for="statutSelect" class="form-label">Nouveau statut :</label>
+        <select id="statutSelect" class="form-control">
+          ${selectOptions}
+        </select>
+      </div>
+    `,
+    showCancelButton: true,
+    confirmButtonText: 'Modifier',
+    cancelButtonText: 'Annuler',
+    confirmButtonColor: '#28a745',
+    cancelButtonColor: '#6c757d',
+    preConfirm: () => {
+      const select = document.getElementById('statutSelect') as HTMLSelectElement;
+      const nouveauStatut = select.value;
+      
+      if (!nouveauStatut) {
+        Swal.showValidationMessage('Veuillez sélectionner un statut');
+        return false;
       }
-    }).then((result) => {
-      if (result.isConfirmed && result.value) {
-        this.updateCommandeStatut(produit.idCommande, result.value);
-      }
-    });
-  }
+      
+      return nouveauStatut;
+    }
+  }).then((result) => {
+    if (result.isConfirmed && result.value) {
+      this.updateCommandeStatut(produit.idCommande, result.value);
+    }
+  });
+}
 
   // Mettre à jour le statut de commande
   updateCommandeStatut(commandeId: number, nouveauStatut: string): void {
@@ -252,49 +258,48 @@ getStatutCommandeLabel(statut: string | null | undefined): string {
 
   // Synchroniser les commandes avec les livraisons au chargement initial
 synchronizeWithLivraisons(livraisons: any[]): void {
-    this.archivedCommandes = [];
+  this.archivedCommandes = [];
+  
+  const livraisonMap = new Map<number, any>();
+  livraisons.forEach(livraison => {
+    if (livraison.commandes && Array.isArray(livraison.commandes)) {
+      livraison.commandes.forEach((cmd: any) => {
+        if (cmd.id) {
+          livraisonMap.set(cmd.id, livraison);
+        }
+      });
+    }
+  });
+
+  const commandesActives: any[] = [];
+  
+  this.allCommandes.forEach(cmd => {
+    const livraison = livraisonMap.get(cmd.id);
+    let livraisonStatut = livraison?.statut?.trim().toUpperCase() || 'SANS_LIVRAISON';
     
-    const livraisonMap = new Map<number, any>();
-    livraisons.forEach(livraison => {
-      if (livraison.commandes && Array.isArray(livraison.commandes)) {
-        livraison.commandes.forEach((cmd: any) => {
-          if (cmd.id) {
-            livraisonMap.set(cmd.id, livraison);
-          }
-        });
-      }
-    });
-
-    const commandesActives: any[] = [];
+    cmd.livraisonStatut = livraisonStatut;
     
-    this.allCommandes.forEach(cmd => {
-      const livraison = livraisonMap.get(cmd.id);
-      let livraisonStatut = livraison?.statut?.trim().toUpperCase() || 'SANS_LIVRAISON';
-      
-      cmd.livraisonStatut = livraisonStatut;
-      
-      // Utiliser la nouvelle logique de mapping
-      if (livraisonStatut !== 'SANS_LIVRAISON') {
-        cmd.statut = this.mapLivraisonStatutToCommandeStatut(livraisonStatut);
-      } else {
-        cmd.statut = cmd.statut || 'PLANNIFIER';
-      }
+    if (livraisonStatut !== 'SANS_LIVRAISON') {
+      cmd.statut = this.mapLivraisonStatutToCommandeStatut(livraisonStatut);
+    } else {
+      cmd.statut = cmd.statut || 'EN_COURS'; // Default to EN_COURS for new commands
+    }
 
-      // Archiver uniquement si LIVRE
-      const shouldArchive = cmd.statut === 'LIVRE';
+    // Archive only if LIVRE
+    const shouldArchive = cmd.statut === 'LIVRE';
 
-      if (shouldArchive) {
-        this.archivedCommandes.push({ ...cmd });
-        console.log(`🗃️ Commande ${cmd.id} archivée - Statut livraison: ${livraisonStatut}, Statut commande: ${cmd.statut}`);
-      } else {
-        commandesActives.push(cmd);
-        console.log(`📝 Commande ${cmd.id} active - Statut livraison: ${livraisonStatut}, Statut commande: ${cmd.statut}`);
-      }
-    });
+    if (shouldArchive) {
+      this.archivedCommandes.push({ ...cmd });
+      console.log(`🗃️ Commande ${cmd.id} archivée - Statut livraison: ${livraisonStatut}, Statut commande: ${cmd.statut}`);
+    } else {
+      commandesActives.push(cmd);
+      console.log(`📝 Commande ${cmd.id} active - Statut livraison: ${livraisonStatut}, Statut commande: ${cmd.statut}`);
+    }
+  });
 
-    this.allCommandes = commandesActives;
-    
-    console.log(`📊 Synchronisation terminée: ${this.allCommandes.length} commandes actives, ${this.archivedCommandes.length} archivées`);
+  this.allCommandes = commandesActives;
+  
+  console.log(`📊 Synchronisation terminée: ${this.allCommandes.length} commandes actives, ${this.archivedCommandes.length} archivées`);
 }
 
   // S'abonner aux mises à jour des livraisons
@@ -326,62 +331,62 @@ synchronizeWithLivraisons(livraisons: any[]): void {
 
   // Mettre à jour le statut des commandes en fonction des livraisons
 updateCommandeStatusFromLivraison(livraison: any): void {
-    const commandeIds: number[] = livraison.commandes?.map((cmd: any) => cmd.id).filter((id: any) => id != null) || [];
-    if (commandeIds.length === 0) {
-        console.warn(`⚠️ No commande IDs found in livraison ${livraison.id}`);
-        return;
-    }
+  const commandeIds: number[] = livraison.commandes?.map((cmd: any) => cmd.id).filter((id: any) => id != null) || [];
+  if (commandeIds.length === 0) {
+    console.warn(`⚠️ No commande IDs found in livraison ${livraison.id}`);
+    return;
+  }
 
-    let livraisonStatut = livraison.statut?.trim().toUpperCase() || 'SANS_LIVRAISON';
-    const newCommandeStatut = this.mapLivraisonStatutToCommandeStatut(livraisonStatut);
-    const shouldArchive = newCommandeStatut === 'LIVRE'; // Archive only if LIVRE
+  let livraisonStatut = livraison.statut?.trim().toUpperCase() || 'SANS_LIVRAISON';
+  const newCommandeStatut = this.mapLivraisonStatutToCommandeStatut(livraisonStatut);
+  const shouldArchive = newCommandeStatut === 'LIVRE'; // Archive only if LIVRE
 
-    this.cService.updateCommandesStatut(commandeIds, newCommandeStatut).subscribe({
-        next: () => {
-            commandeIds.forEach(commandeId => {
-                let commande = this.allCommandes.find(c => c.id === commandeId);
-                let isFromArchive = false;
+  this.cService.updateCommandesStatut(commandeIds, newCommandeStatut).subscribe({
+    next: () => {
+      commandeIds.forEach(commandeId => {
+        let commande = this.allCommandes.find(c => c.id === commandeId);
+        let isFromArchive = false;
 
-                if (!commande) {
-                    commande = this.archivedCommandes.find(c => c.id === commandeId);
-                    isFromArchive = true;
-                }
-
-                if (!commande) {
-                    console.warn(`⚠️ Commande ${commandeId} non trouvée`);
-                    return;
-                }
-
-                commande.livraisonStatut = livraisonStatut;
-                commande.statut = newCommandeStatut;
-
-                if (shouldArchive) {
-                    if (!isFromArchive) {
-                        this.allCommandes = this.allCommandes.filter(c => c.id !== commandeId);
-                        const existingArchive = this.archivedCommandes.find(c => c.id === commandeId);
-                        if (!existingArchive) {
-                            this.archivedCommandes.push({ ...commande });
-                        }
-                        console.log(`📦 Commande ${commandeId} archivée avec statut ${livraisonStatut}, Nouveau statut commande: ${commande.statut}`);
-                    }
-                } else {
-                    if (isFromArchive) {
-                        this.archivedCommandes = this.archivedCommandes.filter(c => c.id !== commandeId);
-                        const existingActive = this.allCommandes.find(c => c.id === commandeId);
-                        if (!existingActive) {
-                            this.allCommandes.push({ ...commande });
-                        }
-                        console.log(`📋 Commande ${commandeId} désarchivée avec statut ${livraisonStatut}, Nouveau statut commande: ${commande.statut}`);
-                    }
-                }
-            });
-
-            this.extractProduits();
-        },
-        error: (err) => {
-            console.error('❌ Erreur lors de la mise à jour des statuts des commandes:', err);
+        if (!commande) {
+          commande = this.archivedCommandes.find(c => c.id === commandeId);
+          isFromArchive = true;
         }
-    });
+
+        if (!commande) {
+          console.warn(`⚠️ Commande ${commandeId} non trouvée`);
+          return;
+        }
+
+        commande.livraisonStatut = livraisonStatut;
+        commande.statut = newCommandeStatut;
+
+        if (shouldArchive) {
+          if (!isFromArchive) {
+            this.allCommandes = this.allCommandes.filter(c => c.id !== commandeId);
+            const existingArchive = this.archivedCommandes.find(c => c.id === commandeId);
+            if (!existingArchive) {
+              this.archivedCommandes.push({ ...commande });
+            }
+            console.log(`📦 Commande ${commandeId} archivée avec statut ${livraisonStatut}, Nouveau statut commande: ${commande.statut}`);
+          }
+        } else {
+          if (isFromArchive) {
+            this.archivedCommandes = this.archivedCommandes.filter(c => c.id !== commandeId);
+            const existingActive = this.allCommandes.find(c => c.id === commandeId);
+            if (!existingActive) {
+              this.allCommandes.push({ ...commande });
+            }
+            console.log(`📋 Commande ${commandeId} désarchivée avec statut ${livraisonStatut}, Nouveau statut commande: ${commande.statut}`);
+          }
+        }
+      });
+
+      this.extractProduits();
+    },
+    error: (err) => {
+      console.error('❌ Erreur lors de la mise à jour des statuts des commandes:', err);
+    }
+  });
 }
 
   // Gérer la suppression d'une livraison
@@ -595,3 +600,6 @@ updateCommandeStatusFromLivraison(livraison: any): void {
     }
   }
 }
+
+
+

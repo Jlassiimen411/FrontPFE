@@ -71,52 +71,58 @@ export class CamionsComponent implements OnInit {
               /*this.nouveauCamion.kilometrage > 0 &&*/ this.nouveauCamion.statut );
   }
 
-  ajouterCamion() {
-    if (this.isFormValid()) {
-      const camionData = {
-        ...this.nouveauCamion,
-      };
-  
-      this.camionService.addCamion(camionData).subscribe(
-        (data) => {
-          this.camions.push(data);
-  
-          // Réinitialiser le formulaire
-          this.nouveauCamion = {
-            id: 0,
-            marque: '',
-            modele: '',
-            immatriculation: '',
-            kilometrage: null,
-            statut: '',
-          };
-  
-          // ✅ Affichage d'une alerte de succès
-          Swal.fire({
-            title: 'Ajouté !',
-            text: 'Le camion a été ajouté avec succès.',
-            icon: 'success',
-            confirmButtonColor: '#28a745',
-            timer: 2000,
-            timerProgressBar: true,
-            showConfirmButton: false
-          });
-        },
-        (error) => {
-          console.error("Erreur lors de l'ajout du camion:", error);
-  
-          // ❌ Alerte en cas d'erreur
-          Swal.fire({
-            title: 'Erreur !',
-            text: "Une erreur s'est produite lors de l'ajout.",
-            icon: 'error',
-            confirmButtonColor: '#d33'
-          });
-        }
-      );
+ajouterCamion() {
+  if (this.isFormValid()) {
+    const immatriculationExist = this.camions.some(
+      (camion) => camion.immatriculation.toLowerCase() === this.nouveauCamion.immatriculation.toLowerCase()
+    );
+
+    if (immatriculationExist) {
+      Swal.fire({
+        title: 'Doublon !',
+        text: "Un camion avec cette immatriculation existe déjà.",
+        icon: 'warning',
+        confirmButtonColor: '#ffc107'
+      });
+      return;
     }
+
+    const camionData = {
+      ...this.nouveauCamion,
+    };
+
+    this.camionService.addCamion(camionData).subscribe(
+      (data) => {
+        this.camions.push(data);
+        this.nouveauCamion = {
+          id: 0,
+          marque: '',
+          modele: '',
+          immatriculation: '',
+          kilometrage: null,
+          statut: '',
+        };
+        Swal.fire({
+          title: 'Ajouté !',
+          text: 'Le camion a été ajouté avec succès.',
+          icon: 'success',
+          timer: 2000,
+          showConfirmButton: false
+        });
+      },
+      (error) => {
+        console.error("Erreur lors de l'ajout du camion:", error);
+        Swal.fire({
+          title: 'Erreur !',
+          text: "Une erreur s'est produite lors de l'ajout.",
+          icon: 'error',
+          confirmButtonColor: '#d33'
+        });
+      }
+    );
   }
-  
+}
+
   
 
   supprimerCamion(id: number) {
@@ -168,28 +174,44 @@ export class CamionsComponent implements OnInit {
  
   
 
-  sauvegarderModification() {
-    if (!this.camionEnCours.marque || !this.camionEnCours.modele || !this.camionEnCours.immatriculation || this.camionEnCours.kilometrage <= 0) {
-      alert('Veuillez remplir tous les champs valides.');
-      return;
-    }
-  
-    const camionModifie = {
-      ...this.camionEnCours,
-      
-    };
-  
-    this.camionService.updateCamion(camionModifie).subscribe(
-      () => {
-        this.loadCamions();
-        this.closeModal();
-      },
-      (error) => {
-        console.error('Erreur lors de la mise à jour du camion:', error);
-        alert("Une erreur est survenue lors de la modification du camion.");
-      }
-    );
+ sauvegarderModification() {
+  if (!this.camionEnCours.marque || !this.camionEnCours.modele || !this.camionEnCours.immatriculation || this.camionEnCours.kilometrage <= 0) {
+    alert('Veuillez remplir tous les champs valides.');
+    return;
   }
+
+  // Vérifier si une autre immatriculation existe déjà
+  const duplicate = this.camions.some(camion =>
+    camion.id !== this.camionEnCours.id &&
+    camion.immatriculation.toLowerCase() === this.camionEnCours.immatriculation.toLowerCase()
+  );
+
+  if (duplicate) {
+    Swal.fire({
+      title: 'Doublon !',
+      text: "Un autre camion avec cette immatriculation existe déjà.",
+      icon: 'warning',
+      confirmButtonColor: '#ffc107'
+    });
+    return;
+  }
+
+  const camionModifie = {
+    ...this.camionEnCours,
+  };
+
+  this.camionService.updateCamion(camionModifie).subscribe(
+    () => {
+      this.loadCamions();
+      this.closeModal();
+    },
+    (error) => {
+      console.error('Erreur lors de la mise à jour du camion:', error);
+      alert("Une erreur est survenue lors de la modification du camion.");
+    }
+  );
+}
+
   
 
   editCamion(id: number): void {

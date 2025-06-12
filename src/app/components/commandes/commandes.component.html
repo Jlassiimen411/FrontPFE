@@ -60,16 +60,17 @@
                     <td>
                       <p class="text-xs font-weight-bold mb-0">{{ produit.codeCommande }}</p>
                     </td>
-                      <td>
-                        <span class="badge badge-sm" 
-                              [ngClass]="{
-                                'bg-gradient-warning': produit.statutCommande === 'PLANNIFIER',
-                                'bg-gradient-info': produit.statutCommande === 'LIVRE',
-                                'bg-gradient-success': produit.statutCommande === 'EN_ATTENTE'
-                              }">
-                          {{ getStatutCommandeLabel(produit.statutCommande) }}
-                        </span>
-                      </td>
+      <td>
+  <span class="badge badge-sm" 
+        [ngClass]="{
+          'bg-gradient-warning': produit.statutCommande === 'PLANNIFIER',
+          'bg-gradient-info': produit.statutCommande === 'LIVRE',
+          'bg-gradient-success': produit.statutCommande === 'EN_ATTENTE',
+          'bg-gradient-primary': produit.statutCommande === 'EN_COURS'
+        }">
+    {{ getStatutCommandeLabel(produit.statutCommande) }}
+  </span>
+</td>
                       <td>
                       <p class="text-xs font-weight-bold mb-0">{{ produit.typeProduit }}</p>
                     </td>
@@ -123,3 +124,4 @@
     </div>
   </div>
 </main>
+

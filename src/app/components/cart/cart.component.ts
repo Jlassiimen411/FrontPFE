@@ -1,4 +1,4 @@
-// src/app/cart/cart.component.ts
+
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CartService } from 'src/app/services/cart.service';
 import { ProduitService } from 'src/app/services/produit.service';
@@ -44,7 +44,7 @@ export class CartComponent implements OnInit {
     private cdr: ChangeDetectorRef,
     private orderService: OrderServiceService,
     private userService: UserService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadCartItems();
@@ -148,7 +148,7 @@ export class CartComponent implements OnInit {
     this.cdr.detectChanges();
 
     this.cartService.removeFromCart(id).subscribe(
-      () => {},
+      () => { },
       error => {
         console.error('Erreur lors de la suppression :', error);
         this.cartItems = originalCart;
@@ -204,22 +204,22 @@ export class CartComponent implements OnInit {
         title: 'Erreur',
         text: 'Votre panier est vide. Veuillez ajouter des produits avant de passer commande.',
         icon: 'error',
-        confirmButtonText: 'OK',
+
         confirmButtonColor: '#d33'
       });
       return;
     }
-  
+
     this.adresseService.validateAddress(this.orderDetails.fullAddress).subscribe({
       next: (result: any) => {
         const latitude = result.latitude ?? result.lat;
         const longitude = result.longitude ?? result.lon;
-  
+
         if (latitude == null || longitude == null) {
           Swal.fire('Erreur', 'Adresse invalide ou coordonnées non disponibles.', 'error');
           return;
         }
-  
+
         const commandeData = {
           codeCommande: this.generateCommandeCode(),
           dateCommande: new Date().toISOString(),
@@ -248,28 +248,22 @@ export class CartComponent implements OnInit {
             };
           })
         };
-  
+
         this.commandeService.addCommande(commandeData).subscribe({
           next: (response) => {
             Swal.fire('Succès', 'Commande envoyée avec succès !', 'success');
             this.clearCartAfterOrder();
             this.showOrderModal = false;
             orderForm.reset();
-  
+
             Swal.fire({
               title: 'Commande passée !',
               text: `Code : ${commandeData.codeCommande}`,
               icon: 'success',
-              showCancelButton: true,
-              confirmButtonText: 'Suivre ma commande',
-              cancelButtonText: 'Retour à la boutique'
-            }).then((result) => {
-              if (result.isConfirmed) {
-                this.router.navigate(['/tracking', response.id]);
-              } else {
-                this.router.navigate(['/categories']);
-              }
+            }).then(() => {
+              this.router.navigate(['/categories']);
             });
+
           },
           error: (err) => {
             console.error(err);
@@ -283,7 +277,7 @@ export class CartComponent implements OnInit {
       }
     });
   }
-  
+
 
   private generateCommandeCode(): string {
     const timestamp = Date.now();

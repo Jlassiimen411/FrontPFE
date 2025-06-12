@@ -51,17 +51,17 @@
       <input type="date" id="dateLivraison" class="form-control" formControlName="dateLivraison" [min]="minDate" required>
     </div>
     
-    <div class="la">
-      <label for="statut">Statut: (Modifiable)</label> 
-      <select id="statut" formControlName="statut" required [disabled]="isStatusLocked()">
-        <option 
-          *ngFor="let option of getAvailableStatusOptions()" 
-          [value]="option.value"
-          [selected]="livraisonForm.get('statut')?.value === option.value">
-          {{ option.label }}
-        </option>
-      </select>
-    </div>
+<div class="la">
+  <label for="statut">Statut: (Modifiable)</label> 
+  <select id="statut" formControlName="statut" required [disabled]="isStatusLocked()">
+    <option 
+      *ngFor="let option of getAvailableStatusOptions()" 
+      [ngValue]="option.value">
+      {{ option.label }}
+    </option>
+  </select>
+</div>
+
     
     <br>
     <div class="button-container">

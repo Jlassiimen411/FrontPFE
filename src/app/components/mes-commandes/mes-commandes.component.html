@@ -24,8 +24,7 @@
               <p><strong>ID commande :</strong> {{ commande.id }}</p>
               <p><strong>Code :</strong> {{ commande.codeCommande }}</p>
               <p><strong>Date :</strong> {{ currentDate | date:'medium' }}</p>
-
-        
+      
               <p><strong>Produits :</strong></p>
               <ul>
                 <li *ngFor="let cp of commande.commandeProduits">
@@ -33,10 +32,16 @@
                 </li>
               </ul>
               <p><strong>Prix total :</strong> {{ commande.totalPrice || commande.prix }} DT</p>
+      
+              <!-- Bouton de suppression -->
+              <button class="btn btn btn-outline-warning mt-3" (click)="deleteCommande(commande.id)">
+                <b><i class="fa-solid fa-trash"></i></b>
+              </button>
             </div>
           </div>
         </div>
       </div>
+      
     </div>
-  </section>
+
   

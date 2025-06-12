@@ -78,6 +78,17 @@
             <label for="fullAddress" class="form-label">Adresse de livraison</label>
             <input type="text" id="fullAddress" class="form-control" [(ngModel)]="orderDetails.fullAddress" name="fullAddress" required>
           </div>
+          <div class="form-group mb-3">More actions
+            <label for="contactNumber" class="form-label">Numéro de téléphone</label>
+            <input type="text" id="contactNumber" class="form-control" [(ngModel)]="orderDetails.contactNumber"
+              name="contactNumber" required pattern="^[0-9]{8,15}$">
+
+          </div>
+          <div class="form-group mb-3">
+            <label for="alternateContactNumber" class="form-label">Autre numéro de téléphone (optionnel)</label>
+            <input type="text" id="alternateContactNumber" class="form-control"
+              [(ngModel)]="orderDetails.alternateContactNumber" name="alternateContactNumber">
+          </div>
           <div class="form-group mb-3">
             <label for="userName" class="form-label">Nom d'utilisateur</label>
             <input type="text" id="userName" class="form-control" [(ngModel)]="orderDetails.userName" name="userName" required>
